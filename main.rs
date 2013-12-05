@@ -19,7 +19,6 @@ use cgmath::matrix::{Matrix, Mat4, Mat3, ToMat4};
 use cgmath::projection;
 use cgmath::angle;
 use cgmath::vector::Vec3;
-// use cgmath::point::Point3;
 
 #[link_args="-lglfw"] extern {}
 
@@ -61,7 +60,7 @@ static VERTEX_DATA: [GLfloat, ..VERTICES_COUNT * 3] = [
 ];
 
 // Shader sources
-static VS_SRC: &'static str = "\
+static VERTEX_SHADER_SRC: &'static str = "\
   #version 130
   in vec3 position;
   uniform mat4 model_view_proj_matrix;
@@ -71,7 +70,7 @@ static VS_SRC: &'static str = "\
   }
 ";
  
-static FS_SRC: &'static str = "\
+static FRAGMENT_SHADER_SRC: &'static str = "\
   #version 130
   out vec4 out_color;
   void main() {
@@ -201,8 +200,8 @@ fn main() {
     gl::load_with(glfw::get_proc_address);
 
     // Create GLSL shaders
-    let vs = compile_shader(VS_SRC, gl::VERTEX_SHADER);
-    let fs = compile_shader(FS_SRC, gl::FRAGMENT_SHADER);
+    let vs = compile_shader(VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
+    let fs = compile_shader(FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
     let program = link_program(vs, fs);
 
     let mut vao = 0;
