@@ -45,8 +45,12 @@ fn print_mat4(name: &str, mat: Mat4<f32>) {
 static mut POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 
+static WIN_WIDTH: uint = 640;
+static WIN_HEIGHT: uint = 480;
+static VERTICES_COUNT: i32 = 3 * 2;
+
 // Vertex data
-static VERTEX_DATA: [GLfloat, ..3 * 3 * 2] = [
+static VERTEX_DATA: [GLfloat, ..VERTICES_COUNT * 3] = [
    0.0,  1.0, 0.0,
    2.0, -1.0, 0.0,
   -2.0, -1.0, 0.0,
@@ -187,10 +191,8 @@ fn main() {
   do glfw::start {
     // glfw::window_hint::context_version(3, 2);
 
-    let h = 150;
-    let w = 200;
     let window = glfw::Window::create(
-      w, h, "OpenGL", glfw::Windowed).unwrap();
+      WIN_WIDTH, WIN_HEIGHT, "OpenGL", glfw::Windowed).unwrap();
     window.make_context_current();
     window.set_cursor_pos_callback(~CursorPosContext);
     window.set_key_callback(~KeyContext);
@@ -253,8 +255,7 @@ fn main() {
       gl::Clear(gl::COLOR_BUFFER_BIT);
 
       // Draw a triangle from the 3 vertices
-      let vertices_count = 3 * 2;
-      gl::DrawArrays(gl::TRIANGLES, 0, vertices_count);
+      gl::DrawArrays(gl::TRIANGLES, 0, VERTICES_COUNT);
 
       window.swap_buffers();
     }
