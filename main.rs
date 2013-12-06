@@ -41,13 +41,12 @@ fn print_mat4(name: &str, mat: Mat4<f32>) {
   println("");
 }
 
-static mut POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
+static mut MOUSE_POS: Vec2<f32> = Vec2{x: 0.0f32, y: 0.0};
 static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 
 static WIN_SIZE: Vec2<uint> = Vec2{x: 640, y: 480};
 static VERTICES_COUNT: i32 = 3 * 2;
 
-// Vertex data
 static VERTEX_DATA: [GLfloat, ..VERTICES_COUNT * 3] = [
    0.0,  1.0, 0.0,
    2.0, -1.0, 0.0,
@@ -58,7 +57,6 @@ static VERTEX_DATA: [GLfloat, ..VERTICES_COUNT * 3] = [
   0.0, -1.0, -2.0
 ];
 
-// Shader sources
 static VERTEX_SHADER_SRC: &'static str = "\
   #version 130
   in vec3 position;
@@ -164,8 +162,8 @@ fn upd(programId: GLuint) {
   let mut mvp_matrix = projection_matrix;
   unsafe {
     mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
-    mvp_matrix = rot_x(mvp_matrix, POS.y / 100.0);
-    mvp_matrix = rot_y(mvp_matrix, POS.x / 100.0);
+    mvp_matrix = rot_x(mvp_matrix, MOUSE_POS.y / 100.0);
+    mvp_matrix = rot_y(mvp_matrix, MOUSE_POS.x / 100.0);
     mvp_matrix = tr(mvp_matrix, CAMERA_POS);
   }
 
@@ -203,17 +201,17 @@ fn main() {
     let fs = compile_shader(FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
     let program = link_program(vs, fs);
 
-    let mut vao = 0;
-    let mut vbo = 0;
+    let mut vertex_array_obj = 0;
+    let mut vertex_buffer_obj = 0;
 
     unsafe {
       // Create Vertex Array Object
-      gl::GenVertexArrays(1, &mut vao);
-      gl::BindVertexArray(vao);
+      gl::GenVertexArrays(1, &mut vertex_array_obj);
+      gl::BindVertexArray(vertex_array_obj);
 
       // Create a Vertex Buffer Object and copy the vertex data to it
-      gl::GenBuffers(1, &mut vbo);
-      gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+      gl::GenBuffers(1, &mut vertex_buffer_obj);
+      gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer_obj);
       let float_size = std::mem::size_of::<GLfloat>();
       let vertices_ptr = (VERTEX_DATA.len() * float_size) as GLsizeiptr;
       gl::BufferData(
@@ -263,8 +261,8 @@ fn main() {
     gl::DeleteShader(fs);
     gl::DeleteShader(vs);
     unsafe {
-      gl::DeleteBuffers(1, &vbo);
-      gl::DeleteVertexArrays(1, &vao);
+      gl::DeleteBuffers(1, &vertex_buffer_obj);
+      gl::DeleteVertexArrays(1, &vertex_array_obj);
     }
   }
 }
@@ -275,8 +273,8 @@ impl glfw::CursorPosCallback for CursorPosContext {
     if w.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
       // println!("Cursor position: ({}, {})", xpos, ypos);
       unsafe {
-        POS.x = xpos as f32;
-        POS.y = ypos as f32;
+        MOUSE_POS.x = xpos as f32;
+        MOUSE_POS.y = ypos as f32;
       }
     }
   }
