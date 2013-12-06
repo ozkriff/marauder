@@ -325,7 +325,7 @@ impl glfw::KeyCallback for KeyContext {
     _:      glfw::Modifiers
   ) {
     match (action, key) {
-      (glfw::Press, glfw::KeyEscape) => {
+      (glfw::Press, glfw::KeyEscape) | (glfw::Press, glfw::KeyQ) => {
         window.set_should_close(true)
       }
       (glfw::Press, glfw::KeySpace) => {
