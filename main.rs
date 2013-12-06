@@ -271,6 +271,19 @@ impl Win {
       gl::DeleteVertexArrays(1, &self.vertex_array_obj);
     }
   }
+
+  fn draw(&self) {
+    upd(self.program);
+
+    // Clear the screen to black
+    gl::ClearColor(0.3, 0.3, 0.3, 1.0);
+    gl::Clear(gl::COLOR_BUFFER_BIT);
+
+    // Draw a triangle from the 3 vertices
+    gl::DrawArrays(gl::TRIANGLES, 0, VERTICES_COUNT);
+
+    self.window.swap_buffers();
+  }
 }
 
 fn main() {
@@ -283,17 +296,7 @@ fn main() {
 
     while !win.window.should_close() {
       glfw::poll_events();
-
-      upd(win.program);
-      
-      // Clear the screen to black
-      gl::ClearColor(0.3, 0.3, 0.3, 1.0);
-      gl::Clear(gl::COLOR_BUFFER_BIT);
-
-      // Draw a triangle from the 3 vertices
-      gl::DrawArrays(gl::TRIANGLES, 0, VERTICES_COUNT);
-
-      win.window.swap_buffers();
+      win.draw();
     }
 
     win.cleanup();
