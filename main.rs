@@ -15,10 +15,18 @@ use gl::types::{
   GLsizeiptr,
   GLboolean
 };
-use cgmath::matrix::{Matrix, Mat4, Mat3, ToMat4};
+use cgmath::matrix::{
+  Matrix,
+  Mat4,
+  Mat3,
+  ToMat4
+};
+use cgmath::vector::{
+  Vec3,
+  Vec2
+};
 use cgmath::projection;
 use cgmath::angle;
-use cgmath::vector::{Vec3, Vec2};
 
 #[link(name = "glfw")]
 #[link(name = "m")]
