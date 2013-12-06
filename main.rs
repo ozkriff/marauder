@@ -284,6 +284,10 @@ impl Win {
 
     self.window.swap_buffers();
   }
+
+  fn is_running(&self) -> bool {
+    return !self.window.should_close()
+  }
 }
 
 fn main() {
@@ -294,7 +298,7 @@ fn main() {
 
     let win =  Win::new();
 
-    while !win.window.should_close() {
+    while win.is_running() {
       glfw::poll_events();
       win.draw();
     }
