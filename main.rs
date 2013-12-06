@@ -32,8 +32,7 @@ fn type_of<T>(_: &T) -> &'static str {
 }
 
 fn print_mat4(name: &str, mat: Mat4<f32>) {
-  print(name);
-  print(":\n");
+  println!("{}:", name);
   for i in range(0u, 4) {
     for j in range(0u, 4) {
       print!("{} ", *mat.cr(i, j));
@@ -59,7 +58,7 @@ static VERTEX_DATA: [GLfloat, ..VERTICES_COUNT * 3] = [
   0.0, -1.0, -2.0
 ];
 
-static VERTEX_SHADER_SRC: &'static str = "\
+static VERTEX_SHADER_SRC: &'static str = "
   #version 130
   in vec3 position;
   uniform mat4 model_view_proj_matrix;
@@ -69,7 +68,7 @@ static VERTEX_SHADER_SRC: &'static str = "\
   }
 ";
  
-static FRAGMENT_SHADER_SRC: &'static str = "\
+static FRAGMENT_SHADER_SRC: &'static str = "
   #version 130
   out vec4 out_color;
   void main() {
