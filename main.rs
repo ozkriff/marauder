@@ -20,7 +20,9 @@ use cgmath::projection;
 use cgmath::angle;
 use cgmath::vector::{Vec3, Vec2};
 
-#[link_args="-lglfw"] extern {}
+#[link_args="-lglfw"]
+#[link_args="-lm"]
+extern {}
 
 /// usage: let s = mvp_matrix; println(type_of(&s));
 fn type_of<T>(_: &T) -> &'static str {
