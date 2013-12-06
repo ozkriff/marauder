@@ -76,11 +76,6 @@ static FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
-#[start]
-fn start(argc: int, argv: **u8) -> int {
-  std::rt::start_on_main_thread(argc, argv, main)
-}
-
 fn compile_shader(src: &str, ty: GLenum) -> GLuint {
   let shader = gl::CreateShader(ty);
   unsafe {
@@ -294,23 +289,6 @@ impl Win {
   }
 }
 
-fn main() {
-  glfw::set_error_callback(~ErrorContext);
-
-  do glfw::start {
-    // glfw::window_hint::context_version(3, 2);
-
-    let win =  Win::new();
-
-    while win.is_running() {
-      win.process_events();
-      win.draw();
-    }
-
-    win.cleanup();
-  }
-}
-
 struct CursorPosContext;
 impl glfw::CursorPosCallback for CursorPosContext {
   fn call(&self, w: &glfw::Window, xpos: f64, ypos: f64) {
@@ -355,6 +333,24 @@ impl glfw::KeyCallback for KeyContext {
       _ => {}
     }
   }
+}
+
+fn main() {
+  glfw::set_error_callback(~ErrorContext);
+  do glfw::start {
+    // glfw::window_hint::context_version(3, 2);
+    let win =  Win::new();
+    while win.is_running() {
+      win.process_events();
+      win.draw();
+    }
+    win.cleanup();
+  }
+}
+
+#[start]
+fn start(argc: int, argv: **u8) -> int {
+  std::rt::start_on_main_thread(argc, argv, main)
 }
 
 // vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
