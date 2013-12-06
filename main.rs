@@ -145,8 +145,7 @@ fn rot_y(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
-// change matrices
-fn upd(programId: GLuint) {
+fn update_matrices(programId: GLuint) {
   let fov = angle::deg(45.0f32);
   let ratio = 4.0 / 3.0;
   let display_range_min = 0.1;
@@ -271,7 +270,7 @@ impl Win {
   }
 
   fn draw(&self) {
-    upd(self.program);
+    update_matrices(self.program);
 
     // Clear the screen to black
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
