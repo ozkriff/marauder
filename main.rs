@@ -107,10 +107,10 @@ fn compile_shader(src: &str, ty: GLenum) -> GLuint {
   shader
 }
 
-fn link_program(vs: GLuint, fs: GLuint) -> GLuint {
+fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
   let program = gl::CreateProgram();
-  gl::AttachShader(program, vs);
-  gl::AttachShader(program, fs);
+  gl::AttachShader(program, vertex_shader);
+  gl::AttachShader(program, fragment_shader);
   gl::LinkProgram(program);
   unsafe {
     // Get the link status
@@ -198,9 +198,11 @@ fn main() {
     gl::load_with(glfw::get_proc_address);
 
     // Create GLSL shaders
-    let vs = compile_shader(VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
-    let fs = compile_shader(FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
-    let program = link_program(vs, fs);
+    let vertex_shader = compile_shader(
+      VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
+    let fragment_shader = compile_shader(
+      FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
+    let program = link_program(vertex_shader, fragment_shader);
 
     let mut vertex_array_obj = 0;
     let mut vertex_buffer_obj = 0;
@@ -259,8 +261,8 @@ fn main() {
 
     // Cleanup
     gl::DeleteProgram(program);
-    gl::DeleteShader(fs);
-    gl::DeleteShader(vs);
+    gl::DeleteShader(fragment_shader);
+    gl::DeleteShader(vertex_shader);
     unsafe {
       gl::DeleteBuffers(1, &vertex_buffer_obj);
       gl::DeleteVertexArrays(1, &vertex_array_obj);
