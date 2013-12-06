@@ -151,7 +151,7 @@ struct Win {
   program: GLuint,
   vertex_array_obj: GLuint,
   vertex_buffer_obj: GLuint,
-  matrix_id: GLint, // TODO: _id
+  matrix_id: GLint,
   window: glfw::Window
 }
 
