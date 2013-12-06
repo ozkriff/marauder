@@ -20,8 +20,8 @@ use cgmath::projection;
 use cgmath::angle;
 use cgmath::vector::{Vec3, Vec2};
 
-#[link_args="-lglfw"]
-#[link_args="-lm"]
+#[link(name = "glfw")]
+#[link(name = "m")]
 extern {}
 
 /// usage: let s = mvp_matrix; println(type_of(&s));
