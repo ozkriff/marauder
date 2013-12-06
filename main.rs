@@ -324,6 +324,7 @@ impl glfw::KeyCallback for KeyContext {
     action: glfw::Action,
     _:      glfw::Modifiers
   ) {
+    let distance = 1.0;
     match (action, key) {
       (glfw::Press, glfw::KeyEscape) | (glfw::Press, glfw::KeyQ) => {
         window.set_should_close(true)
@@ -331,10 +332,10 @@ impl glfw::KeyCallback for KeyContext {
       (glfw::Press, glfw::KeySpace) => {
         println!("space")
       }
-      (glfw::Press, glfw::KeyUp) => unsafe { CAMERA_POS.y -= 1.0f32 },
-      (glfw::Press, glfw::KeyDown) => unsafe { CAMERA_POS.y += 1.0f32 },
-      (glfw::Press, glfw::KeyRight) => unsafe { CAMERA_POS.x -= 1.0f32 },
-      (glfw::Press, glfw::KeyLeft) => unsafe { CAMERA_POS.x += 1.0f32 },
+      (glfw::Press, glfw::KeyUp)    => unsafe { CAMERA_POS.y -= distance },
+      (glfw::Press, glfw::KeyDown)  => unsafe { CAMERA_POS.y += distance },
+      (glfw::Press, glfw::KeyRight) => unsafe { CAMERA_POS.x -= distance },
+      (glfw::Press, glfw::KeyLeft)  => unsafe { CAMERA_POS.x += distance },
       _ => {}
     }
   }
