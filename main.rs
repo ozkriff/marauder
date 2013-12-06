@@ -288,6 +288,10 @@ impl Win {
   fn is_running(&self) -> bool {
     return !self.window.should_close()
   }
+
+  fn process_events(&self) {
+    glfw::poll_events();
+  }
 }
 
 fn main() {
@@ -299,7 +303,7 @@ fn main() {
     let win =  Win::new();
 
     while win.is_running() {
-      glfw::poll_events();
+      win.process_events();
       win.draw();
     }
 
