@@ -18,7 +18,7 @@ use gl::types::{
 use cgmath::matrix::{Matrix, Mat4, Mat3, ToMat4};
 use cgmath::projection;
 use cgmath::angle;
-use cgmath::vector::Vec3;
+use cgmath::vector::{Vec3, Vec2};
 
 #[link_args="-lglfw"] extern {}
 
@@ -44,8 +44,7 @@ fn print_mat4(name: &str, mat: Mat4<f32>) {
 static mut POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 
-static WIN_WIDTH: uint = 640;
-static WIN_HEIGHT: uint = 480;
+static WIN_SIZE: Vec2<uint> = Vec2{x: 640, y: 480};
 static VERTICES_COUNT: i32 = 3 * 2;
 
 // Vertex data
@@ -191,7 +190,7 @@ fn main() {
     // glfw::window_hint::context_version(3, 2);
 
     let window = glfw::Window::create(
-      WIN_WIDTH, WIN_HEIGHT, "OpenGL", glfw::Windowed).unwrap();
+      WIN_SIZE.x, WIN_SIZE.y, "OpenGL", glfw::Windowed).unwrap();
     window.make_context_current();
     window.set_cursor_pos_callback(~CursorPosContext);
     window.set_key_callback(~KeyContext);
