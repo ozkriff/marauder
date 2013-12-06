@@ -182,39 +182,76 @@ fn upd(programId: GLuint) {
   }
 }
 
+struct Win {
+  vertex_shader: GLuint,
+  fragment_shader: GLuint,
+  program: GLuint,
+  vertex_array_obj: GLuint,
+  vertex_buffer_obj: GLuint,
+  window: glfw::Window
+}
+
+impl Win {
+  fn new() -> Win {
+    let mut win =  Win{
+      vertex_shader: 0,
+      fragment_shader: 0,
+      program: 0,
+      vertex_array_obj: 0,
+      vertex_buffer_obj: 0,
+      window: glfw::Window::create(
+        WIN_SIZE.x,
+        WIN_SIZE.y,
+        "OpenGL",
+        glfw::Windowed
+      ).unwrap()
+    };
+    win
+  }
+
+  fn cleanup(&self) {
+    // Cleanup
+    gl::DeleteProgram(self.program);
+    gl::DeleteShader(self.fragment_shader);
+    gl::DeleteShader(self.vertex_shader);
+    unsafe {
+      gl::DeleteBuffers(1, &self.vertex_buffer_obj);
+      gl::DeleteVertexArrays(1, &self.vertex_array_obj);
+    }
+  }
+}
+
 fn main() {
   glfw::set_error_callback(~ErrorContext);
 
   do glfw::start {
     // glfw::window_hint::context_version(3, 2);
 
-    let window = glfw::Window::create(
-      WIN_SIZE.x, WIN_SIZE.y, "OpenGL", glfw::Windowed).unwrap();
-    window.make_context_current();
-    window.set_cursor_pos_callback(~CursorPosContext);
-    window.set_key_callback(~KeyContext);
+    let mut win =  Win::new();
+
+    win.window.make_context_current();
+    win.window.set_cursor_pos_callback(~CursorPosContext);
+    win.window.set_key_callback(~KeyContext);
 
     // Load the OpenGL function pointers
     gl::load_with(glfw::get_proc_address);
 
     // Create GLSL shaders
-    let vertex_shader = compile_shader(
+    win.vertex_shader = compile_shader(
       VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
-    let fragment_shader = compile_shader(
+    win.fragment_shader = compile_shader(
       FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
-    let program = link_program(vertex_shader, fragment_shader);
+    win.program = link_program(win.vertex_shader, win.fragment_shader);
 
-    let mut vertex_array_obj = 0;
-    let mut vertex_buffer_obj = 0;
 
     unsafe {
       // Create Vertex Array Object
-      gl::GenVertexArrays(1, &mut vertex_array_obj);
-      gl::BindVertexArray(vertex_array_obj);
+      gl::GenVertexArrays(1, &mut win.vertex_array_obj);
+      gl::BindVertexArray(win.vertex_array_obj);
 
       // Create a Vertex Buffer Object and copy the vertex data to it
-      gl::GenBuffers(1, &mut vertex_buffer_obj);
-      gl::BindBuffer(gl::ARRAY_BUFFER, vertex_buffer_obj);
+      gl::GenBuffers(1, &mut win.vertex_buffer_obj);
+      gl::BindBuffer(gl::ARRAY_BUFFER, win.vertex_buffer_obj);
       let float_size = std::mem::size_of::<GLfloat>();
       let vertices_ptr = (VERTEX_DATA.len() * float_size) as GLsizeiptr;
       gl::BufferData(
@@ -224,12 +261,12 @@ fn main() {
         gl::STATIC_DRAW
       );
 
-      gl::UseProgram(program);
-      gl::BindFragDataLocation(program, 0, "out_color".to_c_str().unwrap());
+      gl::UseProgram(win.program);
+      gl::BindFragDataLocation(win.program, 0, "out_color".to_c_str().unwrap());
 
       // Specify the layout of the vertex data
       let pos_attr = gl::GetAttribLocation(
-        program, "position".to_c_str().unwrap()) as GLuint;
+        win.program, "position".to_c_str().unwrap()) as GLuint;
       gl::EnableVertexAttribArray(pos_attr);
       let size = 3;
       let normalized = gl::FALSE as GLboolean;
@@ -244,10 +281,10 @@ fn main() {
       );
     }
  
-    while !window.should_close() {
+    while !win.window.should_close() {
       glfw::poll_events();
 
-      upd(program);
+      upd(win.program);
       
       // Clear the screen to black
       gl::ClearColor(0.3, 0.3, 0.3, 1.0);
@@ -256,17 +293,10 @@ fn main() {
       // Draw a triangle from the 3 vertices
       gl::DrawArrays(gl::TRIANGLES, 0, VERTICES_COUNT);
 
-      window.swap_buffers();
+      win.window.swap_buffers();
     }
 
-    // Cleanup
-    gl::DeleteProgram(program);
-    gl::DeleteShader(fragment_shader);
-    gl::DeleteShader(vertex_shader);
-    unsafe {
-      gl::DeleteBuffers(1, &vertex_buffer_obj);
-      gl::DeleteVertexArrays(1, &vertex_array_obj);
-    }
+    win.cleanup();
   }
 }
 
