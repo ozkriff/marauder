@@ -151,7 +151,7 @@ struct Win {
   program: GLuint,
   vertex_array_obj: GLuint,
   vertex_buffer_obj: GLuint,
-  matrixId: GLint, // TODO: _id
+  matrix_id: GLint, // TODO: _id
   window: glfw::Window
 }
 
@@ -166,7 +166,7 @@ impl Win {
       program: 0,
       vertex_array_obj: 0,
       vertex_buffer_obj: 0,
-      matrixId: 0,
+      matrix_id: 0,
       window: glfw::Window::create(
         WIN_SIZE.x,
         WIN_SIZE.y,
@@ -227,7 +227,7 @@ impl Win {
 
       // Get a handle for our "model_view_proj_matrix" uniform.
       // Only at initialisation time.
-      win.matrixId = gl::GetUniformLocation(
+      win.matrix_id = gl::GetUniformLocation(
         win.program, "model_view_proj_matrix".to_c_str().unwrap()
       );
     }
@@ -268,7 +268,7 @@ impl Win {
       // in the "model_view_proj_matrix" uniform.
       // For each model you render, since the model_view_proj_matrix
       // will be different (at least the M part).
-      gl::UniformMatrix4fv(self.matrixId, 1, gl::FALSE, mvp_matrix.cr(0, 0));
+      gl::UniformMatrix4fv(self.matrix_id, 1, gl::FALSE, mvp_matrix.cr(0, 0));
     }
   }
 
