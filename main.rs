@@ -145,43 +145,13 @@ fn rot_y(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
-fn update_matrices(programId: GLuint) {
-  let fov = angle::deg(45.0f32);
-  let ratio = 4.0 / 3.0;
-  let display_range_min = 0.1;
-  let display_range_max = 100.0;
-  let projection_matrix = projection::perspective(
-    fov, ratio, display_range_min, display_range_max
-  );
-
-  let mut mvp_matrix = projection_matrix;
-  unsafe {
-    mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
-    mvp_matrix = rot_x(mvp_matrix, MOUSE_POS.y / 100.0);
-    mvp_matrix = rot_y(mvp_matrix, MOUSE_POS.x / 100.0);
-    mvp_matrix = tr(mvp_matrix, CAMERA_POS);
-  }
-
-  unsafe {
-    // Get a handle for our "model_view_proj_matrix" uniform.
-    // Only at initialisation time.
-    let matrixId = gl::GetUniformLocation(
-      programId, "model_view_proj_matrix".to_c_str().unwrap());
-
-    // Send our transformation to the currently bound shader,
-    // in the "model_view_proj_matrix" uniform.
-    // For each model you render, since the model_view_proj_matrix
-    // will be different (at least the M part).
-    gl::UniformMatrix4fv(matrixId, 1, gl::FALSE, mvp_matrix.cr(0, 0));
-  }
-}
-
 struct Win {
   vertex_shader: GLuint,
   fragment_shader: GLuint,
   program: GLuint,
   vertex_array_obj: GLuint,
   vertex_buffer_obj: GLuint,
+  matrixId: GLint, // TODO: _id
   window: glfw::Window
 }
 
@@ -196,6 +166,7 @@ impl Win {
       program: 0,
       vertex_array_obj: 0,
       vertex_buffer_obj: 0,
+      matrixId: 0,
       window: glfw::Window::create(
         WIN_SIZE.x,
         WIN_SIZE.y,
@@ -253,6 +224,12 @@ impl Win {
         stride,
         std::ptr::null()
       );
+
+      // Get a handle for our "model_view_proj_matrix" uniform.
+      // Only at initialisation time.
+      win.matrixId = gl::GetUniformLocation(
+        win.program, "model_view_proj_matrix".to_c_str().unwrap()
+      );
     }
  
     win
@@ -269,8 +246,34 @@ impl Win {
     }
   }
 
+  fn update_matrices(&self) {
+    let fov = angle::deg(45.0f32);
+    let ratio = 4.0 / 3.0;
+    let display_range_min = 0.1;
+    let display_range_max = 100.0;
+    let projection_matrix = projection::perspective(
+      fov, ratio, display_range_min, display_range_max
+    );
+
+    let mut mvp_matrix = projection_matrix;
+    unsafe {
+      mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
+      mvp_matrix = rot_x(mvp_matrix, MOUSE_POS.y / 100.0);
+      mvp_matrix = rot_y(mvp_matrix, MOUSE_POS.x / 100.0);
+      mvp_matrix = tr(mvp_matrix, CAMERA_POS);
+    }
+
+    unsafe {
+      // Send our transformation to the currently bound shader,
+      // in the "model_view_proj_matrix" uniform.
+      // For each model you render, since the model_view_proj_matrix
+      // will be different (at least the M part).
+      gl::UniformMatrix4fv(self.matrixId, 1, gl::FALSE, mvp_matrix.cr(0, 0));
+    }
+  }
+
   fn draw(&self) {
-    update_matrices(self.program);
+    self.update_matrices();
 
     // Clear the screen to black
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
