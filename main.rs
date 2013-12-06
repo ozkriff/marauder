@@ -206,28 +206,6 @@ impl Win {
         glfw::Windowed
       ).unwrap()
     };
-    win
-  }
-
-  fn cleanup(&self) {
-    // Cleanup
-    gl::DeleteProgram(self.program);
-    gl::DeleteShader(self.fragment_shader);
-    gl::DeleteShader(self.vertex_shader);
-    unsafe {
-      gl::DeleteBuffers(1, &self.vertex_buffer_obj);
-      gl::DeleteVertexArrays(1, &self.vertex_array_obj);
-    }
-  }
-}
-
-fn main() {
-  glfw::set_error_callback(~ErrorContext);
-
-  do glfw::start {
-    // glfw::window_hint::context_version(3, 2);
-
-    let mut win =  Win::new();
 
     win.window.make_context_current();
     win.window.set_cursor_pos_callback(~CursorPosContext);
@@ -242,7 +220,6 @@ fn main() {
     win.fragment_shader = compile_shader(
       FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
     win.program = link_program(win.vertex_shader, win.fragment_shader);
-
 
     unsafe {
       // Create Vertex Array Object
@@ -281,6 +258,29 @@ fn main() {
       );
     }
  
+    win
+  }
+
+  fn cleanup(&self) {
+    // Cleanup
+    gl::DeleteProgram(self.program);
+    gl::DeleteShader(self.fragment_shader);
+    gl::DeleteShader(self.vertex_shader);
+    unsafe {
+      gl::DeleteBuffers(1, &self.vertex_buffer_obj);
+      gl::DeleteVertexArrays(1, &self.vertex_array_obj);
+    }
+  }
+}
+
+fn main() {
+  glfw::set_error_callback(~ErrorContext);
+
+  do glfw::start {
+    // glfw::window_hint::context_version(3, 2);
+
+    let win =  Win::new();
+
     while !win.window.should_close() {
       glfw::poll_events();
 
