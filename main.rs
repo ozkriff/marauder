@@ -188,6 +188,9 @@ struct Win {
 
 impl Win {
   fn new() -> Win {
+    // TODO: Move to opengl_init method
+    // glfw::window_hint::context_version(3, 2);
+
     let mut win =  Win{
       vertex_shader: 0,
       fragment_shader: 0,
@@ -338,7 +341,6 @@ impl glfw::KeyCallback for KeyContext {
 fn main() {
   glfw::set_error_callback(~ErrorContext);
   do glfw::start {
-    // glfw::window_hint::context_version(3, 2);
     let win =  Win::new();
     while win.is_running() {
       win.process_events();
