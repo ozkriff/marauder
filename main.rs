@@ -79,15 +79,12 @@ static FRAGMENT_SHADER_SRC: &'static str = "
 fn compile_shader(src: &str, ty: GLenum) -> GLuint {
   let shader = gl::CreateShader(ty);
   unsafe {
-    // Attempt to compile the shader
     gl::ShaderSource(shader, 1, &src.to_c_str().unwrap(), std::ptr::null());
     gl::CompileShader(shader);
 
-    // Get the compile status
     let mut status = gl::FALSE as GLint;
     gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
 
-    // Fail on error
     if status != (gl::TRUE as GLint) {
       let mut len = 0;
       gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
@@ -108,11 +105,9 @@ fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
   gl::AttachShader(program, fragment_shader);
   gl::LinkProgram(program);
   unsafe {
-    // Get the link status
     let mut status = gl::FALSE as GLint;
     gl::GetProgramiv(program, gl::LINK_STATUS, &mut status);
 
-    // Fail on error
     if status != (gl::TRUE as GLint) {
       let mut len: GLint = 0;
       gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
@@ -182,7 +177,6 @@ impl Win {
     // Load the OpenGL function pointers
     gl::load_with(glfw::get_proc_address);
 
-    // Create GLSL shaders
     win.vertex_shader = compile_shader(
       VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
     win.fragment_shader = compile_shader(
@@ -207,7 +201,8 @@ impl Win {
       );
 
       gl::UseProgram(win.program);
-      gl::BindFragDataLocation(win.program, 0, "out_color".to_c_str().unwrap());
+      gl::BindFragDataLocation(
+        win.program, 0, "out_color".to_c_str().unwrap());
 
       // Specify the layout of the vertex data
       let pos_attr = gl::GetAttribLocation(
@@ -225,8 +220,6 @@ impl Win {
         std::ptr::null()
       );
 
-      // Get a handle for our "model_view_proj_matrix" uniform.
-      // Only at initialisation time.
       win.matrix_id = gl::GetUniformLocation(
         win.program, "model_view_proj_matrix".to_c_str().unwrap()
       );
@@ -236,7 +229,6 @@ impl Win {
   }
 
   fn cleanup(&self) {
-    // Cleanup
     gl::DeleteProgram(self.program);
     gl::DeleteShader(self.fragment_shader);
     gl::DeleteShader(self.vertex_shader);
@@ -265,23 +257,18 @@ impl Win {
 
     unsafe {
       // Send our transformation to the currently bound shader,
-      // in the "model_view_proj_matrix" uniform.
-      // For each model you render, since the model_view_proj_matrix
-      // will be different (at least the M part).
+      // in the "model_view_proj_matrix" uniform for each model
+      // you render, since the model_view_proj_matrix will be
+      // different (at least the M part).
       gl::UniformMatrix4fv(self.matrix_id, 1, gl::FALSE, mvp_matrix.cr(0, 0));
     }
   }
 
   fn draw(&self) {
     self.update_matrices();
-
-    // Clear the screen to black
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
-
-    // Draw a triangle from the 3 vertices
     gl::DrawArrays(gl::TRIANGLES, 0, VERTICES_COUNT);
-
     self.window.swap_buffers();
   }
 
@@ -298,7 +285,6 @@ struct CursorPosContext;
 impl glfw::CursorPosCallback for CursorPosContext {
   fn call(&self, w: &glfw::Window, xpos: f64, ypos: f64) {
     if w.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
-      // println!("Cursor position: ({}, {})", xpos, ypos);
       unsafe {
         MOUSE_POS.x = xpos as f32;
         MOUSE_POS.y = ypos as f32;
