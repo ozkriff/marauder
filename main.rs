@@ -155,7 +155,18 @@ struct Win {
   vertex_array_obj: GLuint,
   vertex_buffer_obj: GLuint,
   matrix_id: GLint,
+  projection_matrix: Mat4<f32>,
   window: glfw::Window
+}
+
+fn get_projection_matrix() -> Mat4<f32> {
+  let fov = angle::deg(45.0f32);
+  let ratio = 4.0 / 3.0;
+  let display_range_min = 0.1;
+  let display_range_max = 100.0;
+  projection::perspective(
+    fov, ratio, display_range_min, display_range_max
+  )
 }
 
 impl Win {
@@ -163,13 +174,14 @@ impl Win {
     // TODO: Move to opengl_init method
     // glfw::window_hint::context_version(3, 2);
 
-    let mut win =  Win{
+    let mut win = Win{
       vertex_shader: 0,
       fragment_shader: 0,
       program: 0,
       vertex_array_obj: 0,
       vertex_buffer_obj: 0,
       matrix_id: 0,
+      projection_matrix: get_projection_matrix(),
       window: glfw::Window::create(
         WIN_SIZE.x,
         WIN_SIZE.y,
@@ -247,15 +259,7 @@ impl Win {
   }
 
   fn update_matrices(&self) {
-    let fov = angle::deg(45.0f32);
-    let ratio = 4.0 / 3.0;
-    let display_range_min = 0.1;
-    let display_range_max = 100.0;
-    let projection_matrix = projection::perspective(
-      fov, ratio, display_range_min, display_range_max
-    );
-
-    let mut mvp_matrix = projection_matrix;
+    let mut mvp_matrix = self.projection_matrix;
     unsafe {
       mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
       mvp_matrix = rot_x(mvp_matrix, MOUSE_POS.y / 100.0);
