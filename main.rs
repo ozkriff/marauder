@@ -269,9 +269,7 @@ impl Win {
       mvp_matrix = rot_x(mvp_matrix, MOUSE_POS.y / 100.0);
       mvp_matrix = rot_y(mvp_matrix, MOUSE_POS.x / 100.0);
       mvp_matrix = tr(mvp_matrix, CAMERA_POS);
-    }
 
-    unsafe {
       // Send our transformation to the currently bound shader,
       // in the "model_view_proj_matrix" uniform for each model
       // you render, since the model_view_proj_matrix will be
