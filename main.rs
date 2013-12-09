@@ -39,15 +39,19 @@ fn type_of<T>(_: &T) -> &'static str {
   }
 }
 
-fn print_mat4(name: &str, mat: Mat4<f32>) {
-  println!("{}:", name);
-  for i in range(0u, 4) {
-    for j in range(0u, 4) {
-      print!("{} ", *mat.cr(i, j));
+pub mod misc {
+  use cgmath::matrix::Mat4;
+
+  pub fn print_mat4(name: &str, mat: Mat4<f32>) {
+    println!("{}:", name);
+    for i in range(0u, 4) {
+      for j in range(0u, 4) {
+        print!("{} ", *mat.cr(i, j));
+      }
+      println("");
     }
     println("");
   }
-  println("");
 }
 
 static mut MOUSE_POS: Vec2<f32> = Vec2{x: 0.0f32, y: 0.0};
