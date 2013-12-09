@@ -89,8 +89,8 @@ static FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
-fn compile_shader(src: &str, ty: GLenum) -> GLuint {
-  let shader = gl::CreateShader(ty);
+fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
+  let shader = gl::CreateShader(shader_type);
   unsafe {
     gl::ShaderSource(shader, 1, &src.to_c_str().unwrap(), std::ptr::null());
     gl::CompileShader(shader);
