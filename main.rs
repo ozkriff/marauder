@@ -32,15 +32,9 @@ use cgmath::angle;
 #[link(name = "m")]
 extern {}
 
-/// usage: let s = mvp_matrix; println(type_of(&s));
-fn type_of<T>(_: &T) -> &'static str {
-  unsafe {
-    (*std::unstable::intrinsics::get_tydesc::<T>()).name
-  }
-}
-
 pub mod misc {
   use cgmath::matrix::Mat4;
+  use std;
 
   pub fn print_mat4(name: &str, mat: Mat4<f32>) {
     println!("{}:", name);
@@ -51,6 +45,13 @@ pub mod misc {
       println("");
     }
     println("");
+  }
+
+  /// usage: let s = mvp_matrix; println(type_of(&s));
+  pub fn type_of<T>(_: &T) -> &'static str {
+    unsafe {
+      (*std::unstable::intrinsics::get_tydesc::<T>()).name
+    }
   }
 }
 
