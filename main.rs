@@ -175,9 +175,6 @@ fn get_projection_matrix() -> Mat4<f32> {
 
 impl Win {
   fn new() -> Win {
-    // TODO: Move to opengl_init method
-    // glfw::window_hint::context_version(3, 2);
-
     let mut win = Win{
       vertex_shader: 0,
       fragment_shader: 0,
@@ -193,28 +190,37 @@ impl Win {
         glfw::Windowed
       ).unwrap()
     };
+    win.init_opengl();
+    win
+  }
 
-    win.window.make_context_current();
-    win.window.set_cursor_pos_callback(~CursorPosContext);
-    win.window.set_key_callback(~KeyContext);
+  fn init_opengl(&mut self) {
+    // TODO: Move to opengl_init method
+    // glfw::window_hint::context_version(3, 2);
+
+    self.window.make_context_current();
+    self.window.set_cursor_pos_callback(~CursorPosContext);
+    self.window.set_key_callback(~KeyContext);
 
     // Load the OpenGL function pointers
     gl::load_with(glfw::get_proc_address);
 
-    win.vertex_shader = compile_shader(
+    self.vertex_shader = compile_shader(
       VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
-    win.fragment_shader = compile_shader(
+    self.fragment_shader = compile_shader(
       FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
-    win.program = link_program(win.vertex_shader, win.fragment_shader);
+    self.program = link_program(self.vertex_shader, self.fragment_shader);
 
     unsafe {
       // Create Vertex Array Object
-      gl::GenVertexArrays(1, &mut win.vertex_array_obj);
-      gl::BindVertexArray(win.vertex_array_obj);
+      gl::GenVertexArrays(1, &mut self.vertex_array_obj);
+      gl::BindVertexArray(self.vertex_array_obj);
 
-      // Create a Vertex Buffer Object and copy the vertex data to it
-      gl::GenBuffers(1, &mut win.vertex_buffer_obj);
-      gl::BindBuffer(gl::ARRAY_BUFFER, win.vertex_buffer_obj);
+      // Create a Vertex Buffer Object
+      gl::GenBuffers(1, &mut self.vertex_buffer_obj);
+      gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
+
+      // Copy vertex data to VBO
       let float_size = std::mem::size_of::<GLfloat>();
       let vertices_ptr = (VERTEX_DATA.len() * float_size) as GLsizeiptr;
       gl::BufferData(
@@ -224,14 +230,15 @@ impl Win {
         gl::STATIC_DRAW
       );
 
-      gl::UseProgram(win.program);
+      gl::UseProgram(self.program);
       gl::BindFragDataLocation(
-        win.program, 0, "out_color".to_c_str().unwrap());
+        self.program, 0, "out_color".to_c_str().unwrap());
 
       // Specify the layout of the vertex data
       let pos_attr = gl::GetAttribLocation(
-        win.program, "position".to_c_str().unwrap()) as GLuint;
+        self.program, "position".to_c_str().unwrap()) as GLuint;
       gl::EnableVertexAttribArray(pos_attr);
+
       let size = 3;
       let normalized = gl::FALSE as GLboolean;
       let stride = 0;
@@ -244,12 +251,10 @@ impl Win {
         std::ptr::null()
       );
 
-      win.matrix_id = gl::GetUniformLocation(
-        win.program, "model_view_proj_matrix".to_c_str().unwrap()
+      self.matrix_id = gl::GetUniformLocation(
+        self.program, "model_view_proj_matrix".to_c_str().unwrap()
       );
     }
- 
-    win
   }
 
   fn cleanup(&self) {
