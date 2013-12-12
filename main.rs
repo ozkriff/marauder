@@ -185,8 +185,8 @@ impl Win {
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
       window: glfw::Window::create(
-        WIN_SIZE.x,
-        WIN_SIZE.y,
+        WIN_SIZE.x as u32,
+        WIN_SIZE.y as u32,
         "OpenGL",
         glfw::Windowed
       ).unwrap()
