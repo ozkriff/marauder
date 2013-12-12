@@ -50,7 +50,7 @@ pub mod misc {
 static mut MOUSE_POS: Vec2<f32> = Vec2{x: 0.0f32, y: 0.0};
 static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 
-static WIN_SIZE: Vec2<uint> = Vec2{x: 640, y: 480};
+static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
 static VERTICES_COUNT: i32 = 3 * 2;
 
 static VERTEX_DATA: [gltypes::GLfloat, ..VERTICES_COUNT * 3] = [
@@ -180,8 +180,8 @@ impl Win {
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
       window: glfw::Window::create(
-        WIN_SIZE.x as u32,
-        WIN_SIZE.y as u32,
+        WIN_SIZE.x,
+        WIN_SIZE.y,
         "OpenGL",
         glfw::Windowed
       ).unwrap()
