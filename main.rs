@@ -6,15 +6,7 @@ extern mod glfw;
 extern mod gl;
 extern mod cgmath;
 
-use gl::types::{
-  GLenum,
-  GLuint,
-  GLint,
-  GLchar,
-  GLfloat,
-  GLsizeiptr,
-  GLboolean
-};
+use gltypes = gl::types;
 use cgmath::matrix::{
   Matrix,
   Mat4,
@@ -61,7 +53,7 @@ static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 static WIN_SIZE: Vec2<uint> = Vec2{x: 640, y: 480};
 static VERTICES_COUNT: i32 = 3 * 2;
 
-static VERTEX_DATA: [GLfloat, ..VERTICES_COUNT * 3] = [
+static VERTEX_DATA: [gltypes::GLfloat, ..VERTICES_COUNT * 3] = [
    0.0,  1.0, 0.0,
    2.0, -1.0, 0.0,
   -2.0, -1.0, 0.0,
@@ -89,22 +81,22 @@ static FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
-fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
+fn compile_shader(src: &str, shader_type: gltypes::GLenum) -> gltypes::GLuint {
   let shader = gl::CreateShader(shader_type);
   unsafe {
     gl::ShaderSource(shader, 1, &src.to_c_str().unwrap(), std::ptr::null());
     gl::CompileShader(shader);
 
-    let mut status = gl::FALSE as GLint;
+    let mut status = gl::FALSE as gltypes::GLint;
     gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
 
-    if status != (gl::TRUE as GLint) {
+    if status != (gl::TRUE as gltypes::GLint) {
       let mut len = 0;
       gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
-        std::vec::raw::to_mut_ptr(buf) as *mut GLchar
+        std::vec::raw::to_mut_ptr(buf) as *mut gltypes::GLchar
       );
       fail!("compile_shader(): " + std::str::raw::from_utf8(buf));
     }
@@ -112,22 +104,25 @@ fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
   shader
 }
 
-fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
+fn link_program(
+    vertex_shader: gltypes::GLuint,
+    fragment_shader: gltypes::GLuint
+) -> gltypes::GLuint {
   let program = gl::CreateProgram();
   gl::AttachShader(program, vertex_shader);
   gl::AttachShader(program, fragment_shader);
   gl::LinkProgram(program);
   unsafe {
-    let mut status = gl::FALSE as GLint;
+    let mut status = gl::FALSE as gltypes::GLint;
     gl::GetProgramiv(program, gl::LINK_STATUS, &mut status);
 
-    if status != (gl::TRUE as GLint) {
-      let mut len: GLint = 0;
+    if status != (gl::TRUE as gltypes::GLint) {
+      let mut len: gltypes::GLint = 0;
       gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
-        std::vec::raw::to_mut_ptr(buf) as *mut GLchar
+        std::vec::raw::to_mut_ptr(buf) as *mut gltypes::GLchar
       );
       fail!("link_program(): " + std::str::raw::from_utf8(buf));
     }
@@ -154,12 +149,12 @@ fn rot_y(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
 }
 
 struct Win {
-  vertex_shader: GLuint,
-  fragment_shader: GLuint,
-  program: GLuint,
-  vertex_array_obj: GLuint,
-  vertex_buffer_obj: GLuint,
-  matrix_id: GLint,
+  vertex_shader: gltypes::GLuint,
+  fragment_shader: gltypes::GLuint,
+  program: gltypes::GLuint,
+  vertex_array_obj: gltypes::GLuint,
+  vertex_buffer_obj: gltypes::GLuint,
+  matrix_id: gltypes::GLint,
   projection_matrix: Mat4<f32>,
   window: glfw::Window
 }
@@ -222,8 +217,8 @@ impl Win {
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
 
       // Copy vertex data to VBO
-      let float_size = std::mem::size_of::<GLfloat>();
-      let vertices_ptr = (VERTEX_DATA.len() * float_size) as GLsizeiptr;
+      let float_size = std::mem::size_of::<gltypes::GLfloat>();
+      let vertices_ptr = (VERTEX_DATA.len() * float_size) as gltypes::GLsizeiptr;
       gl::BufferData(
         gl::ARRAY_BUFFER,
         vertices_ptr,
@@ -237,11 +232,11 @@ impl Win {
 
       // Specify the layout of the vertex data
       let pos_attr = gl::GetAttribLocation(
-        self.program, "position".to_c_str().unwrap()) as GLuint;
+        self.program, "position".to_c_str().unwrap()) as gltypes::GLuint;
       gl::EnableVertexAttribArray(pos_attr);
 
       let size = 3;
-      let normalized = gl::FALSE as GLboolean;
+      let normalized = gl::FALSE as gltypes::GLboolean;
       let stride = 0;
       gl::VertexAttribPointer(
         pos_attr,
