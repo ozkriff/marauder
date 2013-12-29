@@ -5,6 +5,7 @@
 extern mod glfw;
 extern mod gl;
 extern mod cgmath;
+extern mod native;
 
 use gltypes = gl::types;
 use cgmath::matrix::{
@@ -96,7 +97,7 @@ fn compile_shader(src: &str, shader_type: gltypes::GLenum) -> gltypes::GLuint {
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
-        std::vec::raw::to_mut_ptr(buf) as *mut gltypes::GLchar
+        buf.as_mut_ptr() as *mut gltypes::GLchar
       );
       fail!("compile_shader(): " + std::str::raw::from_utf8(buf));
     }
@@ -122,7 +123,7 @@ fn link_program(
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
-        std::vec::raw::to_mut_ptr(buf) as *mut gltypes::GLchar
+        buf.as_mut_ptr() as *mut gltypes::GLchar
       );
       fail!("link_program(): " + std::str::raw::from_utf8(buf));
     }
@@ -356,7 +357,7 @@ fn main() {
 
 #[start]
 fn start(argc: int, argv: **u8) -> int {
-  std::rt::start_on_main_thread(argc, argv, main)
+  native::start(argc, argv, main)
 }
 
 // vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
