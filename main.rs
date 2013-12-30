@@ -192,7 +192,6 @@ impl Win {
   }
 
   fn init_opengl(&mut self) {
-    // TODO: Move to opengl_init method
     // glfw::window_hint::context_version(3, 2);
 
     self.window.make_context_current();
