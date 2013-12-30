@@ -236,7 +236,7 @@ impl Win {
       gl::EnableVertexAttribArray(pos_attr);
 
       let size = 3;
-      let normalized = gl::FALSE as gltypes::GLboolean;
+      let normalized = gl::FALSE;
       let stride = 0;
       gl::VertexAttribPointer(
         pos_attr,
