@@ -133,6 +133,10 @@ impl Visualizer {
     let n = FRAC_PI_2 + 2.0 * PI * (i as f32) / (count as f32);
     Vec2{x: cos(n), y: sin(n)}.mul_s(self.hex_ex_radius)
   }
+
+  pub fn index_to_hex_vertex(&self, i: int) -> Vec2<f32> {
+    self.index_to_circle_vertex(6, i)
+  }
 }
 
 fn compile_shader(src: &str, shader_type: gltypes::GLenum) -> gltypes::GLuint {
