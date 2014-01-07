@@ -210,7 +210,6 @@ struct Win {
   vertex_shader: gltypes::GLuint,
   fragment_shader: gltypes::GLuint,
   program: gltypes::GLuint,
-  vertex_array_obj: gltypes::GLuint,
   vertex_buffer_obj: gltypes::GLuint,
   matrix_id: gltypes::GLint,
   projection_matrix: Mat4<f32>,
@@ -233,7 +232,6 @@ impl Win {
       vertex_shader: 0,
       fragment_shader: 0,
       program: 0,
-      vertex_array_obj: 0,
       vertex_buffer_obj: 0,
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
@@ -265,10 +263,6 @@ impl Win {
     self.program = link_program(self.vertex_shader, self.fragment_shader);
 
     unsafe {
-      // Create Vertex Array Object
-      gl::GenVertexArrays(1, &mut self.vertex_array_obj);
-      gl::BindVertexArray(self.vertex_array_obj);
-
       // Create a Vertex Buffer Object
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
@@ -316,7 +310,6 @@ impl Win {
     gl::DeleteShader(self.vertex_shader);
     unsafe {
       gl::DeleteBuffers(1, &self.vertex_buffer_obj);
-      gl::DeleteVertexArrays(1, &self.vertex_array_obj);
     }
   }
 
