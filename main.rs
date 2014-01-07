@@ -243,25 +243,11 @@ impl Win {
       ).unwrap()
     };
     win.init_opengl();
+    win.init_model();
     win
   }
 
-  fn init_opengl(&mut self) {
-    // glfw::window_hint::context_version(3, 2);
-
-    self.window.make_context_current();
-    self.window.set_cursor_pos_callback(~CursorPosContext);
-    self.window.set_key_callback(~KeyContext);
-
-    // Load the OpenGL function pointers
-    gl::load_with(glfw::get_proc_address);
-
-    self.vertex_shader = compile_shader(
-      VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
-    self.fragment_shader = compile_shader(
-      FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
-    self.program = link_program(self.vertex_shader, self.fragment_shader);
-
+  fn init_model(&mut self) {
     unsafe {
       // Create a Vertex Buffer Object
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);
@@ -302,6 +288,23 @@ impl Win {
         self.program, "model_view_proj_matrix".to_c_str().unwrap()
       );
     }
+  }
+
+  fn init_opengl(&mut self) {
+    // glfw::window_hint::context_version(3, 2);
+
+    self.window.make_context_current();
+    self.window.set_cursor_pos_callback(~CursorPosContext);
+    self.window.set_key_callback(~KeyContext);
+
+    // Load the OpenGL function pointers
+    gl::load_with(glfw::get_proc_address);
+
+    self.vertex_shader = compile_shader(
+      VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
+    self.fragment_shader = compile_shader(
+      FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
+    self.program = link_program(self.vertex_shader, self.fragment_shader);
   }
 
   fn cleanup(&self) {
