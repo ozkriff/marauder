@@ -361,13 +361,6 @@ impl glfw::CursorPosCallback for CursorPosContext {
   }
 }
 
-struct ErrorContext;
-impl glfw::ErrorCallback for ErrorContext {
-  fn call(&self, _: glfw::Error, description: ~str) {
-    println!("GLFW Error: {:s}", description);
-  }
-}
-
 struct KeyContext;
 impl glfw::KeyCallback for KeyContext {
   fn call(
@@ -396,7 +389,7 @@ impl glfw::KeyCallback for KeyContext {
 }
 
 fn main() {
-  glfw::set_error_callback(~ErrorContext);
+  glfw::set_error_callback(~glfw::LogErrorHandler);
   do glfw::start {
     let win = Win::new();
     while win.is_running() {
