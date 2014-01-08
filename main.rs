@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-// Marauder is grid-less turn-based strategy game.
+// Marauder is turn-based strategy game with hex grid.
 
 extern mod glfw;
 extern mod gl;
