@@ -398,7 +398,7 @@ impl glfw::KeyCallback for KeyContext {
 fn main() {
   glfw::set_error_callback(~ErrorContext);
   do glfw::start {
-    let win =  Win::new();
+    let win = Win::new();
     while win.is_running() {
       win.process_events();
       win.draw();
