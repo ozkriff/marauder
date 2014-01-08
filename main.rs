@@ -228,7 +228,7 @@ fn get_projection_matrix() -> Mat4<f32> {
 
 impl Win {
   fn new() -> Win {
-    let mut win = Win{
+    let mut win = Win {
       vertex_shader: 0,
       fragment_shader: 0,
       program: 0,
