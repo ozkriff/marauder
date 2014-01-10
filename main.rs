@@ -38,7 +38,10 @@ use cgmath::angle;
 extern {}
 
 pub mod misc {
-  use cgmath::matrix::Mat4;
+  use cgmath::matrix::{
+    Mat4,
+    Matrix
+  };
   use std;
 
   pub fn print_mat4(name: &str, mat: Mat4<f32>) {
