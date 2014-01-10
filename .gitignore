@@ -2,3 +2,4 @@ marauder
 
 # vim tmp files
 *.swp
+libwin-*.so
