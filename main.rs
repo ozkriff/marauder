@@ -18,6 +18,7 @@ use std::num::{
   sin,
   cos
 };
+use std::option;
 use gltypes = gl::types;
 use cgmath::matrix::{
   Matrix,
@@ -216,7 +217,7 @@ struct Win {
   vertex_buffer_obj: gltypes::GLuint,
   matrix_id: gltypes::GLint,
   projection_matrix: Mat4<f32>,
-  window: glfw::Window
+  window: Option<glfw::Window>
 }
 
 fn get_projection_matrix() -> Mat4<f32> {
@@ -231,6 +232,10 @@ fn get_projection_matrix() -> Mat4<f32> {
 
 impl Win {
   fn new() -> Win {
+    // TODO: move to priv fn init_glfw()
+    glfw::set_error_callback(~glfw::LogErrorHandler);
+    glfw::init();
+
     let mut win = Win {
       vertex_shader: 0,
       fragment_shader: 0,
@@ -238,12 +243,12 @@ impl Win {
       vertex_buffer_obj: 0,
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
-      window: glfw::Window::create(
+      window: option::Some(glfw::Window::create(
         WIN_SIZE.x,
         WIN_SIZE.y,
         "OpenGL",
         glfw::Windowed
-      ).unwrap()
+      ).unwrap())
     };
     win.init_opengl();
     win.init_model();
@@ -295,10 +300,10 @@ impl Win {
 
   fn init_opengl(&mut self) {
     // glfw::window_hint::context_version(3, 2);
-
-    self.window.make_context_current();
-    self.window.set_cursor_pos_callback(~CursorPosContext);
-    self.window.set_key_callback(~KeyContext);
+    let window = self.window.get_ref();
+    window.make_context_current();
+    window.set_cursor_pos_callback(~CursorPosContext);
+    window.set_key_callback(~KeyContext);
 
     // Load the OpenGL function pointers
     gl::load_with(glfw::get_proc_address);
@@ -310,7 +315,7 @@ impl Win {
     self.program = link_program(self.vertex_shader, self.fragment_shader);
   }
 
-  fn cleanup(&self) {
+  pub fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
     gl::DeleteShader(self.fragment_shader);
     gl::DeleteShader(self.vertex_shader);
@@ -340,15 +345,26 @@ impl Win {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     gl::DrawArrays(gl::TRIANGLES, 0, VERTICES_COUNT);
-    self.window.swap_buffers();
+    self.window.get_ref().swap_buffers();
   }
 
   fn is_running(&self) -> bool {
-    return !self.window.should_close()
+    return !self.window.get_ref().should_close()
   }
 
   fn process_events(&self) {
     glfw::poll_events();
+  }
+}
+
+impl Drop for Win {
+  fn drop(&mut self) {
+    self.cleanup_opengl();
+
+    // destroy glfw::Window before terminating glfw
+    self.window = option::None;
+
+    glfw::terminate();
   }
 }
 
@@ -392,14 +408,10 @@ impl glfw::KeyCallback for KeyContext {
 }
 
 fn main() {
-  glfw::set_error_callback(~glfw::LogErrorHandler);
-  do glfw::start {
-    let win = Win::new();
-    while win.is_running() {
-      win.process_events();
-      win.draw();
-    }
-    win.cleanup();
+  let win = Win::new();
+  while win.is_running() {
+    win.process_events();
+    win.draw();
   }
 }
 
