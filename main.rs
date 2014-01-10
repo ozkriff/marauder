@@ -232,10 +232,6 @@ fn get_projection_matrix() -> Mat4<f32> {
 
 impl Win {
   fn new() -> Win {
-    // TODO: move to priv fn init_glfw()
-    glfw::set_error_callback(~glfw::LogErrorHandler);
-    glfw::init();
-
     let mut win = Win {
       vertex_shader: 0,
       fragment_shader: 0,
@@ -243,13 +239,9 @@ impl Win {
       vertex_buffer_obj: 0,
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
-      window: option::Some(glfw::Window::create(
-        WIN_SIZE.x,
-        WIN_SIZE.y,
-        "OpenGL",
-        glfw::Windowed
-      ).unwrap())
+      window: option::None
     };
+    win.init_glfw();
     win.init_opengl();
     win.init_model();
     win
@@ -296,6 +288,19 @@ impl Win {
         self.program, "model_view_proj_matrix".to_c_str().unwrap()
       );
     }
+  }
+
+  fn init_glfw(&mut self) {
+    glfw::set_error_callback(~glfw::LogErrorHandler);
+    glfw::init();
+    self.window = option::Some(
+      glfw::Window::create(
+        WIN_SIZE.x,
+        WIN_SIZE.y,
+        "OpenGL",
+        glfw::Windowed
+      ).unwrap()
+    );
   }
 
   fn init_opengl(&mut self) {
