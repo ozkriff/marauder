@@ -7,10 +7,10 @@ RUSTC_FLAGS += -L .
 
 all: marauder
 
-main.o: main.rs
-	rustc --lib main.rs ${RUSTC_FLAGS}
+win.o: win.rs
+	rustc --lib win.rs ${RUSTC_FLAGS}
 
-marauder: marauder.rs main.o
+marauder: marauder.rs win.o
 	rustc marauder.rs -o marauder ${RUSTC_FLAGS}
 
 clean:

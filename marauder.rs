@@ -1,9 +1,9 @@
 // See LICENSE file for copyright and license details.
 
 extern mod native;
-extern mod main;
+extern mod win;
 
-use main::Win;
+use win::Win;
 
 fn main() {
   let win = Win::new();
