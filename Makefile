@@ -3,11 +3,15 @@
 # RUSTC_FLAGS += -Z debug-info
 # RUSTC_FLAGS += --opt-level 3
 RUSTC_FLAGS += -L ~/lib 
+RUSTC_FLAGS += -L .
 
 all: marauder
 
-marauder: main.rs
-	rustc main.rs -o marauder ${RUSTC_FLAGS}
+main.o: main.rs
+	rustc --lib main.rs ${RUSTC_FLAGS}
+
+marauder: marauder.rs main.o
+	rustc marauder.rs -o marauder ${RUSTC_FLAGS}
 
 clean:
-	rm -f marauder
+	rm -f marauder lib*-*.so

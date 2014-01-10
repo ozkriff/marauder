@@ -5,7 +5,6 @@
 extern mod glfw;
 extern mod gl;
 extern mod cgmath;
-extern mod native;
 
 use std::f32::consts::{
   PI,
@@ -210,7 +209,7 @@ fn rot_y(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
-struct Win {
+pub struct Win {
   vertex_shader: gltypes::GLuint,
   fragment_shader: gltypes::GLuint,
   program: gltypes::GLuint,
@@ -231,7 +230,7 @@ fn get_projection_matrix() -> Mat4<f32> {
 }
 
 impl Win {
-  fn new() -> Win {
+  pub fn new() -> Win {
     let mut win = Win {
       vertex_shader: 0,
       fragment_shader: 0,
@@ -345,7 +344,7 @@ impl Win {
     }
   }
 
-  fn draw(&self) {
+  pub fn draw(&self) {
     self.update_matrices();
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
@@ -353,11 +352,11 @@ impl Win {
     self.window.get_ref().swap_buffers();
   }
 
-  fn is_running(&self) -> bool {
+  pub fn is_running(&self) -> bool {
     return !self.window.get_ref().should_close()
   }
 
-  fn process_events(&self) {
+  pub fn process_events(&self) {
     glfw::poll_events();
   }
 }
@@ -410,19 +409,6 @@ impl glfw::KeyCallback for KeyContext {
       _ => {}
     }
   }
-}
-
-fn main() {
-  let win = Win::new();
-  while win.is_running() {
-    win.process_events();
-    win.draw();
-  }
-}
-
-#[start]
-fn start(argc: int, argv: **u8) -> int {
-  native::start(argc, argv, main)
 }
 
 // vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
