@@ -37,32 +37,6 @@ use cgmath::angle;
 #[link(name = "m")]
 extern {}
 
-pub mod misc {
-  use cgmath::matrix::{
-    Mat4,
-    Matrix
-  };
-  use std;
-
-  pub fn print_mat4(name: &str, mat: Mat4<f32>) {
-    println!("{}:", name);
-    for i in range(0u, 4) {
-      for j in range(0u, 4) {
-        print!("{} ", *mat.cr(i, j));
-      }
-      println!("");
-    }
-    println!("");
-  }
-
-  /// usage: let s = mvp_matrix; println(type_of(&s));
-  pub fn type_of<T>(_: &T) -> &'static str {
-    unsafe {
-      (*std::unstable::intrinsics::get_tydesc::<T>()).name
-    }
-  }
-}
-
 static mut MOUSE_POS: Vec2<f32> = Vec2{x: 0.0f32, y: 0.0};
 static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 
