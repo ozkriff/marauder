@@ -50,9 +50,9 @@ pub mod misc {
       for j in range(0u, 4) {
         print!("{} ", *mat.cr(i, j));
       }
-      println("");
+      println!("");
     }
-    println("");
+    println!("");
   }
 
   /// usage: let s = mvp_matrix; println(type_of(&s));
