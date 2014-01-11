@@ -2,4 +2,4 @@ marauder
 
 # vim tmp files
 *.swp
-libwin-*.so
+lib*-*.so
