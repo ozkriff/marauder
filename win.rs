@@ -191,15 +191,6 @@ fn get_projection_matrix() -> Mat4<f32> {
 
 impl Win {
   pub fn new() -> Win {
-    let vertex_data = ~[
-       0.0,  1.0, 0.0,
-       2.0, -1.0, 0.0,
-      -2.0, -1.0, 0.0,
-
-      0.0,  1.0,  0.0,
-      0.0, -1.0,  2.0,
-      0.0, -1.0, -2.0
-    ];
     let mut win = Win {
       vertex_shader: 0,
       fragment_shader: 0,
@@ -208,7 +199,7 @@ impl Win {
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
       window: option::None,
-      vertex_data: vertex_data
+      vertex_data: ~[]
     };
     win.init_glfw();
     win.init_opengl();
@@ -216,7 +207,25 @@ impl Win {
     win
   }
 
+  fn add_point(&mut self, x: f32, y: f32, z: f32) {
+    self.vertex_data.push(x);
+    self.vertex_data.push(y);
+    self.vertex_data.push(z);
+  }
+
+  fn build_hex_mesh(&mut self) {
+    let visualizer = Visualizer::new();
+    for num in range(0, 6) {
+      let v = visualizer.index_to_hex_vertex(num);
+      let v2 = visualizer.index_to_hex_vertex(num + 1);
+      self.add_point(v.x, v.y, 0.0);
+      self.add_point(v2.x, v2.y, 0.0);
+      self.add_point(0.0, 0.0, 0.0);
+    }
+  }
+
   fn init_model(&mut self) {
+    self.build_hex_mesh();
     unsafe {
       // Create a Vertex Buffer Object
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);
