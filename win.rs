@@ -33,10 +33,6 @@ use cgmath::vector::{
 use cgmath::projection;
 use cgmath::angle;
 
-#[link(name = "glfw")]
-#[link(name = "m")]
-extern {}
-
 static mut MOUSE_POS: Vec2<f32> = Vec2{x: 0.0f32, y: 0.0};
 static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 
