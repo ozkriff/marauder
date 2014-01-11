@@ -37,17 +37,6 @@ static mut MOUSE_POS: Vec2<f32> = Vec2{x: 0.0f32, y: 0.0};
 static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
 
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
-static VERTICES_COUNT: i32 = 3 * 2;
-
-static VERTEX_DATA: [gltypes::GLfloat, ..VERTICES_COUNT * 3] = [
-   0.0,  1.0, 0.0,
-   2.0, -1.0, 0.0,
-  -2.0, -1.0, 0.0,
-
-  0.0,  1.0,  0.0,
-  0.0, -1.0,  2.0,
-  0.0, -1.0, -2.0
-];
 
 static VERTEX_SHADER_SRC: &'static str = "
   #version 130
@@ -186,7 +175,8 @@ pub struct Win {
   vertex_buffer_obj: gltypes::GLuint,
   matrix_id: gltypes::GLint,
   projection_matrix: Mat4<f32>,
-  window: Option<glfw::Window>
+  window: Option<glfw::Window>,
+  vertex_data: ~[gltypes::GLfloat]
 }
 
 fn get_projection_matrix() -> Mat4<f32> {
@@ -201,6 +191,15 @@ fn get_projection_matrix() -> Mat4<f32> {
 
 impl Win {
   pub fn new() -> Win {
+    let vertex_data = ~[
+       0.0,  1.0, 0.0,
+       2.0, -1.0, 0.0,
+      -2.0, -1.0, 0.0,
+
+      0.0,  1.0,  0.0,
+      0.0, -1.0,  2.0,
+      0.0, -1.0, -2.0
+    ];
     let mut win = Win {
       vertex_shader: 0,
       fragment_shader: 0,
@@ -208,7 +207,8 @@ impl Win {
       vertex_buffer_obj: 0,
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
-      window: option::None
+      window: option::None,
+      vertex_data: vertex_data
     };
     win.init_glfw();
     win.init_opengl();
@@ -224,11 +224,12 @@ impl Win {
 
       // Copy vertex data to VBO
       let float_size = std::mem::size_of::<gltypes::GLfloat>();
-      let vertices_ptr = (VERTEX_DATA.len() * float_size) as gltypes::GLsizeiptr;
+      let vertices_ptr = (self.vertex_data.len() * float_size)
+        as gltypes::GLsizeiptr;
       gl::BufferData(
         gl::ARRAY_BUFFER,
         vertices_ptr,
-        std::cast::transmute(&VERTEX_DATA[0]),
+        std::cast::transmute(&self.vertex_data[0]),
         gl::STATIC_DRAW
       );
 
@@ -318,7 +319,7 @@ impl Win {
     self.update_matrices();
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
-    gl::DrawArrays(gl::TRIANGLES, 0, VERTICES_COUNT);
+    gl::DrawArrays(gl::TRIANGLES, 0, self.vertex_data.len() as i32);
     self.window.get_ref().swap_buffers();
   }
 
