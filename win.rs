@@ -261,6 +261,7 @@ impl Win {
   }
 
   fn init_glfw(&mut self) {
+    // glfw::window_hint::context_version(3, 2);
     glfw::set_error_callback(~glfw::LogErrorHandler);
     glfw::init();
     self.window = option::Some(
@@ -274,7 +275,6 @@ impl Win {
   }
 
   fn init_opengl(&mut self) {
-    // glfw::window_hint::context_version(3, 2);
     let window = self.window.get_ref();
     window.make_context_current();
     window.set_cursor_pos_callback(~CursorPosContext);
