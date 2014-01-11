@@ -2,7 +2,7 @@
 
 # RUSTC_FLAGS += -Z debug-info
 # RUSTC_FLAGS += --opt-level 3
-RUSTC_FLAGS += -L ~/lib 
+RUSTC_FLAGS += -L ~/rust_libs
 RUSTC_FLAGS += -L .
 
 all: marauder
