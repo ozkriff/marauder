@@ -189,6 +189,16 @@ fn get_projection_matrix() -> Mat4<f32> {
   )
 }
 
+// TODO: use iterator?
+fn for_each_tile(f: |Vec2<i32>|) {
+  let map_size = Vec2{x: 3, y: 4};
+  for y in range(0i32, map_size.y) {
+    for x in range(0i32, map_size.x) {
+      f(Vec2{x: x, y: y});
+    }
+  }
+}
+
 impl Win {
   pub fn new() -> Win {
     let mut win = Win {
@@ -214,19 +224,17 @@ impl Win {
   }
 
   fn build_hex_mesh(&mut self) {
-    let visualizer = Visualizer::new();
-    for y in range(0i32, 3) {
-      for x in range(0i32, 3) {
-        let pos = visualizer.v2i_to_v2f(Vec2{x: x, y: y}).extend(0.0);
-        for num in range(0, 6) {
-          let v = visualizer.index_to_hex_vertex(num);
-          let v2 = visualizer.index_to_hex_vertex(num + 1);
-          self.add_point(&pos, v.x, v.y, 0.0);
-          self.add_point(&pos, v2.x, v2.y, 0.0);
-          self.add_point(&pos, 0.0, 0.0, 0.0);
-        }
+    let v = Visualizer::new(); // TODO: move out here
+    for_each_tile(|tile_pos| {
+      let pos3d = v.v2i_to_v2f(tile_pos).extend(0.0);
+      for num in range(0, 6) {
+        let vertex = v.index_to_hex_vertex(num);
+        let next_vertex = v.index_to_hex_vertex(num + 1);
+        self.add_point(&pos3d, vertex.x, vertex.y, 0.0);
+        self.add_point(&pos3d, next_vertex.x, next_vertex.y, 0.0);
+        self.add_point(&pos3d, 0.0, 0.0, 0.0);
       }
-    }
+    });
   }
 
   fn init_model(&mut self) {
