@@ -207,20 +207,25 @@ impl Win {
     win
   }
 
-  fn add_point(&mut self, x: f32, y: f32, z: f32) {
-    self.vertex_data.push(x);
-    self.vertex_data.push(y);
-    self.vertex_data.push(z);
+  fn add_point(&mut self, pos: &Vec3<f32>, x: f32, y: f32, z: f32) {
+    self.vertex_data.push(x + pos.x);
+    self.vertex_data.push(y + pos.y);
+    self.vertex_data.push(z + pos.z);
   }
 
   fn build_hex_mesh(&mut self) {
     let visualizer = Visualizer::new();
-    for num in range(0, 6) {
-      let v = visualizer.index_to_hex_vertex(num);
-      let v2 = visualizer.index_to_hex_vertex(num + 1);
-      self.add_point(v.x, v.y, 0.0);
-      self.add_point(v2.x, v2.y, 0.0);
-      self.add_point(0.0, 0.0, 0.0);
+    for y in range(0i32, 3) {
+      for x in range(0i32, 3) {
+        let pos = visualizer.v2i_to_v2f(Vec2{x: x, y: y}).extend(0.0);
+        for num in range(0, 6) {
+          let v = visualizer.index_to_hex_vertex(num);
+          let v2 = visualizer.index_to_hex_vertex(num + 1);
+          self.add_point(&pos, v.x, v.y, 0.0);
+          self.add_point(&pos, v2.x, v2.y, 0.0);
+          self.add_point(&pos, 0.0, 0.0, 0.0);
+        }
+      }
     }
   }
 
