@@ -33,10 +33,23 @@ use cgmath::vector::{
 use cgmath::projection;
 use cgmath::angle;
 
-static mut MOUSE_POS: Vec2<f32> = Vec2{x: 0.0f32, y: 0.0};
-static mut CAMERA_POS: Vec3<f32> = Vec3{x: 0.0f32, y: 0.0, z: 0.0};
-
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
+
+// hack to pass mutable Win to glfs-rs callbacks
+static mut WIN: Option<*mut Win> = None;
+
+fn get_win() -> &mut Win {
+  unsafe {
+    match WIN {
+      Some(win) => &mut *win,
+      None => fail!("Bad Win pointer")
+    }
+  }
+}
+
+fn set_win(win: &mut Win) {
+  unsafe { WIN = Some(win as (*mut Win)); }
+}
 
 static VERTEX_SHADER_SRC: &'static str = "
   #version 130
@@ -176,7 +189,9 @@ pub struct Win {
   matrix_id: gltypes::GLint,
   projection_matrix: Mat4<f32>,
   window: Option<glfw::Window>,
-  vertex_data: ~[gltypes::GLfloat]
+  vertex_data: ~[gltypes::GLfloat],
+  mouse_pos: Vec2<f32>,
+  camera_pos: Vec3<f32>
 }
 
 fn get_projection_matrix() -> Mat4<f32> {
@@ -200,8 +215,8 @@ fn for_each_tile(f: |Vec2<i32>|) {
 }
 
 impl Win {
-  pub fn new() -> Win {
-    let mut win = Win {
+  pub fn new() -> ~Win {
+    let mut win = ~Win {
       vertex_shader: 0,
       fragment_shader: 0,
       program: 0,
@@ -209,8 +224,11 @@ impl Win {
       matrix_id: 0,
       projection_matrix: get_projection_matrix(),
       window: option::None,
-      vertex_data: ~[]
+      vertex_data: ~[],
+      mouse_pos: Vec2{x: 0.0f32, y: 0.0},
+      camera_pos: Vec3{x: 0.0f32, y: 0.0, z: 0.0}
     };
+    set_win(&mut *win);
     win.init_glfw();
     win.init_opengl();
     win.init_model();
@@ -325,9 +343,9 @@ impl Win {
     let mut mvp_matrix = self.projection_matrix;
     unsafe {
       mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
-      mvp_matrix = rot_x(mvp_matrix, MOUSE_POS.y / 100.0);
-      mvp_matrix = rot_y(mvp_matrix, MOUSE_POS.x / 100.0);
-      mvp_matrix = tr(mvp_matrix, CAMERA_POS);
+      mvp_matrix = rot_x(mvp_matrix, self.mouse_pos.y / 100.0);
+      mvp_matrix = rot_y(mvp_matrix, self.mouse_pos.x / 100.0);
+      mvp_matrix = tr(mvp_matrix, self.camera_pos);
 
       // Send our transformation to the currently bound shader,
       // in the "model_view_proj_matrix" uniform for each model
@@ -369,10 +387,8 @@ struct CursorPosContext;
 impl glfw::CursorPosCallback for CursorPosContext {
   fn call(&self, w: &glfw::Window, xpos: f64, ypos: f64) {
     if w.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
-      unsafe {
-        MOUSE_POS.x = xpos as f32;
-        MOUSE_POS.y = ypos as f32;
-      }
+      get_win().mouse_pos.x = xpos as f32;
+      get_win().mouse_pos.y = ypos as f32;
     }
   }
 }
@@ -395,10 +411,10 @@ impl glfw::KeyCallback for KeyContext {
       glfw::KeyEscape | glfw::KeyQ
                      => window.set_should_close(true),
       glfw::KeySpace => println!("space"),
-      glfw::KeyUp    => unsafe { CAMERA_POS.y -= distance },
-      glfw::KeyDown  => unsafe { CAMERA_POS.y += distance },
-      glfw::KeyRight => unsafe { CAMERA_POS.x -= distance },
-      glfw::KeyLeft  => unsafe { CAMERA_POS.x += distance },
+      glfw::KeyUp    => get_win().camera_pos.y -= distance,
+      glfw::KeyDown  => get_win().camera_pos.y += distance,
+      glfw::KeyRight => get_win().camera_pos.x -= distance,
+      glfw::KeyLeft  => get_win().camera_pos.x += distance,
       _ => {}
     }
   }
