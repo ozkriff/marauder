@@ -202,12 +202,14 @@ fn tr(m: Mat4<f32>, v: Vec3<f32>) -> Mat4<f32> {
 }
 
 fn rot_x(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
-  let r = Mat3::from_angle_x(angle::rad(angle)).to_mat4();
+  let rad = angle::rad(angle * (PI / 180.0));
+  let r = Mat3::from_angle_x(rad).to_mat4();
   m.mul_m(&r)
 }
 
 fn rot_y(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
-  let r = Mat3::from_angle_y(angle::rad(angle)).to_mat4();
+  let rad = angle::rad(angle * (PI / 180.0));
+  let r = Mat3::from_angle_y(rad).to_mat4();
   m.mul_m(&r)
 }
 
@@ -412,11 +414,11 @@ impl glfw::CursorPosCallback for CursorPosContext {
     if w.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
       let dx = get_win().mouse_pos.x - xpos as f32;
       let dy = get_win().mouse_pos.y - ypos as f32;
-      get_win().camera.z_angle += dx / 10.0;
-      get_win().camera.x_angle += dy / 10.0;
-      get_win().mouse_pos.x = xpos as f32;
-      get_win().mouse_pos.y = ypos as f32;
+      get_win().camera.z_angle += dx;
+      get_win().camera.x_angle += dy;
     }
+    get_win().mouse_pos.x = xpos as f32;
+    get_win().mouse_pos.y = ypos as f32;
   }
 }
 
