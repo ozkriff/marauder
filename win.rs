@@ -341,12 +341,11 @@ impl Win {
 
   fn update_matrices(&self) {
     let mut mvp_matrix = self.projection_matrix;
+    mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
+    mvp_matrix = rot_x(mvp_matrix, self.mouse_pos.y / 100.0);
+    mvp_matrix = rot_y(mvp_matrix, self.mouse_pos.x / 100.0);
+    mvp_matrix = tr(mvp_matrix, self.camera_pos);
     unsafe {
-      mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
-      mvp_matrix = rot_x(mvp_matrix, self.mouse_pos.y / 100.0);
-      mvp_matrix = rot_y(mvp_matrix, self.mouse_pos.x / 100.0);
-      mvp_matrix = tr(mvp_matrix, self.camera_pos);
-
       // Send our transformation to the currently bound shader,
       // in the "model_view_proj_matrix" uniform for each model
       // you render, since the model_view_proj_matrix will be
