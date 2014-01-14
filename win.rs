@@ -90,7 +90,8 @@ impl Camera {
 
   pub fn matrix(&self) -> Mat4<f32> {
     let mut mvp_matrix = self.projection_matrix;
-    mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -10.0f32});
+    let default_zoom = 10.0f32;
+    mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -default_zoom});
     mvp_matrix = rot_x(mvp_matrix, self.z_angle);
     mvp_matrix = rot_y(mvp_matrix, self.x_angle);
     mvp_matrix = tr(mvp_matrix, self.pos);
