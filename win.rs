@@ -80,7 +80,7 @@ struct Camera {
 impl Camera {
   pub fn new() -> Camera {
     Camera {
-      x_angle: 0.0,
+      x_angle: 45.0,
       z_angle: 0.0,
       pos: Vec3{x: 0.0, y: 0.0, z: 0.0},
       zoom: 10.0,
@@ -92,8 +92,8 @@ impl Camera {
     let mut mvp_matrix = self.projection_matrix;
     let default_zoom = 10.0f32;
     mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -default_zoom});
-    mvp_matrix = rot_x(mvp_matrix, self.z_angle);
-    mvp_matrix = rot_y(mvp_matrix, self.x_angle);
+    mvp_matrix = rot_x(mvp_matrix, -self.x_angle);
+    mvp_matrix = rot_z(mvp_matrix, -self.z_angle);
     mvp_matrix = tr(mvp_matrix, self.pos);
     mvp_matrix
   }
@@ -207,9 +207,9 @@ fn rot_x(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
-fn rot_y(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
+fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   let rad = angle::rad(angle * (PI / 180.0));
-  let r = Mat3::from_angle_y(rad).to_mat4();
+  let r = Mat3::from_angle_z(rad).to_mat4();
   m.mul_m(&r)
 }
 
