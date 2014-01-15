@@ -17,7 +17,6 @@ use std::num::{
   sin,
   cos
 };
-use std::option;
 use gltypes = gl::types;
 use cgmath::matrix::{
   Matrix,
@@ -253,7 +252,7 @@ impl Win {
       program: 0,
       vertex_buffer_obj: 0,
       matrix_id: 0,
-      window: option::None,
+      window: None,
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
       camera: Camera::new()
@@ -334,7 +333,7 @@ impl Win {
     // glfw::window_hint::context_version(3, 2);
     glfw::set_error_callback(~glfw::LogErrorHandler);
     glfw::init();
-    self.window = option::Some(
+    self.window = Some(
       glfw::Window::create(
         WIN_SIZE.x,
         WIN_SIZE.y,
@@ -402,7 +401,7 @@ impl Drop for Win {
     self.cleanup_opengl();
 
     // destroy glfw::Window before terminating glfw
-    self.window = option::None;
+    self.window = None;
 
     glfw::terminate();
   }
