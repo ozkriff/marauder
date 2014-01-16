@@ -96,6 +96,15 @@ impl Camera {
     mvp_matrix = tr(mvp_matrix, self.pos);
     mvp_matrix
   }
+
+  pub fn move(&mut self, angle: f32) {
+    // TODO: deg2rad, rename
+    let speed_in_radians = (self.z_angle - angle) * PI / 180.0;
+    let dx = sin(speed_in_radians);
+    let dy = cos(speed_in_radians);
+    self.pos.x -= dy;
+    self.pos.y -= dx;
+  }
 }
 
 pub struct Visualizer {
@@ -440,10 +449,10 @@ impl glfw::KeyCallback for KeyContext {
       glfw::KeyEscape | glfw::KeyQ
                      => window.set_should_close(true),
       glfw::KeySpace => println!("space"),
-      glfw::KeyUp    => get_win().camera.pos.y -= distance,
-      glfw::KeyDown  => get_win().camera.pos.y += distance,
-      glfw::KeyRight => get_win().camera.pos.x -= distance,
-      glfw::KeyLeft  => get_win().camera.pos.x += distance,
+      glfw::KeyUp    => get_win().camera.move(270.0),
+      glfw::KeyDown  => get_win().camera.move(90.0),
+      glfw::KeyRight => get_win().camera.move(0.0),
+      glfw::KeyLeft  => get_win().camera.move(180.0),
       _ => {}
     }
   }
