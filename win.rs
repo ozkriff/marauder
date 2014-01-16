@@ -221,7 +221,8 @@ pub struct Win {
   window: Option<glfw::Window>,
   vertex_data: ~[gltypes::GLfloat],
   mouse_pos: Vec2<f32>,
-  camera: Camera
+  camera: Camera,
+  visualizer: Visualizer
 }
 
 fn get_projection_matrix() -> Mat4<f32> {
@@ -255,7 +256,8 @@ impl Win {
       window: None,
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
-      camera: Camera::new()
+      camera: Camera::new(),
+      visualizer: Visualizer::new()
     };
     set_win(&mut *win);
     win.init_glfw();
@@ -271,12 +273,11 @@ impl Win {
   }
 
   fn build_hex_mesh(&mut self) {
-    let v = Visualizer::new(); // TODO: move out here
     for_each_tile(|tile_pos| {
-      let pos3d = v.v2i_to_v2f(tile_pos).extend(0.0);
+      let pos3d = self.visualizer.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
-        let vertex = v.index_to_hex_vertex(num);
-        let next_vertex = v.index_to_hex_vertex(num + 1);
+        let vertex = self.visualizer.index_to_hex_vertex(num);
+        let next_vertex = self.visualizer.index_to_hex_vertex(num + 1);
         self.add_point(&pos3d, vertex.x, vertex.y, 0.0);
         self.add_point(&pos3d, next_vertex.x, next_vertex.y, 0.0);
         self.add_point(&pos3d, 0.0, 0.0, 0.0);
