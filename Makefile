@@ -5,12 +5,14 @@
 RUSTC_FLAGS += -L ~/rust_libs
 RUSTC_FLAGS += -L .
 
+RUSTC = rustc ${RUSTC_FLAGS}
+
 all: marauder
 
 marauder: main.rs win.rs misc.rs
-	rustc --lib misc.rs ${RUSTC_FLAGS}
-	rustc --lib win.rs ${RUSTC_FLAGS}
-	rustc main.rs -o marauder ${RUSTC_FLAGS}
+	${RUSTC} --lib misc.rs
+	${RUSTC} --lib win.rs
+	${RUSTC} main.rs -o marauder
 
 clean:
 	rm -f marauder lib*-*.so
