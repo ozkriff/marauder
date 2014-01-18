@@ -201,6 +201,21 @@ fn link_program(
   program
 }
 
+fn compile_program(
+  vertex_shader_src: &str,
+  frag_shader_src: &str
+) -> gltypes::GLuint {
+  let vertex_shader = compile_shader(
+    vertex_shader_src, gl::VERTEX_SHADER);
+  let fragment_shader = compile_shader(
+    frag_shader_src, gl::FRAGMENT_SHADER);
+  let program = link_program(vertex_shader, fragment_shader);
+  // mark shaders for deletion after program deletion
+  gl::DeleteShader(fragment_shader);
+  gl::DeleteShader(vertex_shader);
+  program
+}
+
 fn tr(m: Mat4<f32>, v: Vec3<f32>) -> Mat4<f32> {
   let mut t = Mat4::<f32>::identity();
   *t.mut_cr(3, 0) = v.x;
@@ -362,17 +377,13 @@ impl Win {
     // Load the OpenGL function pointers
     gl::load_with(glfw::get_proc_address);
 
-    self.vertex_shader = compile_shader(
-      VERTEX_SHADER_SRC, gl::VERTEX_SHADER);
-    self.fragment_shader = compile_shader(
-      FRAGMENT_SHADER_SRC, gl::FRAGMENT_SHADER);
-    self.program = link_program(self.vertex_shader, self.fragment_shader);
+    self.program = compile_program(
+      VERTEX_SHADER_SRC,
+      FRAGMENT_SHADER_SRC);
   }
 
   pub fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
-    gl::DeleteShader(self.fragment_shader);
-    gl::DeleteShader(self.vertex_shader);
     unsafe {
       gl::DeleteBuffers(1, &self.vertex_buffer_obj);
     }
