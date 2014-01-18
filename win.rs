@@ -404,15 +404,17 @@ impl Win {
   pub fn process_events(&self) {
     glfw::poll_events();
   }
+
+  fn close_window(&mut self) {
+    // destroy glfw::Window before terminating glfw
+    self.window = None;
+  }
 }
 
 impl Drop for Win {
   fn drop(&mut self) {
     self.cleanup_opengl();
-
-    // destroy glfw::Window before terminating glfw
-    self.window = None;
-
+    self.close_window();
     glfw::terminate();
   }
 }
