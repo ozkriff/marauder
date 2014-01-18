@@ -441,7 +441,6 @@ impl glfw::KeyCallback for KeyContext {
     action: glfw::Action,
     _:      glfw::Modifiers
   ) {
-    let distance = 1.0;
     if action != glfw::Press {
       return;
     }
