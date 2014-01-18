@@ -17,7 +17,7 @@ use std::num::{
   sin,
   cos
 };
-use gltypes = gl::types;
+use glt = gl::types;
 use cgmath::matrix::{
   Matrix,
   Mat4,
@@ -107,13 +107,13 @@ impl Camera {
 }
 
 pub struct Visualizer {
-  hex_ex_radius: gltypes::GLfloat,
-  hex_in_radius: gltypes::GLfloat
+  hex_ex_radius: glt::GLfloat,
+  hex_in_radius: glt::GLfloat
 }
 
 impl Visualizer {
   pub fn new() -> Visualizer {
-    let hex_ex_radius: gltypes::GLfloat = 1.0 / 2.0;
+    let hex_ex_radius: glt::GLfloat = 1.0 / 2.0;
     let hex_in_radius = sqrt(
         pow(hex_ex_radius, 2.0) - pow(hex_ex_radius / 2.0, 2.0));
     let visualizer = Visualizer {
@@ -151,22 +151,22 @@ impl Visualizer {
   }
 }
 
-fn compile_shader(src: &str, shader_type: gltypes::GLenum) -> gltypes::GLuint {
+fn compile_shader(src: &str, shader_type: glt::GLenum) -> glt::GLuint {
   let shader = gl::CreateShader(shader_type);
   unsafe {
     gl::ShaderSource(shader, 1, &src.to_c_str().unwrap(), std::ptr::null());
     gl::CompileShader(shader);
 
-    let mut status = gl::FALSE as gltypes::GLint;
+    let mut status = gl::FALSE as glt::GLint;
     gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
 
-    if status != (gl::TRUE as gltypes::GLint) {
+    if status != (gl::TRUE as glt::GLint) {
       let mut len = 0;
       gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
-        buf.as_mut_ptr() as *mut gltypes::GLchar
+        buf.as_mut_ptr() as *mut glt::GLchar
       );
       fail!("compile_shader(): " + std::str::raw::from_utf8(buf));
     }
@@ -175,24 +175,24 @@ fn compile_shader(src: &str, shader_type: gltypes::GLenum) -> gltypes::GLuint {
 }
 
 fn link_program(
-    vertex_shader: gltypes::GLuint,
-    fragment_shader: gltypes::GLuint
-) -> gltypes::GLuint {
+    vertex_shader: glt::GLuint,
+    fragment_shader: glt::GLuint
+) -> glt::GLuint {
   let program = gl::CreateProgram();
   gl::AttachShader(program, vertex_shader);
   gl::AttachShader(program, fragment_shader);
   gl::LinkProgram(program);
   unsafe {
-    let mut status = gl::FALSE as gltypes::GLint;
+    let mut status = gl::FALSE as glt::GLint;
     gl::GetProgramiv(program, gl::LINK_STATUS, &mut status);
 
-    if status != (gl::TRUE as gltypes::GLint) {
-      let mut len: gltypes::GLint = 0;
+    if status != (gl::TRUE as glt::GLint) {
+      let mut len: glt::GLint = 0;
       gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
-        buf.as_mut_ptr() as *mut gltypes::GLchar
+        buf.as_mut_ptr() as *mut glt::GLchar
       );
       fail!("link_program(): " + std::str::raw::from_utf8(buf));
     }
@@ -203,7 +203,7 @@ fn link_program(
 fn compile_program(
   vertex_shader_src: &str,
   frag_shader_src: &str
-) -> gltypes::GLuint {
+) -> glt::GLuint {
   let vertex_shader = compile_shader(
     vertex_shader_src, gl::VERTEX_SHADER);
   let fragment_shader = compile_shader(
@@ -236,13 +236,13 @@ fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
 }
 
 pub struct Win {
-  vertex_shader: gltypes::GLuint,
-  fragment_shader: gltypes::GLuint,
-  program: gltypes::GLuint,
-  vertex_buffer_obj: gltypes::GLuint,
-  matrix_id: gltypes::GLint,
+  vertex_shader: glt::GLuint,
+  fragment_shader: glt::GLuint,
+  program: glt::GLuint,
+  vertex_buffer_obj: glt::GLuint,
+  matrix_id: glt::GLint,
   window: Option<glfw::Window>,
-  vertex_data: ~[gltypes::GLfloat],
+  vertex_data: ~[glt::GLfloat],
   mouse_pos: Vec2<f32>,
   camera: Camera,
   visualizer: Visualizer
@@ -268,9 +268,9 @@ fn for_each_tile(f: |Vec2<i32>|) {
   }
 }
 
-fn fill_current_vbo(data: &[gltypes::GLfloat]) {
-  let glfloat_size = std::mem::size_of::<gltypes::GLfloat>();
-  let buffer_size = (data.len() * glfloat_size) as gltypes::GLsizeiptr;
+fn fill_current_vbo(data: &[glt::GLfloat]) {
+  let glfloat_size = std::mem::size_of::<glt::GLfloat>();
+  let buffer_size = (data.len() * glfloat_size) as glt::GLsizeiptr;
   unsafe {
     gl::BufferData(
       gl::ARRAY_BUFFER,
@@ -281,7 +281,7 @@ fn fill_current_vbo(data: &[gltypes::GLfloat]) {
   }
 }
 
-fn define_array_of_generic_attr_data(attr: gltypes::GLuint) {
+fn define_array_of_generic_attr_data(attr: glt::GLuint) {
   let components_count = 3;
   let normalized = gl::FALSE;
   let stride = 0;
@@ -345,9 +345,9 @@ impl Win {
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
 
       // Copy vertex data to VBO
-      let float_size = std::mem::size_of::<gltypes::GLfloat>();
+      let float_size = std::mem::size_of::<glt::GLfloat>();
       let vertices_ptr = (self.vertex_data.len() * float_size)
-        as gltypes::GLsizeiptr;
+        as glt::GLsizeiptr;
       gl::BufferData(
         gl::ARRAY_BUFFER,
         vertices_ptr,
@@ -361,7 +361,7 @@ impl Win {
 
       // Specify the layout of the vertex data
       let pos_attr = gl::GetAttribLocation(
-        self.program, "position".to_c_str().unwrap()) as gltypes::GLuint;
+        self.program, "position".to_c_str().unwrap()) as glt::GLuint;
       gl::EnableVertexAttribArray(pos_attr);
 
       let size = 3;
