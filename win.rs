@@ -268,6 +268,35 @@ fn for_each_tile(f: |Vec2<i32>|) {
   }
 }
 
+fn fill_current_vbo(data: &[gltypes::GLfloat]) {
+  let glfloat_size = std::mem::size_of::<gltypes::GLfloat>();
+  let buffer_size = (data.len() * glfloat_size) as gltypes::GLsizeiptr;
+  unsafe {
+    gl::BufferData(
+      gl::ARRAY_BUFFER,
+      buffer_size,
+      std::cast::transmute(&data[0]),
+      gl::STATIC_DRAW
+    );
+  }
+}
+
+fn define_array_of_generic_attr_data(attr: gltypes::GLuint) {
+  let components_count = 3;
+  let normalized = gl::FALSE;
+  let stride = 0;
+  unsafe {
+    gl::VertexAttribPointer(
+      attr,
+      components_count,
+      gl::FLOAT,
+      normalized,
+      stride,
+      std::ptr::null()
+    );
+  }
+}
+
 impl Win {
   pub fn new() -> ~Win {
     let mut win = ~Win {
