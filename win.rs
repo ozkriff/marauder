@@ -386,8 +386,6 @@ impl Win {
       );
 
       gl::UseProgram(self.program);
-      gl::BindFragDataLocation(
-        self.program, 0, "out_color".to_c_str().unwrap());
 
       // Specify the layout of the vertex data
       let pos_attr = gl::GetAttribLocation(
