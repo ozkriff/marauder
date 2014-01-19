@@ -53,10 +53,10 @@ fn set_win(win: &mut Win) {
 static VERTEX_SHADER_SRC: &'static str = "
   #version 130
   in vec3 position;
-  uniform mat4 model_view_proj_matrix;
+  uniform mat4 mvp_mat;
   void main() {
     vec4 v = vec4(position, 1);
-    gl_Position = model_view_proj_matrix * v;
+    gl_Position = mvp_mat * v;
   }
 ";
  
@@ -377,7 +377,7 @@ impl Win {
       );
 
       self.matrix_id = gl::GetUniformLocation(
-        self.program, "model_view_proj_matrix".to_c_str().unwrap()
+        self.program, "mvp_mat".to_c_str().unwrap()
       );
     }
   }
@@ -421,8 +421,8 @@ impl Win {
     let mvp_matrix = self.camera.matrix();
     unsafe {
       // Send our transformation to the currently bound shader,
-      // in the "model_view_proj_matrix" uniform for each model
-      // you render, since the model_view_proj_matrix will be
+      // in the "mvp_mat" uniform for each model
+      // you render, since the mvp_mat will be
       // different (at least the M part).
       gl::UniformMatrix4fv(self.matrix_id, 1, gl::FALSE, mvp_matrix.cr(0, 0));
     }
