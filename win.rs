@@ -370,43 +370,14 @@ impl Win {
   fn init_model(&mut self) {
     self.build_hex_mesh();
     unsafe {
-      // Create a Vertex Buffer Object
+      gl::UseProgram(self.program);
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-
-      // Copy vertex data to VBO
-      let float_size = std::mem::size_of::<glt::GLfloat>();
-      let vertices_ptr = (self.vertex_data.len() * float_size)
-        as glt::GLsizeiptr;
-      gl::BufferData(
-        gl::ARRAY_BUFFER,
-        vertices_ptr,
-        std::cast::transmute(&self.vertex_data[0]),
-        gl::STATIC_DRAW
-      );
-
-      gl::UseProgram(self.program);
-
-      // Specify the layout of the vertex data
-      let pos_attr = gl::GetAttribLocation(
-        self.program, "position".to_c_str().unwrap()) as glt::GLuint;
+      fill_current_vbo(self.vertex_data);
+      let pos_attr = get_attr(self.program, "position");
       gl::EnableVertexAttribArray(pos_attr);
-
-      let size = 3;
-      let normalized = gl::FALSE;
-      let stride = 0;
-      gl::VertexAttribPointer(
-        pos_attr,
-        size,
-        gl::FLOAT,
-        normalized,
-        stride,
-        std::ptr::null()
-      );
-
-      self.matrix_id = gl::GetUniformLocation(
-        self.program, "mvp_mat".to_c_str().unwrap()
-      );
+      define_array_of_generic_attr_data(pos_attr);
+      self.matrix_id = get_uniform(self.program, "mvp_mat");
     }
   }
 
@@ -445,22 +416,13 @@ impl Win {
     }
   }
 
-  fn update_matrices(&self) {
-    let mvp_matrix = self.camera.matrix();
-    unsafe {
-      // Send our transformation to the currently bound shader,
-      // in the "mvp_mat" uniform for each model
-      // you render, since the mvp_mat will be
-      // different (at least the M part).
-      gl::UniformMatrix4fv(self.matrix_id, 1, gl::FALSE, mvp_matrix.cr(0, 0));
-    }
-  }
-
   pub fn draw(&self) {
-    self.update_matrices();
+    gl::UseProgram(self.program);
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
+    uniform_mat4f(self.matrix_id, &self.camera.matrix());
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
-    gl::DrawArrays(gl::TRIANGLES, 0, self.vertex_data.len() as i32);
+    draw_mesh(self.vertex_data);
     self.window.get_ref().swap_buffers();
   }
 
