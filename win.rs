@@ -323,6 +323,15 @@ fn define_array_of_generic_attr_data(attr: glt::GLuint) {
   }
 }
 
+fn add_point<T: Num>(
+  vertex_data: &mut ~[T],
+  pos: &Vec3<T>, x: T, y: T, z: T)
+{
+  vertex_data.push(x + pos.x);
+  vertex_data.push(y + pos.y);
+  vertex_data.push(z + pos.z);
+}
+
 impl Win {
   pub fn new() -> ~Win {
     let mut win = ~Win {
@@ -344,21 +353,16 @@ impl Win {
     win
   }
 
-  fn add_point(&mut self, pos: &Vec3<f32>, x: f32, y: f32, z: f32) {
-    self.vertex_data.push(x + pos.x);
-    self.vertex_data.push(y + pos.y);
-    self.vertex_data.push(z + pos.z);
-  }
-
   fn build_hex_mesh(&mut self) {
     for_each_tile(|tile_pos| {
       let pos3d = self.visualizer.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
         let vertex = self.visualizer.index_to_hex_vertex(num);
         let next_vertex = self.visualizer.index_to_hex_vertex(num + 1);
-        self.add_point(&pos3d, vertex.x, vertex.y, 0.0);
-        self.add_point(&pos3d, next_vertex.x, next_vertex.y, 0.0);
-        self.add_point(&pos3d, 0.0, 0.0, 0.0);
+        let data = &mut self.vertex_data;
+        add_point(data, &pos3d, vertex.x, vertex.y, 0.0);
+        add_point(data, &pos3d, next_vertex.x, next_vertex.y, 0.0);
+        add_point(data, &pos3d, 0.0, 0.0, 0.0);
       }
     });
   }
