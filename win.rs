@@ -451,14 +451,15 @@ impl Drop for Win {
 struct CursorPosContext;
 impl glfw::CursorPosCallback for CursorPosContext {
   fn call(&self, w: &glfw::Window, xpos: f64, ypos: f64) {
+    let win = get_win();
     if w.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
-      let dx = get_win().mouse_pos.x - xpos as f32;
-      let dy = get_win().mouse_pos.y - ypos as f32;
-      get_win().camera.z_angle += dx;
-      get_win().camera.x_angle += dy;
+      let dx = win.mouse_pos.x - xpos as f32;
+      let dy = win.mouse_pos.y - ypos as f32;
+      win.camera.z_angle += dx;
+      win.camera.x_angle += dy;
     }
-    get_win().mouse_pos.x = xpos as f32;
-    get_win().mouse_pos.y = ypos as f32;
+    win.mouse_pos.x = xpos as f32;
+    win.mouse_pos.y = ypos as f32;
   }
 }
 
@@ -475,14 +476,15 @@ impl glfw::KeyCallback for KeyContext {
     if action != glfw::Press {
       return;
     }
+    let win = get_win();
     match key {
       glfw::KeyEscape | glfw::KeyQ
                      => window.set_should_close(true),
       glfw::KeySpace => println!("space"),
-      glfw::KeyUp    => get_win().camera.move(270.0),
-      glfw::KeyDown  => get_win().camera.move(90.0),
-      glfw::KeyRight => get_win().camera.move(0.0),
-      glfw::KeyLeft  => get_win().camera.move(180.0),
+      glfw::KeyUp    => win.camera.move(270.0),
+      glfw::KeyDown  => win.camera.move(90.0),
+      glfw::KeyRight => win.camera.move(0.0),
+      glfw::KeyLeft  => win.camera.move(180.0),
       _ => {}
     }
   }
