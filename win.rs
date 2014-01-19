@@ -215,6 +215,32 @@ fn compile_program(
   program
 }
 
+fn get_attr(program_id: glt::GLuint, name: &str) -> glt::GLuint {
+  unsafe {
+    let c_str = name.to_c_str().unwrap();
+    gl::GetAttribLocation(program_id, c_str) as glt::GLuint
+  }
+}
+
+fn get_uniform(program: glt::GLuint, name: &str) -> glt::GLint {
+  unsafe {
+    let c_str = name.to_c_str().unwrap();
+    gl::GetUniformLocation(program, c_str)
+  }
+}
+
+fn draw_mesh<T>(mesh: &[T]) {
+  let starting_index = 0;
+  let len = mesh.len() as i32;
+  gl::DrawArrays(gl::TRIANGLES, starting_index, len);
+}
+
+pub fn uniform_mat4f(matrix_id: glt::GLint, matrix: &Mat4<glt::GLfloat>) {
+  unsafe {
+    gl::UniformMatrix4fv(matrix_id, 1, gl::FALSE, matrix.cr(0, 0));
+  }
+}
+
 fn tr(m: Mat4<f32>, v: Vec3<f32>) -> Mat4<f32> {
   let mut t = Mat4::<f32>::identity();
   *t.mut_cr(3, 0) = v.x;
