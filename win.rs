@@ -115,7 +115,7 @@ impl Visualizer {
   pub fn new() -> Visualizer {
     let hex_ex_radius: glt::GLfloat = 1.0 / 2.0;
     let hex_in_radius = sqrt(
-        pow(hex_ex_radius, 2.0) - pow(hex_ex_radius / 2.0, 2.0));
+        pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
     let visualizer = Visualizer {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius
@@ -126,7 +126,7 @@ impl Visualizer {
   pub fn dist(a: Vec2<f32>, b: Vec2<f32>) -> f32 {
     let dx = abs(b.x - a.x);
     let dy = abs(b.y - a.y);
-    sqrt(pow(dx, 2.0) + pow(dy, 2.0))
+    sqrt(pow(dx, 2) + pow(dy, 2))
   }
 
   pub fn v2i_to_v2f(&self, i: Vec2<i32>) -> Vec2<f32> {
