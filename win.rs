@@ -263,8 +263,6 @@ fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
 pub struct Win {
   key_event_port: Port<KeyEvent>,
   cursor_pos_event_port: Port<CursorPosEvent>,
-  vertex_shader: glt::GLuint,
-  fragment_shader: glt::GLuint,
   program: glt::GLuint,
   vertex_buffer_obj: glt::GLuint,
   matrix_id: glt::GLint,
@@ -349,8 +347,6 @@ impl Win {
     let mut win = ~Win {
       key_event_port: key_event_port,
       cursor_pos_event_port: cursor_pos_event_port,
-      vertex_shader: 0,
-      fragment_shader: 0,
       program: 0,
       vertex_buffer_obj: 0,
       matrix_id: 0,
