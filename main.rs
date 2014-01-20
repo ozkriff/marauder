@@ -6,7 +6,7 @@ extern mod win;
 use win::Win;
 
 fn main() {
-  let win = Win::new();
+  let mut win = Win::new();
   while win.is_running() {
     win.process_events();
     win.draw();

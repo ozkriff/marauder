@@ -6,6 +6,11 @@ extern mod glfw;
 extern mod gl;
 extern mod cgmath;
 
+use std::comm::{
+  Port,
+  Chan,
+  Data
+};
 use std::f32::consts::{
   PI,
   FRAC_PI_2
@@ -32,23 +37,17 @@ use cgmath::vector::{
 use cgmath::projection;
 use cgmath::angle;
 
+struct KeyEvent {
+  key: glfw::Key,
+  action: glfw::Action
+}
+
+struct CursorPosEvent {
+  x: f32,
+  y: f32
+}
+
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
-
-// hack to pass mutable Win to glfs-rs callbacks
-static mut WIN: Option<*mut Win> = None;
-
-fn get_win() -> &mut Win {
-  unsafe {
-    match WIN {
-      Some(win) => &mut *win,
-      None => fail!("Bad Win pointer")
-    }
-  }
-}
-
-fn set_win(win: &mut Win) {
-  unsafe { WIN = Some(win as (*mut Win)); }
-}
 
 static VERTEX_SHADER_SRC: &'static str = "
   #version 130
@@ -262,6 +261,8 @@ fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
 }
 
 pub struct Win {
+  key_event_port: Port<KeyEvent>,
+  cursor_pos_event_port: Port<CursorPosEvent>,
   vertex_shader: glt::GLuint,
   fragment_shader: glt::GLuint,
   program: glt::GLuint,
@@ -332,9 +333,22 @@ fn add_point<T: Num>(
   vertex_data.push(z + pos.z);
 }
 
+fn handle_event_port<T: Send>(port: &Port<T>, f: |T|) {
+  loop {
+    match port.try_recv() {
+      Data(e) => f(e),
+      _ => break
+    }
+  }
+}
+
 impl Win {
   pub fn new() -> ~Win {
+    let (key_event_port, key_event_chan) = Chan::new();
+    let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
     let mut win = ~Win {
+      key_event_port: key_event_port,
+      cursor_pos_event_port: cursor_pos_event_port,
       vertex_shader: 0,
       fragment_shader: 0,
       program: 0,
@@ -346,10 +360,13 @@ impl Win {
       camera: Camera::new(),
       visualizer: Visualizer::new()
     };
-    set_win(&mut *win);
     win.init_glfw();
     win.init_opengl();
     win.init_model();
+    win.window.get_ref().set_key_callback(
+      ~KeyContext{chan: key_event_chan});
+    win.window.get_ref().set_cursor_pos_callback(
+      ~CursorPosContext{chan: cursor_pos_chan});
     win
   }
 
@@ -393,17 +410,12 @@ impl Win {
         glfw::Windowed
       ).unwrap()
     );
+    let window = self.window.get_ref();
+    window.make_context_current();
   }
 
   fn init_opengl(&mut self) {
-    let window = self.window.get_ref();
-    window.make_context_current();
-    window.set_cursor_pos_callback(~CursorPosContext);
-    window.set_key_callback(~KeyContext);
-
-    // Load the OpenGL function pointers
     gl::load_with(glfw::get_proc_address);
-
     self.program = compile_program(
       VERTEX_SHADER_SRC,
       FRAGMENT_SHADER_SRC);
@@ -430,8 +442,33 @@ impl Win {
     return !self.window.get_ref().should_close()
   }
 
-  pub fn process_events(&self) {
+  pub fn process_events(&mut self) {
+    let win = self.window.get_ref();
     glfw::poll_events();
+    handle_event_port(&self.key_event_port, |e| {
+      if e.action != glfw::Press {
+        return;
+      }
+      match e.key {
+        glfw::KeyEscape | glfw::KeyQ
+                       => win.set_should_close(true),
+        glfw::KeySpace => println!("space"),
+        glfw::KeyUp    => self.camera.move(270.0),
+        glfw::KeyDown  => self.camera.move(90.0),
+        glfw::KeyRight => self.camera.move(0.0),
+        glfw::KeyLeft  => self.camera.move(180.0),
+        _ => {}
+      }
+    });
+    handle_event_port(&self.cursor_pos_event_port, |e| {
+      if win.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
+        let dx = self.mouse_pos.x - e.x;
+        let dy = self.mouse_pos.y - e.y;
+        self.camera.z_angle += dx;
+        self.camera.x_angle += dy;
+      }
+      self.mouse_pos = Vec2{x: e.x, y: e.y};
+    });
   }
 
   fn close_window(&mut self) {
@@ -448,45 +485,30 @@ impl Drop for Win {
   }
 }
 
-struct CursorPosContext;
+struct CursorPosContext { chan: Chan<CursorPosEvent> }
 impl glfw::CursorPosCallback for CursorPosContext {
-  fn call(&self, w: &glfw::Window, xpos: f64, ypos: f64) {
-    let win = get_win();
-    if w.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
-      let dx = win.mouse_pos.x - xpos as f32;
-      let dy = win.mouse_pos.y - ypos as f32;
-      win.camera.z_angle += dx;
-      win.camera.x_angle += dy;
-    }
-    win.mouse_pos.x = xpos as f32;
-    win.mouse_pos.y = ypos as f32;
+  fn call(&self, _: &glfw::Window, xpos: f64, ypos: f64) {
+    self.chan.send(CursorPosEvent {
+      x: xpos as f32,
+      y: ypos as f32
+    });
   }
 }
 
-struct KeyContext;
+struct KeyContext { chan: Chan<KeyEvent> }
 impl glfw::KeyCallback for KeyContext {
   fn call(
     &self,
-    window: &glfw::Window,
+    _:      &glfw::Window,
     key:    glfw::Key,
     _:      std::libc::c_int,
     action: glfw::Action,
     _:      glfw::Modifiers
   ) {
-    if action != glfw::Press {
-      return;
-    }
-    let win = get_win();
-    match key {
-      glfw::KeyEscape | glfw::KeyQ
-                     => window.set_should_close(true),
-      glfw::KeySpace => println!("space"),
-      glfw::KeyUp    => win.camera.move(270.0),
-      glfw::KeyDown  => win.camera.move(90.0),
-      glfw::KeyRight => win.camera.move(0.0),
-      glfw::KeyLeft  => win.camera.move(180.0),
-      _ => {}
-    }
+    self.chan.send(KeyEvent {
+      key: key,
+      action: action
+    });
   }
 }
 
