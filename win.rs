@@ -149,10 +149,16 @@ impl Visualizer {
   }
 }
 
+fn c_str(s: &str) -> *glt::GLchar {
+  unsafe {
+    s.to_c_str().unwrap()
+  }
+}
+
 fn compile_shader(src: &str, shader_type: glt::GLenum) -> glt::GLuint {
   let shader = gl::CreateShader(shader_type);
   unsafe {
-    gl::ShaderSource(shader, 1, &src.to_c_str().unwrap(), std::ptr::null());
+    gl::ShaderSource(shader, 1, &c_str(src), std::ptr::null());
     gl::CompileShader(shader);
 
     let mut status = gl::FALSE as glt::GLint;
@@ -215,15 +221,13 @@ fn compile_program(
 
 fn get_attr(program_id: glt::GLuint, name: &str) -> glt::GLuint {
   unsafe {
-    let c_str = name.to_c_str().unwrap();
-    gl::GetAttribLocation(program_id, c_str) as glt::GLuint
+    gl::GetAttribLocation(program_id, &c_str(name)) as glt::GLuint
   }
 }
 
 fn get_uniform(program: glt::GLuint, name: &str) -> glt::GLint {
   unsafe {
-    let c_str = name.to_c_str().unwrap();
-    gl::GetUniformLocation(program, c_str)
+    gl::GetUniformLocation(program, &c_str(name))
   }
 }
 
