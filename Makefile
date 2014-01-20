@@ -7,16 +7,14 @@ RUSTC_FLAGS += -W unnecessary-qualification
 RUSTC_FLAGS += -W non-uppercase-statics
 RUSTC_FLAGS += -W non-camel-case-types
 RUSTC_FLAGS += -L ~/rust_libs
-RUSTC_FLAGS += -L .
+RUSTC_FLAGS += --link-args=-lglfw
 
 RUSTC = rustc ${RUSTC_FLAGS}
 
 all: marauder
 
 marauder: main.rs win.rs misc.rs
-	${RUSTC} --lib misc.rs
-	${RUSTC} --lib win.rs
 	${RUSTC} main.rs -o marauder
 
 clean:
-	rm -f marauder lib*-*.so
+	rm -f marauder

@@ -2,10 +2,6 @@
 
 // Marauder is turn-based strategy game with hex grid.
 
-extern mod glfw;
-extern mod gl;
-extern mod cgmath;
-
 use std::comm::{
   Port,
   Chan,
@@ -22,6 +18,9 @@ use std::num::{
   sin,
   cos
 };
+use glfw;
+use gl;
+use std;
 use glt = gl::types;
 use cgmath::matrix::{
   Matrix,

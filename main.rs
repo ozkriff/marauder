@@ -1,9 +1,14 @@
 // See LICENSE file for copyright and license details.
 
 extern mod native;
-extern mod win;
+extern mod cgmath;
+extern mod glfw;
+extern mod gl;
 
 use win::Win;
+
+mod misc;
+mod win;
 
 fn main() {
   let mut win = Win::new();

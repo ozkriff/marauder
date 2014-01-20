@@ -1,7 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-extern mod cgmath;
-
+use std;
 use cgmath::matrix::{
   Mat4,
   Matrix
