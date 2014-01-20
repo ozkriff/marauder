@@ -2,10 +2,6 @@
 
 # RUSTC_FLAGS += -Z debug-info
 # RUSTC_FLAGS += --opt-level 3
-RUSTC_FLAGS += -W unnecessary-typecast
-RUSTC_FLAGS += -W unnecessary-qualification
-RUSTC_FLAGS += -W non-uppercase-statics
-RUSTC_FLAGS += -W non-camel-case-types
 RUSTC_FLAGS += -L ~/rust_libs
 RUSTC_FLAGS += --link-args=-lglfw
 

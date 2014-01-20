@@ -1,5 +1,10 @@
 // See LICENSE file for copyright and license details.
 
+#[deny(non_camel_case_types)];
+#[deny(non_uppercase_statics)];
+#[deny(unnecessary_qualification)];
+#[deny(unnecessary_typecast)];
+
 extern mod native;
 extern mod cgmath;
 extern mod glfw;
