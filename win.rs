@@ -464,10 +464,8 @@ impl Win {
     });
     handle_event_port(&self.cursor_pos_event_port, |e| {
       if win.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
-        let dx = self.mouse_pos.x - e.x;
-        let dy = self.mouse_pos.y - e.y;
-        self.camera.z_angle += dx;
-        self.camera.x_angle += dy;
+        self.camera.z_angle += self.mouse_pos.x - e.x;
+        self.camera.x_angle += self.mouse_pos.y - e.y;
       }
       self.mouse_pos = Vec2{x: e.x, y: e.y};
     });
