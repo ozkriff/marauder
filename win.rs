@@ -72,6 +72,28 @@ static FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
+static PICK_VERTEX_SHADER_SRC: &'static str = "
+  #version 130
+  in vec3 position;
+  in vec3 color;
+  out vec3 pass_color;
+  uniform mat4 mvp_mat;
+  void main() {
+    vec4 v = vec4(position, 1);
+    gl_Position = mvp_mat * v;
+    pass_color = color;
+  }
+";
+
+static PICK_FRAGMENT_SHADER_SRC: &'static str = "
+  #version 130
+  in vec3 pass_color;
+  out vec4 out_color;
+  void main() {
+    out_color = vec4(pass_color, 1.0);
+  }
+";
+
 fn deg_to_rad(n: f32) -> f32 {
   n * PI / 180.0
 }
@@ -269,6 +291,28 @@ fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
+struct TilePicker {
+  program: GLuint,
+  color_buffer_obj: GLuint,
+  matrix_id: GLint,
+  vertex_buffer_obj: GLuint,
+  vertex_data: ~[GLfloat],
+  color_data: ~[GLfloat]
+}
+
+impl TilePicker {
+  fn new() -> TilePicker {
+    TilePicker {
+      color_buffer_obj: 0,
+      program: 0,
+      vertex_buffer_obj: 0,
+      matrix_id: 0,
+      vertex_data: ~[],
+      color_data: ~[]
+    }
+  }
+}
+
 pub struct Win {
   key_event_port: Port<KeyEvent>,
   cursor_pos_event_port: Port<CursorPosEvent>,
@@ -279,7 +323,8 @@ pub struct Win {
   vertex_data: ~[GLfloat],
   mouse_pos: Vec2<f32>,
   camera: Camera,
-  visualizer: Visualizer
+  visualizer: Visualizer,
+  picker: TilePicker
 }
 
 fn get_projection_matrix() -> Mat4<f32> {
@@ -340,6 +385,12 @@ fn add_point<T: Num>(
   vertex_data.push(z + pos.z);
 }
 
+fn add_color<T>(color_data: &mut ~[T], r: T, g: T, b: T) {
+  color_data.push(r);
+  color_data.push(g);
+  color_data.push(b);
+}
+
 fn handle_event_port<T: Send>(port: &Port<T>, f: |T|) {
   loop {
     match port.try_recv() {
@@ -363,11 +414,13 @@ impl Win {
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
       camera: Camera::new(),
-      visualizer: Visualizer::new()
+      visualizer: Visualizer::new(),
+      picker: TilePicker::new()
     };
     win.init_glfw();
     win.init_opengl();
     win.init_model();
+    win.init_tile_picker();
     win.window.get_ref().set_key_callback(
       ~KeyContext{chan: key_event_chan});
     win.window.get_ref().set_cursor_pos_callback(
@@ -424,12 +477,18 @@ impl Win {
     self.program = compile_program(
       VERTEX_SHADER_SRC,
       FRAGMENT_SHADER_SRC);
+    self.picker.program = compile_program(
+      PICK_VERTEX_SHADER_SRC,
+      PICK_FRAGMENT_SHADER_SRC);
   }
 
   pub fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
+    gl::DeleteProgram(self.picker.program);
     unsafe {
       gl::DeleteBuffers(1, &self.vertex_buffer_obj);
+      gl::DeleteBuffers(1, &self.picker.vertex_buffer_obj);
+      gl::DeleteBuffers(1, &self.picker.color_buffer_obj);
     }
   }
 
@@ -477,6 +536,83 @@ impl Win {
   fn close_window(&mut self) {
     // destroy glfw::Window before terminating glfw
     self.window = None;
+  }
+
+  fn build_hex_mesh_for_picking(&mut self) {
+    for_each_tile(|tile_pos| {
+      let pos3d = self.visualizer.v2i_to_v2f(tile_pos).extend(0.0);
+      for num in range(0, 6) {
+        let vertex = self.visualizer.index_to_hex_vertex(num);
+        let next_vertex = self.visualizer.index_to_hex_vertex(num + 1);
+        let col_x = tile_pos.x as f32 / 255.0;
+        let col_y = tile_pos.y as f32 / 255.0;
+        let c_data = &mut self.picker.color_data;
+        let v_data = &mut self.picker.vertex_data;
+        add_point(v_data, &pos3d, vertex.x, vertex.y, 0.0);
+        add_color(c_data, col_x, col_y, 1.0);
+        add_point(v_data, &pos3d, next_vertex.x, next_vertex.y, 0.0);
+        add_color(c_data, col_x, col_y, 1.0);
+        add_point(v_data, &pos3d, 0.0, 0.0, 0.0);
+        add_color(c_data, col_x, col_y, 1.0);
+      }
+    });
+  }
+
+  fn init_tile_picker(&mut self) {
+    self.build_hex_mesh_for_picking();
+    unsafe {
+      gl::UseProgram(self.picker.program);
+      gl::GenBuffers(1, &mut self.picker.vertex_buffer_obj);
+      gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
+      fill_current_vbo(self.picker.vertex_data);
+      let pos_attr = get_attr(self.picker.program, "position");
+      gl::EnableVertexAttribArray(pos_attr);
+      define_array_of_generic_attr_data(pos_attr);
+      gl::GenBuffers(1, &mut self.picker.color_buffer_obj);
+      gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
+      fill_current_vbo(self.picker.color_data);
+      let color_attr = get_attr(self.picker.program, "color");
+      gl::EnableVertexAttribArray(color_attr);
+      define_array_of_generic_attr_data(color_attr);
+      self.picker.matrix_id = get_uniform(self.picker.program, "mvp_mat");
+    }
+  }
+
+  fn _pick_tile(&self, x: i32, y: i32) -> Option<Vec2<int>> {
+    let glfw_win = self.window.get_ref();
+    let (_, height) = glfw_win.get_size();
+    let reverted_y = height - y;
+    let data: [u8, ..4] = [0, 0, 0, 0]; // mut
+    unsafe {
+      let data_ptr = std::cast::transmute(&data[0]);
+      gl::ReadPixels(
+        x, reverted_y, 1, 1,
+        gl::RGBA,
+        gl::UNSIGNED_BYTE,
+        data_ptr
+      );
+    }
+    if data[2] != 0 {
+      Some(Vec2{x: data[0] as int, y: data[1] as int})
+    } else {
+      None
+    }
+  }
+
+  pub fn pick_tile(&mut self) {
+    gl::UseProgram(self.picker.program);
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
+    uniform_mat4f(self.picker.matrix_id, &self.camera.matrix());
+    gl::ClearColor(0.0, 0.0, 0.0, 1.0);
+    gl::Clear(gl::COLOR_BUFFER_BIT);
+    draw_mesh(self.picker.vertex_data);
+    let selected_tile_pos = self._pick_tile(
+      self.mouse_pos.x as i32,
+      self.mouse_pos.y as i32
+    );
+    // println!("selected: {}", selected_tile_pos.to_str());
+    println!("selected: {:?}", selected_tile_pos);
   }
 }
 

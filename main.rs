@@ -19,6 +19,7 @@ fn main() {
   let mut win = Win::new();
   while win.is_running() {
     win.process_events();
+    win.pick_tile();
     win.draw();
   }
 }
