@@ -297,7 +297,8 @@ struct TilePicker {
   matrix_id: GLint,
   vertex_buffer_obj: GLuint,
   vertex_data: ~[GLfloat],
-  color_data: ~[GLfloat]
+  color_data: ~[GLfloat],
+  selected_tile_pos: Option<Vec2<int>>
 }
 
 impl TilePicker {
@@ -308,7 +309,8 @@ impl TilePicker {
       vertex_buffer_obj: 0,
       matrix_id: 0,
       vertex_data: ~[],
-      color_data: ~[]
+      color_data: ~[],
+      selected_tile_pos: None
     }
   }
 }
@@ -607,12 +609,11 @@ impl Win {
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     draw_mesh(self.picker.vertex_data);
-    let selected_tile_pos = self._pick_tile(
+    self.picker.selected_tile_pos = self._pick_tile(
       self.mouse_pos.x as i32,
       self.mouse_pos.y as i32
     );
-    // println!("selected: {}", selected_tile_pos.to_str());
-    println!("selected: {:?}", selected_tile_pos);
+    println!("selected: {:?}", self.picker.selected_tile_pos);
   }
 }
 
