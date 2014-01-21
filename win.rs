@@ -66,6 +66,10 @@ static FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
+fn deg_to_rad(n: f32) -> f32 {
+  n * PI / 180.0
+}
+
 struct Camera {
   x_angle: f32,
   z_angle: f32,
@@ -95,8 +99,7 @@ impl Camera {
   }
 
   pub fn move(&mut self, angle: f32) {
-    // TODO: deg2rad, rename
-    let speed_in_radians = (self.z_angle - angle) * PI / 180.0;
+    let speed_in_radians = deg_to_rad(self.z_angle - angle);
     let dx = sin(speed_in_radians);
     let dy = cos(speed_in_radians);
     self.pos.x -= dy;
@@ -252,13 +255,13 @@ fn tr(m: Mat4<f32>, v: Vec3<f32>) -> Mat4<f32> {
 }
 
 fn rot_x(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
-  let rad = angle::rad(angle * (PI / 180.0));
+  let rad = angle::rad(deg_to_rad(angle));
   let r = Mat3::from_angle_x(rad).to_mat4();
   m.mul_m(&r)
 }
 
 fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
-  let rad = angle::rad(angle * (PI / 180.0));
+  let rad = angle::rad(deg_to_rad(angle));
   let r = Mat3::from_angle_z(rad).to_mat4();
   m.mul_m(&r)
 }
