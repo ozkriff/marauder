@@ -221,13 +221,13 @@ fn compile_program(
 
 fn get_attr(program_id: glt::GLuint, name: &str) -> glt::GLuint {
   unsafe {
-    gl::GetAttribLocation(program_id, &c_str(name)) as glt::GLuint
+    gl::GetAttribLocation(program_id, c_str(name)) as glt::GLuint
   }
 }
 
 fn get_uniform(program: glt::GLuint, name: &str) -> glt::GLint {
   unsafe {
-    gl::GetUniformLocation(program, &c_str(name))
+    gl::GetUniformLocation(program, c_str(name))
   }
 }
 
