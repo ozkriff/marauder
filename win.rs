@@ -19,18 +19,14 @@ use std::num::{
 use glfw;
 use gl;
 use std;
-use glt = gl::types;
 use gl::types::{
   GLfloat,
   GLint,
-  GLuint,
-  GLenum
+  GLuint
 };
 use cgmath::matrix::{
   Matrix,
-  Mat4,
-  Mat3,
-  ToMat4
+  Mat4
 };
 use cgmath::vector::{
   Vec3,
@@ -39,6 +35,8 @@ use cgmath::vector::{
 };
 use cgmath::projection;
 use cgmath::angle;
+use glh = gl_helpers;
+use misc::deg_to_rad;
 
 struct KeyEvent {
   key: glfw::Key,
@@ -92,10 +90,6 @@ static PICK_FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
-fn deg_to_rad(n: f32) -> f32 {
-  n * PI / 180.0
-}
-
 struct Camera {
   x_angle: f32,
   z_angle: f32,
@@ -117,10 +111,10 @@ impl Camera {
 
   pub fn matrix(&self) -> Mat4<f32> {
     let mut mvp_matrix = self.projection_matrix;
-    mvp_matrix = tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -self.zoom});
-    mvp_matrix = rot_x(mvp_matrix, -self.x_angle);
-    mvp_matrix = rot_z(mvp_matrix, -self.z_angle);
-    mvp_matrix = tr(mvp_matrix, self.pos);
+    mvp_matrix = glh::tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -self.zoom});
+    mvp_matrix = glh::rot_x(mvp_matrix, -self.x_angle);
+    mvp_matrix = glh::rot_z(mvp_matrix, -self.z_angle);
+    mvp_matrix = glh::tr(mvp_matrix, self.pos);
     mvp_matrix
   }
 
@@ -178,117 +172,6 @@ impl Visualizer {
   }
 }
 
-fn c_str(s: &str) -> *glt::GLchar {
-  unsafe {
-    s.to_c_str().unwrap()
-  }
-}
-
-fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
-  let shader = gl::CreateShader(shader_type);
-  unsafe {
-    gl::ShaderSource(shader, 1, &c_str(src), std::ptr::null());
-    gl::CompileShader(shader);
-
-    let mut status = gl::FALSE as GLint;
-    gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
-
-    if status != (gl::TRUE as GLint) {
-      let mut len = 0;
-      gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
-      // subtract 1 to skip the trailing null character
-      let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
-      gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
-        buf.as_mut_ptr() as *mut glt::GLchar
-      );
-      fail!("compile_shader(): " + std::str::raw::from_utf8(buf));
-    }
-  }
-  shader
-}
-
-fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
-  let program = gl::CreateProgram();
-  gl::AttachShader(program, vertex_shader);
-  gl::AttachShader(program, fragment_shader);
-  gl::LinkProgram(program);
-  unsafe {
-    let mut status = gl::FALSE as GLint;
-    gl::GetProgramiv(program, gl::LINK_STATUS, &mut status);
-
-    if status != (gl::TRUE as GLint) {
-      let mut len: GLint = 0;
-      gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
-      // subtract 1 to skip the trailing null character
-      let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
-      gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
-        buf.as_mut_ptr() as *mut glt::GLchar
-      );
-      fail!("link_program(): " + std::str::raw::from_utf8(buf));
-    }
-  }
-  program
-}
-
-fn compile_program(
-  vertex_shader_src: &str,
-  frag_shader_src: &str
-) -> GLuint {
-  let vertex_shader = compile_shader(
-    vertex_shader_src, gl::VERTEX_SHADER);
-  let fragment_shader = compile_shader(
-    frag_shader_src, gl::FRAGMENT_SHADER);
-  let program = link_program(vertex_shader, fragment_shader);
-  // mark shaders for deletion after program deletion
-  gl::DeleteShader(fragment_shader);
-  gl::DeleteShader(vertex_shader);
-  program
-}
-
-fn get_attr(program_id: GLuint, name: &str) -> GLuint {
-  unsafe {
-    gl::GetAttribLocation(program_id, c_str(name)) as GLuint
-  }
-}
-
-fn get_uniform(program: GLuint, name: &str) -> GLint {
-  unsafe {
-    gl::GetUniformLocation(program, c_str(name))
-  }
-}
-
-fn draw_mesh<T>(mesh: &[T]) {
-  let starting_index = 0;
-  let len = mesh.len() as i32;
-  gl::DrawArrays(gl::TRIANGLES, starting_index, len);
-}
-
-pub fn uniform_mat4f(matrix_id: GLint, matrix: &Mat4<GLfloat>) {
-  unsafe {
-    gl::UniformMatrix4fv(matrix_id, 1, gl::FALSE, matrix.cr(0, 0));
-  }
-}
-
-fn tr(m: Mat4<f32>, v: Vec3<f32>) -> Mat4<f32> {
-  let mut t = Mat4::<f32>::identity();
-  *t.mut_cr(3, 0) = v.x;
-  *t.mut_cr(3, 1) = v.y;
-  *t.mut_cr(3, 2) = v.z;
-  m.mul_m(&t)
-}
-
-fn rot_x(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
-  let rad = angle::rad(deg_to_rad(angle));
-  let r = Mat3::from_angle_x(rad).to_mat4();
-  m.mul_m(&r)
-}
-
-fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
-  let rad = angle::rad(deg_to_rad(angle));
-  let r = Mat3::from_angle_z(rad).to_mat4();
-  m.mul_m(&r)
-}
-
 struct TilePicker {
   program: GLuint,
   color_buffer_obj: GLuint,
@@ -344,35 +227,6 @@ fn for_each_tile(f: |Vec2<i32>|) {
     for x in range(0i32, map_size.x) {
       f(Vec2{x: x, y: y});
     }
-  }
-}
-
-fn fill_current_vbo(data: &[GLfloat]) {
-  let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * glfloat_size) as glt::GLsizeiptr;
-  unsafe {
-    gl::BufferData(
-      gl::ARRAY_BUFFER,
-      buffer_size,
-      std::cast::transmute(&data[0]),
-      gl::STATIC_DRAW
-    );
-  }
-}
-
-fn define_array_of_generic_attr_data(attr: GLuint) {
-  let components_count = 3;
-  let normalized = gl::FALSE;
-  let stride = 0;
-  unsafe {
-    gl::VertexAttribPointer(
-      attr,
-      components_count,
-      gl::FLOAT,
-      normalized,
-      stride,
-      std::ptr::null()
-    );
   }
 }
 
@@ -448,11 +302,11 @@ impl Win {
       gl::UseProgram(self.program);
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-      fill_current_vbo(self.vertex_data);
-      let pos_attr = get_attr(self.program, "position");
+      glh::fill_current_vbo(self.vertex_data);
+      let pos_attr = glh::get_attr(self.program, "position");
       gl::EnableVertexAttribArray(pos_attr);
-      define_array_of_generic_attr_data(pos_attr);
-      self.matrix_id = get_uniform(self.program, "mvp_mat");
+      glh::define_array_of_generic_attr_data(pos_attr);
+      self.matrix_id = glh::get_uniform(self.program, "mvp_mat");
     }
   }
 
@@ -474,10 +328,10 @@ impl Win {
 
   fn init_opengl(&mut self) {
     gl::load_with(glfw::get_proc_address);
-    self.program = compile_program(
+    self.program = glh::compile_program(
       VERTEX_SHADER_SRC,
       FRAGMENT_SHADER_SRC);
-    self.picker.program = compile_program(
+    self.picker.program = glh::compile_program(
       PICK_VERTEX_SHADER_SRC,
       PICK_FRAGMENT_SHADER_SRC);
   }
@@ -495,10 +349,10 @@ impl Win {
   pub fn draw(&self) {
     gl::UseProgram(self.program);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-    uniform_mat4f(self.matrix_id, &self.camera.matrix());
+    glh::uniform_mat4f(self.matrix_id, &self.camera.matrix());
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
-    draw_mesh(self.vertex_data);
+    glh::draw_mesh(self.vertex_data);
     self.window.get_ref().swap_buffers();
   }
 
@@ -564,17 +418,17 @@ impl Win {
       gl::UseProgram(self.picker.program);
       gl::GenBuffers(1, &mut self.picker.vertex_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
-      fill_current_vbo(self.picker.vertex_data);
-      let pos_attr = get_attr(self.picker.program, "position");
+      glh::fill_current_vbo(self.picker.vertex_data);
+      let pos_attr = glh::get_attr(self.picker.program, "position");
       gl::EnableVertexAttribArray(pos_attr);
-      define_array_of_generic_attr_data(pos_attr);
+      glh::define_array_of_generic_attr_data(pos_attr);
       gl::GenBuffers(1, &mut self.picker.color_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
-      fill_current_vbo(self.picker.color_data);
-      let color_attr = get_attr(self.picker.program, "color");
+      glh::fill_current_vbo(self.picker.color_data);
+      let color_attr = glh::get_attr(self.picker.program, "color");
       gl::EnableVertexAttribArray(color_attr);
-      define_array_of_generic_attr_data(color_attr);
-      self.picker.matrix_id = get_uniform(self.picker.program, "mvp_mat");
+      glh::define_array_of_generic_attr_data(color_attr);
+      self.picker.matrix_id = glh::get_uniform(self.picker.program, "mvp_mat");
     }
   }
 
@@ -603,10 +457,10 @@ impl Win {
     gl::UseProgram(self.picker.program);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
-    uniform_mat4f(self.picker.matrix_id, &self.camera.matrix());
+    glh::uniform_mat4f(self.picker.matrix_id, &self.camera.matrix());
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
-    draw_mesh(self.picker.vertex_data);
+    glh::draw_mesh(self.picker.vertex_data);
     self.picker.selected_tile_pos = self._pick_tile(
       self.mouse_pos.x as i32,
       self.mouse_pos.y as i32

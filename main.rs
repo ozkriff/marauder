@@ -16,6 +16,7 @@ use win::Win;
 
 mod misc;
 mod win;
+mod gl_helpers;
 
 fn main() {
   let mut win = Win::new();
