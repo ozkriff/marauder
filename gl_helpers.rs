@@ -2,11 +2,11 @@
 
 use std;
 use gl;
-use glt = gl::types;
 use gl::types::{
   GLfloat,
   GLint,
   GLuint,
+  GLchar,
   GLenum
 };
 use cgmath::matrix::{
@@ -39,7 +39,7 @@ pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
-        buf.as_mut_ptr() as *mut glt::GLchar
+        buf.as_mut_ptr() as *mut GLchar
       );
       fail!("compile_shader(): " + std::str::raw::from_utf8(buf));
     }
@@ -62,7 +62,7 @@ pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
       gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
-        buf.as_mut_ptr() as *mut glt::GLchar
+        buf.as_mut_ptr() as *mut GLchar
       );
       fail!("link_program(): " + std::str::raw::from_utf8(buf));
     }
@@ -131,7 +131,7 @@ pub fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
 
 pub fn fill_current_vbo(data: &[GLfloat]) {
   let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * glfloat_size) as glt::GLsizeiptr;
+  let buffer_size = (data.len() * glfloat_size) as gl::types::GLsizeiptr;
   unsafe {
     gl::BufferData(
       gl::ARRAY_BUFFER,
