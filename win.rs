@@ -1,7 +1,5 @@
 // See LICENSE file for copyright and license details.
 
-// Marauder is turn-based strategy game with hex grid.
-
 use std::comm::{
   Port,
   Chan,
