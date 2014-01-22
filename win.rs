@@ -155,7 +155,7 @@ pub struct Win {
   program: GLuint,
   vertex_buffer_obj: GLuint,
   matrix_id: GLint,
-  window: Option<glfw::Window>,
+  glfw_win: Option<glfw::Window>,
   vertex_data: ~[GLfloat],
   mouse_pos: Vec2<f32>,
   camera: Camera,
@@ -207,7 +207,7 @@ impl Win {
       program: 0,
       vertex_buffer_obj: 0,
       matrix_id: 0,
-      window: None,
+      glfw_win: None,
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
       camera: Camera::new(),
@@ -218,11 +218,15 @@ impl Win {
     win.init_opengl();
     win.init_model();
     win.init_tile_picker();
-    win.window.get_ref().set_key_callback(
+    win.glfw_win().set_key_callback(
       ~KeyContext{chan: key_event_chan});
-    win.window.get_ref().set_cursor_pos_callback(
+    win.glfw_win().set_cursor_pos_callback(
       ~CursorPosContext{chan: cursor_pos_chan});
     win
+  }
+
+  fn glfw_win<'a>(&'a self) -> &'a glfw::Window {
+    self.glfw_win.get_ref()
   }
 
   fn build_hex_mesh(&mut self) {
@@ -257,7 +261,7 @@ impl Win {
     // glfw::window_hint::context_version(3, 2);
     glfw::set_error_callback(~glfw::LogErrorHandler);
     glfw::init();
-    self.window = Some(
+    self.glfw_win = Some(
       glfw::Window::create(
         WIN_SIZE.x,
         WIN_SIZE.y,
@@ -265,8 +269,7 @@ impl Win {
         glfw::Windowed
       ).unwrap()
     );
-    let window = self.window.get_ref();
-    window.make_context_current();
+    self.glfw_win().make_context_current();
   }
 
   fn init_opengl(&mut self) {
@@ -296,15 +299,14 @@ impl Win {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     glh::draw_mesh(self.vertex_data);
-    self.window.get_ref().swap_buffers();
+    self.glfw_win().swap_buffers();
   }
 
   pub fn is_running(&self) -> bool {
-    return !self.window.get_ref().should_close()
+    return !self.glfw_win().should_close()
   }
 
   pub fn process_events(&mut self) {
-    let win = self.window.get_ref();
     glfw::poll_events();
     handle_event_port(&self.key_event_port, |e| {
       if e.action != glfw::Press {
@@ -312,7 +314,7 @@ impl Win {
       }
       match e.key {
         glfw::KeyEscape | glfw::KeyQ
-                       => win.set_should_close(true),
+                       => self.glfw_win().set_should_close(true),
         glfw::KeySpace => println!("space"),
         glfw::KeyUp    => self.camera.move(270.0),
         glfw::KeyDown  => self.camera.move(90.0),
@@ -322,7 +324,8 @@ impl Win {
       }
     });
     handle_event_port(&self.cursor_pos_event_port, |e| {
-      if win.get_mouse_button(glfw::MouseButtonRight) == glfw::Press {
+      let button = self.glfw_win().get_mouse_button(glfw::MouseButtonRight);
+      if button == glfw::Press {
         self.camera.z_angle += self.mouse_pos.x - e.x;
         self.camera.x_angle += self.mouse_pos.y - e.y;
       }
@@ -332,7 +335,7 @@ impl Win {
 
   fn close_window(&mut self) {
     // destroy glfw::Window before terminating glfw
-    self.window = None;
+    self.glfw_win = None;
   }
 
   fn build_hex_mesh_for_picking(&mut self) {
@@ -376,8 +379,7 @@ impl Win {
   }
 
   fn _pick_tile(&self, x: i32, y: i32) -> Option<Vec2<int>> {
-    let glfw_win = self.window.get_ref();
-    let (_, height) = glfw_win.get_size();
+    let (_, height) = self.glfw_win().get_size();
     let reverted_y = height - y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
     unsafe {
