@@ -1,0 +1,26 @@
+# See LICENSE file for copyright and license details.
+
+before_install:
+  - yes | sudo add-apt-repository ppa:hansjorg/rust
+  - sudo apt-get update
+
+install:
+  - sudo apt-get install rust-nightly
+  - sudo apt-get install libXxf86vm-dev
+
+script:
+  # Install glfw lib
+  - git clone https://github.com/glfw/glfw.git
+  - cd glfw
+  - git checkout 3.0.3
+  - cmake -DBUILD_SHARED_LIBS=ON
+  - make
+  - sudo make install
+  - cd ..
+
+  # TODO: Install glfw-rs
+  # TODO: Install gl-rs
+  # TODO: Install cgmath-rs
+
+  # Build Marauder
+  - make
