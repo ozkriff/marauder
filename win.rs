@@ -12,7 +12,6 @@ use std::f32::consts::{
 use std::num::{
   sqrt,
   pow,
-  abs,
   sin,
   cos
 };
@@ -142,12 +141,6 @@ impl Visualizer {
       hex_in_radius: hex_in_radius
     };
     visualizer
-  }
-
-  pub fn dist(a: Vec2<f32>, b: Vec2<f32>) -> f32 {
-    let dx = abs(b.x - a.x);
-    let dy = abs(b.y - a.y);
-    sqrt(pow(dx, 2) + pow(dy, 2))
   }
 
   pub fn v2i_to_v2f(&self, i: Vec2<i32>) -> Vec2<f32> {
