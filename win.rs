@@ -128,7 +128,7 @@ impl Visualizer {
 struct TilePicker {
   program: GLuint,
   color_buffer_obj: GLuint,
-  matrix_id: GLint,
+  mat_id: GLint,
   vertex_buffer_obj: GLuint,
   vertex_data: ~[GLfloat],
   color_data: ~[GLfloat],
@@ -141,7 +141,7 @@ impl TilePicker {
       color_buffer_obj: 0,
       program: 0,
       vertex_buffer_obj: 0,
-      matrix_id: 0,
+      mat_id: 0,
       vertex_data: ~[],
       color_data: ~[],
       selected_tile_pos: None
@@ -154,7 +154,7 @@ pub struct Win {
   cursor_pos_event_port: Port<CursorPosEvent>,
   program: GLuint,
   vertex_buffer_obj: GLuint,
-  matrix_id: GLint,
+  mat_id: GLint,
   glfw_win: Option<glfw::Window>,
   vertex_data: ~[GLfloat],
   mouse_pos: Vec2<f32>,
@@ -206,7 +206,7 @@ impl Win {
       cursor_pos_event_port: cursor_pos_event_port,
       program: 0,
       vertex_buffer_obj: 0,
-      matrix_id: 0,
+      mat_id: 0,
       glfw_win: None,
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
@@ -253,7 +253,7 @@ impl Win {
       let pos_attr = glh::get_attr(self.program, "position");
       gl::EnableVertexAttribArray(pos_attr);
       glh::define_array_of_generic_attr_data(pos_attr);
-      self.matrix_id = glh::get_uniform(self.program, "mvp_mat");
+      self.mat_id = glh::get_uniform(self.program, "mvp_mat");
     }
   }
 
@@ -295,7 +295,7 @@ impl Win {
   pub fn draw(&self) {
     gl::UseProgram(self.program);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-    glh::uniform_mat4f(self.matrix_id, &self.camera.matrix());
+    glh::uniform_mat4f(self.mat_id, &self.camera.mat());
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     glh::draw_mesh(self.vertex_data);
@@ -374,7 +374,7 @@ impl Win {
       let color_attr = glh::get_attr(self.picker.program, "color");
       gl::EnableVertexAttribArray(color_attr);
       glh::define_array_of_generic_attr_data(color_attr);
-      self.picker.matrix_id = glh::get_uniform(self.picker.program, "mvp_mat");
+      self.picker.mat_id = glh::get_uniform(self.picker.program, "mvp_mat");
     }
   }
 
@@ -402,7 +402,7 @@ impl Win {
     gl::UseProgram(self.picker.program);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
-    glh::uniform_mat4f(self.picker.matrix_id, &self.camera.matrix());
+    glh::uniform_mat4f(self.picker.mat_id, &self.camera.mat());
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     glh::draw_mesh(self.picker.vertex_data);

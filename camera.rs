@@ -20,10 +20,10 @@ pub struct Camera {
   z_angle: f32,
   pos: Vec3<f32>,
   zoom: f32,
-  projection_matrix: Mat4<f32>,
+  projection_mat: Mat4<f32>,
 }
 
-fn get_projection_matrix() -> Mat4<f32> {
+fn get_projection_mat() -> Mat4<f32> {
   let fov = angle::deg(45.0f32);
   let ratio = 4.0 / 3.0;
   let display_range_min = 0.1;
@@ -40,17 +40,17 @@ impl Camera {
       z_angle: 0.0,
       pos: Vec3{x: 0.0, y: 0.0, z: 0.0},
       zoom: 10.0,
-      projection_matrix: get_projection_matrix(),
+      projection_mat: get_projection_mat(),
     }
   }
 
-  pub fn matrix(&self) -> Mat4<f32> {
-    let mut mvp_matrix = self.projection_matrix;
-    mvp_matrix = glh::tr(mvp_matrix, Vec3{x: 0.0f32, y: 0.0, z: -self.zoom});
-    mvp_matrix = glh::rot_x(mvp_matrix, -self.x_angle);
-    mvp_matrix = glh::rot_z(mvp_matrix, -self.z_angle);
-    mvp_matrix = glh::tr(mvp_matrix, self.pos);
-    mvp_matrix
+  pub fn mat(&self) -> Mat4<f32> {
+    let mut mvp_mat = self.projection_mat;
+    mvp_mat = glh::tr(mvp_mat, Vec3{x: 0.0f32, y: 0.0, z: -self.zoom});
+    mvp_mat = glh::rot_x(mvp_mat, -self.x_angle);
+    mvp_mat = glh::rot_z(mvp_mat, -self.z_angle);
+    mvp_mat = glh::tr(mvp_mat, self.pos);
+    mvp_mat
   }
 
   pub fn move(&mut self, angle: f32) {

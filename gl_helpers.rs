@@ -103,9 +103,9 @@ pub fn draw_mesh<T>(mesh: &[T]) {
   gl::DrawArrays(gl::TRIANGLES, starting_index, len);
 }
 
-pub fn uniform_mat4f(matrix_id: GLint, matrix: &Mat4<GLfloat>) {
+pub fn uniform_mat4f(mat_id: GLint, mat: &Mat4<GLfloat>) {
   unsafe {
-    gl::UniformMatrix4fv(matrix_id, 1, gl::FALSE, matrix.cr(0, 0));
+    gl::UniformMatrix4fv(mat_id, 1, gl::FALSE, mat.cr(0, 0));
   }
 }
 
