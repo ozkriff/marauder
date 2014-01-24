@@ -86,45 +86,6 @@ static PICK_FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
-pub struct Visualizer {
-  hex_ex_radius: GLfloat,
-  hex_in_radius: GLfloat
-}
-
-impl Visualizer {
-  pub fn new() -> Visualizer {
-    let hex_ex_radius: GLfloat = 1.0 / 2.0;
-    let hex_in_radius = sqrt(
-        pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
-    let visualizer = Visualizer {
-      hex_ex_radius: hex_ex_radius,
-      hex_in_radius: hex_in_radius
-    };
-    visualizer
-  }
-
-  pub fn v2i_to_v2f(&self, i: Vec2<i32>) -> Vec2<f32> {
-    let v = Vec2 {
-      x: (i.x as f32) * self.hex_in_radius * 2.0,
-      y: (i.y as f32) * self.hex_ex_radius * 1.5
-    };
-    if i.y % 2 == 0 {
-      Vec2{x: v.x + self.hex_in_radius, y: v.y}
-    } else {
-      v
-    }
-  }
-
-  pub fn index_to_circle_vertex(&self, count: int, i: int) -> Vec2<f32> {
-    let n = FRAC_PI_2 + 2.0 * PI * (i as f32) / (count as f32);
-    Vec2{x: cos(n), y: sin(n)}.mul_s(self.hex_ex_radius)
-  }
-
-  pub fn index_to_hex_vertex(&self, i: int) -> Vec2<f32> {
-    self.index_to_circle_vertex(6, i)
-  }
-}
-
 struct TilePicker {
   program: GLuint,
   color_buffer_obj: GLuint,
@@ -150,6 +111,8 @@ impl TilePicker {
 }
 
 pub struct Win {
+  hex_ex_radius: GLfloat,
+  hex_in_radius: GLfloat,
   key_event_port: Port<KeyEvent>,
   cursor_pos_event_port: Port<CursorPosEvent>,
   program: GLuint,
@@ -159,7 +122,6 @@ pub struct Win {
   vertex_data: ~[GLfloat],
   mouse_pos: Vec2<f32>,
   camera: Camera,
-  visualizer: Visualizer,
   picker: TilePicker
 }
 
@@ -199,9 +161,14 @@ fn handle_event_port<T: Send>(port: &Port<T>, f: |T|) {
 
 impl Win {
   pub fn new() -> ~Win {
+    let hex_ex_radius: GLfloat = 1.0 / 2.0;
+    let hex_in_radius = sqrt(
+        pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
     let (key_event_port, key_event_chan) = Chan::new();
     let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
     let mut win = ~Win {
+      hex_ex_radius: hex_ex_radius,
+      hex_in_radius: hex_in_radius,
       key_event_port: key_event_port,
       cursor_pos_event_port: cursor_pos_event_port,
       program: 0,
@@ -211,7 +178,6 @@ impl Win {
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
       camera: Camera::new(),
-      visualizer: Visualizer::new(),
       picker: TilePicker::new()
     };
     win.init_glfw();
@@ -225,16 +191,38 @@ impl Win {
     win
   }
 
+  pub fn v2i_to_v2f(&self, i: Vec2<i32>) -> Vec2<f32> {
+    let v = Vec2 {
+      x: (i.x as f32) * self.hex_in_radius * 2.0,
+      y: (i.y as f32) * self.hex_ex_radius * 1.5
+    };
+    if i.y % 2 == 0 {
+      Vec2{x: v.x + self.hex_in_radius, y: v.y}
+    } else {
+      v
+    }
+  }
+
+  pub fn index_to_circle_vertex(&self, count: int, i: int) -> Vec2<f32> {
+    let n = FRAC_PI_2 + 2.0 * PI * (i as f32) / (count as f32);
+    Vec2{x: cos(n), y: sin(n)}.mul_s(self.hex_ex_radius)
+  }
+
+  pub fn index_to_hex_vertex(&self, i: int) -> Vec2<f32> {
+    self.index_to_circle_vertex(6, i)
+  }
+
+
   fn glfw_win<'a>(&'a self) -> &'a glfw::Window {
     self.glfw_win.get_ref()
   }
 
   fn build_hex_mesh(&mut self) {
     for_each_tile(|tile_pos| {
-      let pos3d = self.visualizer.v2i_to_v2f(tile_pos).extend(0.0);
+      let pos3d = self.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
-        let vertex = self.visualizer.index_to_hex_vertex(num);
-        let next_vertex = self.visualizer.index_to_hex_vertex(num + 1);
+        let vertex = self.index_to_hex_vertex(num);
+        let next_vertex = self.index_to_hex_vertex(num + 1);
         let data = &mut self.vertex_data;
         add_point(data, &pos3d, vertex.x, vertex.y, 0.0);
         add_point(data, &pos3d, next_vertex.x, next_vertex.y, 0.0);
@@ -340,10 +328,10 @@ impl Win {
 
   fn build_hex_mesh_for_picking(&mut self) {
     for_each_tile(|tile_pos| {
-      let pos3d = self.visualizer.v2i_to_v2f(tile_pos).extend(0.0);
+      let pos3d = self.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
-        let vertex = self.visualizer.index_to_hex_vertex(num);
-        let next_vertex = self.visualizer.index_to_hex_vertex(num + 1);
+        let vertex = self.index_to_hex_vertex(num);
+        let next_vertex = self.index_to_hex_vertex(num + 1);
         let col_x = tile_pos.x as f32 / 255.0;
         let col_y = tile_pos.y as f32 / 255.0;
         let c_data = &mut self.picker.color_data;
