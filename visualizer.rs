@@ -110,7 +110,7 @@ impl TilePicker {
   }
 }
 
-pub struct Win {
+pub struct Visualizer {
   hex_ex_radius: GLfloat,
   hex_in_radius: GLfloat,
   key_event_port: Port<KeyEvent>,
@@ -159,14 +159,14 @@ fn handle_event_port<T: Send>(port: &Port<T>, f: |T|) {
   }
 }
 
-impl Win {
-  pub fn new() -> ~Win {
+impl Visualizer {
+  pub fn new() -> ~Visualizer {
     let hex_ex_radius: GLfloat = 1.0 / 2.0;
     let hex_in_radius = sqrt(
         pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
     let (key_event_port, key_event_chan) = Chan::new();
     let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
-    let mut win = ~Win {
+    let mut vis = ~Visualizer {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius,
       key_event_port: key_event_port,
@@ -180,15 +180,15 @@ impl Win {
       camera: Camera::new(),
       picker: TilePicker::new()
     };
-    win.init_glfw();
-    win.init_opengl();
-    win.init_model();
-    win.init_tile_picker();
-    win.glfw_win().set_key_callback(
+    vis.init_glfw();
+    vis.init_opengl();
+    vis.init_model();
+    vis.init_tile_picker();
+    vis.glfw_win().set_key_callback(
       ~KeyContext{chan: key_event_chan});
-    win.glfw_win().set_cursor_pos_callback(
+    vis.glfw_win().set_cursor_pos_callback(
       ~CursorPosContext{chan: cursor_pos_chan});
-    win
+    vis
   }
 
   pub fn v2i_to_v2f(&self, i: Vec2<i32>) -> Vec2<f32> {
@@ -402,7 +402,7 @@ impl Win {
   }
 }
 
-impl Drop for Win {
+impl Drop for Visualizer {
   fn drop(&mut self) {
     self.cleanup_opengl();
     self.close_window();

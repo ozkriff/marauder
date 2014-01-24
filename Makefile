@@ -9,7 +9,7 @@ RUSTC = rustc ${RUSTC_FLAGS}
 
 all: marauder
 
-marauder: main.rs win.rs misc.rs
+marauder: main.rs visualizer.rs misc.rs
 	${RUSTC} main.rs -o marauder
 
 clean:

@@ -12,19 +12,19 @@ extern mod cgmath;
 extern mod glfw;
 extern mod gl;
 
-use win::Win;
+use visualizer::Visualizer;
 
 mod misc;
-mod win;
+mod visualizer;
 mod gl_helpers;
 mod camera;
 
 fn main() {
-  let mut win = Win::new();
-  while win.is_running() {
-    win.process_events();
-    win.pick_tile();
-    win.draw();
+  let mut visualizer = Visualizer::new();
+  while visualizer.is_running() {
+    visualizer.process_events();
+    visualizer.pick_tile();
+    visualizer.draw();
   }
 }
 
