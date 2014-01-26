@@ -1,5 +1,7 @@
 # marauder
 
+[![Build Status](https://travis-ci.org/ozkriff/marauder.png?branch=master)](https://travis-ci.org/ozkriff/marauder)
+
 Marauder is turn-based post-apocalyptic hexagonal wargame
 written in [Rust](https://rust-lang.org).
 
