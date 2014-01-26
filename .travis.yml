@@ -32,5 +32,8 @@ script:
   - git clone --depth=1 https://github.com/bjz/cgmath-rs
   - rustc --dylib cgmath-rs/src/cgmath/lib.rs --out-dir .
 
+  # Return from 'deps' dir
+  - ..
+
   # Build Marauder
   - make
