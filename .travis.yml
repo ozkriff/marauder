@@ -9,31 +9,8 @@ install:
   - sudo apt-get install libXxf86vm-dev
 
 script:
-  - mkdir deps
-  - cd deps
-
-  # Install glfw lib
-  - git clone --depth=1 https://github.com/glfw/glfw.git
-  - cd glfw
-  - cmake -DBUILD_SHARED_LIBS=ON
-  - make glfw # build only .so files
-  - cp src/libglfw.so* .. # copy dynamic libraries
-  - cd ..
-
-  # Install glfw-rs
-  - git clone --depth=1 https://github.com/bjz/glfw-rs
-  - rustc --dylib glfw-rs/src/lib.rs --out-dir .
-
-  # Install gl-rs
-  - git clone --depth=1 https://github.com/bjz/gl-rs
-  - rustc --dylib gl-rs/src/gl/lib.rs --out-dir .
-
-  # Install cgmath-rs
-  - git clone --depth=1 https://github.com/bjz/cgmath-rs
-  - rustc --dylib cgmath-rs/src/cgmath/lib.rs --out-dir .
-
-  # Return from 'deps' dir
-  - cd ..
+  # Download, build and install dependancies
+  - ./make_deps
 
   # Build Marauder
   - make
