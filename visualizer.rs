@@ -108,6 +108,26 @@ impl TilePicker {
       selected_tile_pos: None
     }
   }
+
+  fn init_opengl(&mut self) {
+    self.program = glh::compile_program(
+      PICK_VERTEX_SHADER_SRC,
+      PICK_FRAGMENT_SHADER_SRC);
+  }
+
+  pub fn cleanup_opengl(&self) {
+    gl::DeleteProgram(self.program);
+    unsafe {
+      gl::DeleteBuffers(1, &self.vertex_buffer_obj);
+      gl::DeleteBuffers(1, &self.color_buffer_obj);
+    }
+  }
+}
+
+impl Drop for TilePicker {
+  fn drop(&mut self) {
+    self.cleanup_opengl();
+  }
 }
 
 pub struct Visualizer {
@@ -265,19 +285,15 @@ impl Visualizer {
     self.program = glh::compile_program(
       VERTEX_SHADER_SRC,
       FRAGMENT_SHADER_SRC);
-    self.picker.program = glh::compile_program(
-      PICK_VERTEX_SHADER_SRC,
-      PICK_FRAGMENT_SHADER_SRC);
+    self.picker.init_opengl();
   }
 
   pub fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
-    gl::DeleteProgram(self.picker.program);
     unsafe {
       gl::DeleteBuffers(1, &self.vertex_buffer_obj);
-      gl::DeleteBuffers(1, &self.picker.vertex_buffer_obj);
-      gl::DeleteBuffers(1, &self.picker.color_buffer_obj);
     }
+    self.picker.cleanup_opengl();
   }
 
   fn draw_map(&self) {
