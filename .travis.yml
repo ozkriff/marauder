@@ -13,7 +13,7 @@ script:
   - cd deps
 
   # Install glfw lib
-  - git clone https://github.com/glfw/glfw.git
+  - git clone --depth=1 https://github.com/glfw/glfw.git
   - cd glfw
   - cmake -DBUILD_SHARED_LIBS=ON
   - make glfw # build only .so files
