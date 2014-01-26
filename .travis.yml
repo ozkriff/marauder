@@ -10,7 +10,7 @@ install:
 
 script:
   # Download, build and install dependancies
-  - ./make_deps
+  - ./make_deps.sh
 
   # Build Marauder
   - make
