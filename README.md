@@ -13,6 +13,12 @@ system on [ozkriff/marauder](https://github.com/ozkriff/marauder).
 Any feedback would be much appreciated!
 
 
+## Compilation
+
+    ./make_deps.sh
+    make
+
+
 ## License
 
 Marauder is licensed under the MIT license (see the "LICENSE" file).
