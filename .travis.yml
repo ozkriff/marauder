@@ -33,7 +33,7 @@ script:
   - rustc --dylib cgmath-rs/src/cgmath/lib.rs --out-dir .
 
   # Return from 'deps' dir
-  - ..
+  - cd ..
 
   # Build Marauder
   - make
