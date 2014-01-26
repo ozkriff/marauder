@@ -280,13 +280,17 @@ impl Visualizer {
     }
   }
 
-  pub fn draw(&self) {
+  fn draw_map(&self) {
     gl::UseProgram(self.program);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
+    glh::draw_mesh(self.vertex_data);
+  }
+
+  pub fn draw(&self) {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
-    glh::draw_mesh(self.vertex_data);
+    self.draw_map();
     self.glfw_win().swap_buffers();
   }
 
