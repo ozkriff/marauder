@@ -33,16 +33,12 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use camera::Camera;
-
-struct KeyEvent {
-  key: glfw::Key,
-  action: glfw::Action
-}
-
-struct CursorPosEvent {
-  x: f32,
-  y: f32
-}
+use glfw_callacks::{
+  KeyEvent,
+  KeyContext,
+  CursorPosEvent,
+  CursorPosContext
+};
 
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
 
@@ -427,33 +423,6 @@ impl Drop for Visualizer {
     self.cleanup_opengl();
     self.close_window();
     glfw::terminate();
-  }
-}
-
-struct CursorPosContext { chan: Chan<CursorPosEvent> }
-impl glfw::CursorPosCallback for CursorPosContext {
-  fn call(&self, _: &glfw::Window, xpos: f64, ypos: f64) {
-    self.chan.send(CursorPosEvent {
-      x: xpos as f32,
-      y: ypos as f32
-    });
-  }
-}
-
-struct KeyContext { chan: Chan<KeyEvent> }
-impl glfw::KeyCallback for KeyContext {
-  fn call(
-    &self,
-    _:      &glfw::Window,
-    key:    glfw::Key,
-    _:      std::libc::c_int,
-    action: glfw::Action,
-    _:      glfw::Modifiers
-  ) {
-    self.chan.send(KeyEvent {
-      key: key,
-      action: action
-    });
   }
 }
 

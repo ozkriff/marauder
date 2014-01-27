@@ -17,6 +17,7 @@ use visualizer::Visualizer;
 mod misc;
 mod visualizer;
 mod gl_helpers;
+mod glfw_callacks;
 mod camera;
 
 fn main() {
