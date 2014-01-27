@@ -59,18 +59,14 @@ impl EventPorts {
   pub fn new(glfw_win: &glfw::Window) -> EventPorts {
     let (key_event_port, key_event_chan) = Chan::new();
     let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
-
-    let event_ports = EventPorts {
-      key_event_port: key_event_port,
-      cursor_pos_event_port: cursor_pos_event_port,
-    };
-
     glfw_win.set_key_callback(
       ~KeyContext{chan: key_event_chan});
     glfw_win.set_cursor_pos_callback(
       ~CursorPosContext{chan: cursor_pos_chan});
-
-    event_ports
+    EventPorts {
+      key_event_port: key_event_port,
+      cursor_pos_event_port: cursor_pos_event_port,
+    }
   }
 }
 
