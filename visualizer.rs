@@ -1,8 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use std::comm::{
-  Port,
-  Chan,
   Data
 };
 use std::f32::consts::{
@@ -33,12 +31,7 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use camera::Camera;
-use glfw_callacks::{
-  KeyEvent,
-  KeyContext,
-  CursorPosEvent,
-  CursorPosContext
-};
+use glfw_callacks::EventPorts;
 
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
 
@@ -129,8 +122,7 @@ impl Drop for TilePicker {
 pub struct Visualizer {
   hex_ex_radius: GLfloat,
   hex_in_radius: GLfloat,
-  key_event_port: Port<KeyEvent>,
-  cursor_pos_event_port: Port<CursorPosEvent>,
+  glfw_event_ports: EventPorts,
   program: GLuint,
   vertex_buffer_obj: GLuint,
   mat_id: GLint,
@@ -193,14 +185,11 @@ impl Visualizer {
     let hex_ex_radius: GLfloat = 1.0 / 2.0;
     let hex_in_radius = sqrt(
         pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
-    let (key_event_port, key_event_chan) = Chan::new();
-    let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
     let glfw_win = init_glfw_win();
     let mut vis = ~Visualizer {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius,
-      key_event_port: key_event_port,
-      cursor_pos_event_port: cursor_pos_event_port,
+      glfw_event_ports: EventPorts::new(&glfw_win),
       program: 0,
       vertex_buffer_obj: 0,
       mat_id: 0,
@@ -213,10 +202,6 @@ impl Visualizer {
     vis.init_opengl();
     vis.init_model();
     vis.init_tile_picker();
-    vis.glfw_win().set_key_callback(
-      ~KeyContext{chan: key_event_chan});
-    vis.glfw_win().set_cursor_pos_callback(
-      ~CursorPosContext{chan: cursor_pos_chan});
     vis
   }
 
@@ -310,7 +295,7 @@ impl Visualizer {
 
   pub fn process_events(&mut self) {
     glfw::poll_events();
-    handle_event_port(&self.key_event_port, |e| {
+    handle_event_port(&self.glfw_event_ports.key_event_port, |e| {
       if e.action != glfw::Press {
         return;
       }
@@ -325,7 +310,7 @@ impl Visualizer {
         _ => {}
       }
     });
-    handle_event_port(&self.cursor_pos_event_port, |e| {
+    handle_event_port(&self.glfw_event_ports.cursor_pos_event_port, |e| {
       let button = self.glfw_win().get_mouse_button(glfw::MouseButtonRight);
       if button == glfw::Press {
         self.camera.z_angle += self.mouse_pos.x - e.x;

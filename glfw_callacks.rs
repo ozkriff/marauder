@@ -1,5 +1,9 @@
 // See LICENSE file for copyright and license details.
 
+use std::comm::{
+  Port,
+  Chan
+};
 use std;
 use glfw;
 
@@ -8,7 +12,7 @@ pub struct CursorPosEvent {
   y: f32
 }
 
-pub struct CursorPosContext {
+struct CursorPosContext {
   chan: Chan<CursorPosEvent>
 }
 
@@ -26,7 +30,7 @@ pub struct KeyEvent {
   action: glfw::Action
 }
 
-pub struct KeyContext {
+struct KeyContext {
   chan: Chan<KeyEvent>
 }
 
@@ -43,6 +47,30 @@ impl glfw::KeyCallback for KeyContext {
       key: key,
       action: action
     });
+  }
+}
+
+pub struct EventPorts {
+  key_event_port: Port<KeyEvent>,
+  cursor_pos_event_port: Port<CursorPosEvent>,
+}
+
+impl EventPorts {
+  pub fn new(glfw_win: &glfw::Window) -> EventPorts {
+    let (key_event_port, key_event_chan) = Chan::new();
+    let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
+
+    let event_ports = EventPorts {
+      key_event_port: key_event_port,
+      cursor_pos_event_port: cursor_pos_event_port,
+    };
+
+    glfw_win.set_key_callback(
+      ~KeyContext{chan: key_event_chan});
+    glfw_win.set_cursor_pos_callback(
+      ~CursorPosContext{chan: cursor_pos_chan});
+
+    event_ports
   }
 }
 
