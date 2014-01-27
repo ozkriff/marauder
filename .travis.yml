@@ -9,7 +9,7 @@ install:
   - sudo apt-get install libXxf86vm-dev
 
 script:
-  # Download, build and install dependancies
+  # Download, build and install dependencies
   - ./make_deps.sh
 
   # Build Marauder
