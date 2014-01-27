@@ -13,5 +13,4 @@ pub fn deg_to_rad(n: f32) -> f32 {
   n * PI / 180.0
 }
 
-
 // vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
