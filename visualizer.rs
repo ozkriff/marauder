@@ -1,8 +1,5 @@
 // See LICENSE file for copyright and license details.
 
-use std::comm::{
-  Data
-};
 use std::f32::consts::{
   PI,
   FRAC_PI_2
@@ -158,15 +155,6 @@ fn add_color<T>(color_data: &mut ~[T], r: T, g: T, b: T) {
   color_data.push(b);
 }
 
-fn handle_event_port<T: Send>(port: &Port<T>, f: |T|) {
-  loop {
-    match port.try_recv() {
-      Data(e) => f(e),
-      _ => break
-    }
-  }
-}
-
 fn init_win() -> glfw::Window {
   glfw::set_error_callback(~glfw::LogErrorHandler);
   glfw::init();
@@ -295,7 +283,8 @@ impl Visualizer {
 
   pub fn process_events(&mut self) {
     glfw::poll_events();
-    handle_event_port(&self.glfw_event_ports.key_event_port, |e| {
+    let ep = &self.glfw_event_ports;
+    ep.handle_event(&ep.key_event_port, |e| {
       if e.action != glfw::Press {
         return;
       }
@@ -310,7 +299,7 @@ impl Visualizer {
         _ => {}
       }
     });
-    handle_event_port(&self.glfw_event_ports.cursor_pos_event_port, |e| {
+    ep.handle_event(&ep.cursor_pos_event_port, |e| {
       let button = self.win().get_mouse_button(glfw::MouseButtonRight);
       if button == glfw::Press {
         self.camera.z_angle += self.mouse_pos.x - e.x;

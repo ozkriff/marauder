@@ -2,7 +2,8 @@
 
 use std::comm::{
   Port,
-  Chan
+  Chan,
+  Data
 };
 use std;
 use glfw;
@@ -66,6 +67,15 @@ impl EventPorts {
     EventPorts {
       key_event_port: key_event_port,
       cursor_pos_event_port: cursor_pos_event_port,
+    }
+  }
+
+  pub fn handle_event<T: Send>(&self, port: &Port<T>, f: |T|) {
+    loop {
+      match port.try_recv() {
+        Data(e) => f(e),
+        _ => break
+      }
     }
   }
 }
