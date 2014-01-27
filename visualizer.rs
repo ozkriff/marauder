@@ -175,6 +175,19 @@ fn handle_event_port<T: Send>(port: &Port<T>, f: |T|) {
   }
 }
 
+fn init_glfw_win() -> glfw::Window {
+  glfw::set_error_callback(~glfw::LogErrorHandler);
+  glfw::init();
+  let glfw_win = glfw::Window::create(
+    WIN_SIZE.x,
+    WIN_SIZE.y,
+    "OpenGL",
+    glfw::Windowed
+  ).unwrap();
+  glfw_win.make_context_current();
+  glfw_win
+}
+
 impl Visualizer {
   pub fn new() -> ~Visualizer {
     let hex_ex_radius: GLfloat = 1.0 / 2.0;
@@ -182,6 +195,7 @@ impl Visualizer {
         pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
     let (key_event_port, key_event_chan) = Chan::new();
     let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
+    let glfw_win = init_glfw_win();
     let mut vis = ~Visualizer {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius,
@@ -190,13 +204,12 @@ impl Visualizer {
       program: 0,
       vertex_buffer_obj: 0,
       mat_id: 0,
-      glfw_win: None,
+      glfw_win: Some(glfw_win),
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
       camera: Camera::new(),
       picker: TilePicker::new()
     };
-    vis.init_glfw();
     vis.init_opengl();
     vis.init_model();
     vis.init_tile_picker();
@@ -259,21 +272,6 @@ impl Visualizer {
       glh::define_array_of_generic_attr_data(pos_attr);
       self.mat_id = glh::get_uniform(self.program, "mvp_mat");
     }
-  }
-
-  fn init_glfw(&mut self) {
-    // glfw::window_hint::context_version(3, 2);
-    glfw::set_error_callback(~glfw::LogErrorHandler);
-    glfw::init();
-    self.glfw_win = Some(
-      glfw::Window::create(
-        WIN_SIZE.x,
-        WIN_SIZE.y,
-        "OpenGL",
-        glfw::Windowed
-      ).unwrap()
-    );
-    self.glfw_win().make_context_current();
   }
 
   fn init_opengl(&mut self) {
