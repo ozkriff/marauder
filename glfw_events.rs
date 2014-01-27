@@ -51,31 +51,42 @@ impl glfw::KeyCallback for KeyContext {
   }
 }
 
-pub struct EventPorts {
-  key_event_port: Port<KeyEvent>,
-  cursor_pos_event_port: Port<CursorPosEvent>,
+pub struct EventHandler<T> {
+  port: Port<T>,
 }
 
-impl EventPorts {
-  pub fn new(win: &glfw::Window) -> EventPorts {
-    let (key_event_port, key_event_chan) = Chan::new();
-    let (cursor_pos_event_port, cursor_pos_chan) = Chan::new();
+impl<T: Send> EventHandler<T> {
+  pub fn new() -> (EventHandler<T>, Chan<T>) {
+    let (port, chan) = Chan::new();
+    (EventHandler{port: port}, chan)
+  }
+
+  pub fn handle(&self, f: |T|) {
+    loop {
+      match self.port.try_recv() {
+        Data(e) => f(e),
+        _ => break
+      }
+    }
+  }
+}
+
+pub struct EventHandlers {
+  key_handler: EventHandler<KeyEvent>,
+  cursor_pos_handler: EventHandler<CursorPosEvent>,
+}
+
+impl EventHandlers {
+  pub fn new(win: &glfw::Window) -> EventHandlers {
+    let (key_handler, key_event_chan) = EventHandler::new();
+    let (cursor_pos_handler, cursor_pos_chan) = EventHandler::new();
     win.set_key_callback(
       ~KeyContext{chan: key_event_chan});
     win.set_cursor_pos_callback(
       ~CursorPosContext{chan: cursor_pos_chan});
-    EventPorts {
-      key_event_port: key_event_port,
-      cursor_pos_event_port: cursor_pos_event_port,
-    }
-  }
-
-  pub fn handle_event<T: Send>(&self, port: &Port<T>, f: |T|) {
-    loop {
-      match port.try_recv() {
-        Data(e) => f(e),
-        _ => break
-      }
+    EventHandlers {
+      key_handler: key_handler,
+      cursor_pos_handler: cursor_pos_handler,
     }
   }
 }

@@ -28,7 +28,7 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use camera::Camera;
-use glfw_events::EventPorts;
+use glfw_events::EventHandlers;
 
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
 
@@ -119,7 +119,7 @@ impl Drop for TilePicker {
 pub struct Visualizer {
   hex_ex_radius: GLfloat,
   hex_in_radius: GLfloat,
-  glfw_event_ports: EventPorts,
+  glfw_event_handlers: EventHandlers,
   program: GLuint,
   vertex_buffer_obj: GLuint,
   mat_id: GLint,
@@ -177,7 +177,7 @@ impl Visualizer {
     let mut vis = ~Visualizer {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius,
-      glfw_event_ports: EventPorts::new(&win),
+      glfw_event_handlers: EventHandlers::new(&win),
       program: 0,
       vertex_buffer_obj: 0,
       mat_id: 0,
@@ -283,12 +283,12 @@ impl Visualizer {
 
   pub fn process_events(&mut self) {
     glfw::poll_events();
-    let ep = &self.glfw_event_ports;
-    ep.handle_event(&ep.key_event_port, |e| {
-      if e.action != glfw::Press {
+    let eh = &self.glfw_event_handlers;
+    eh.key_handler.handle(|event| {
+      if event.action != glfw::Press {
         return;
       }
-      match e.key {
+      match event.key {
         glfw::KeyEscape | glfw::KeyQ
                        => self.win().set_should_close(true),
         glfw::KeySpace => println!("space"),
@@ -299,13 +299,13 @@ impl Visualizer {
         _ => {}
       }
     });
-    ep.handle_event(&ep.cursor_pos_event_port, |e| {
+    eh.cursor_pos_handler.handle(|event| {
       let button = self.win().get_mouse_button(glfw::MouseButtonRight);
       if button == glfw::Press {
-        self.camera.z_angle += self.mouse_pos.x - e.x;
-        self.camera.x_angle += self.mouse_pos.y - e.y;
+        self.camera.z_angle += self.mouse_pos.x - event.x;
+        self.camera.x_angle += self.mouse_pos.y - event.y;
       }
-      self.mouse_pos = Vec2{x: e.x, y: e.y};
+      self.mouse_pos = Vec2{x: event.x, y: event.y};
     });
   }
 
