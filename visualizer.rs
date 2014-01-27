@@ -28,7 +28,7 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use camera::Camera;
-use glfw_callacks::EventPorts;
+use glfw_events::EventPorts;
 
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
 
