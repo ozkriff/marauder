@@ -126,7 +126,7 @@ pub struct Visualizer {
   program: GLuint,
   vertex_buffer_obj: GLuint,
   mat_id: GLint,
-  glfw_win: Option<glfw::Window>,
+  win: Option<glfw::Window>,
   vertex_data: ~[GLfloat],
   mouse_pos: Vec2<f32>,
   camera: Camera,
@@ -167,17 +167,17 @@ fn handle_event_port<T: Send>(port: &Port<T>, f: |T|) {
   }
 }
 
-fn init_glfw_win() -> glfw::Window {
+fn init_win() -> glfw::Window {
   glfw::set_error_callback(~glfw::LogErrorHandler);
   glfw::init();
-  let glfw_win = glfw::Window::create(
+  let win = glfw::Window::create(
     WIN_SIZE.x,
     WIN_SIZE.y,
     "OpenGL",
     glfw::Windowed
   ).unwrap();
-  glfw_win.make_context_current();
-  glfw_win
+  win.make_context_current();
+  win
 }
 
 impl Visualizer {
@@ -185,15 +185,15 @@ impl Visualizer {
     let hex_ex_radius: GLfloat = 1.0 / 2.0;
     let hex_in_radius = sqrt(
         pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
-    let glfw_win = init_glfw_win();
+    let win = init_win();
     let mut vis = ~Visualizer {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius,
-      glfw_event_ports: EventPorts::new(&glfw_win),
+      glfw_event_ports: EventPorts::new(&win),
       program: 0,
       vertex_buffer_obj: 0,
       mat_id: 0,
-      glfw_win: Some(glfw_win),
+      win: Some(win),
       vertex_data: ~[],
       mouse_pos: Vec2{x: 0.0f32, y: 0.0},
       camera: Camera::new(),
@@ -227,8 +227,8 @@ impl Visualizer {
   }
 
 
-  fn glfw_win<'a>(&'a self) -> &'a glfw::Window {
-    self.glfw_win.get_ref()
+  fn win<'a>(&'a self) -> &'a glfw::Window {
+    self.win.get_ref()
   }
 
   fn build_hex_mesh(&mut self) {
@@ -286,11 +286,11 @@ impl Visualizer {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     self.draw_map();
-    self.glfw_win().swap_buffers();
+    self.win().swap_buffers();
   }
 
   pub fn is_running(&self) -> bool {
-    return !self.glfw_win().should_close()
+    return !self.win().should_close()
   }
 
   pub fn process_events(&mut self) {
@@ -301,7 +301,7 @@ impl Visualizer {
       }
       match e.key {
         glfw::KeyEscape | glfw::KeyQ
-                       => self.glfw_win().set_should_close(true),
+                       => self.win().set_should_close(true),
         glfw::KeySpace => println!("space"),
         glfw::KeyUp    => self.camera.move(270.0),
         glfw::KeyDown  => self.camera.move(90.0),
@@ -311,7 +311,7 @@ impl Visualizer {
       }
     });
     handle_event_port(&self.glfw_event_ports.cursor_pos_event_port, |e| {
-      let button = self.glfw_win().get_mouse_button(glfw::MouseButtonRight);
+      let button = self.win().get_mouse_button(glfw::MouseButtonRight);
       if button == glfw::Press {
         self.camera.z_angle += self.mouse_pos.x - e.x;
         self.camera.x_angle += self.mouse_pos.y - e.y;
@@ -322,7 +322,7 @@ impl Visualizer {
 
   fn close_window(&mut self) {
     // destroy glfw::Window before terminating glfw
-    self.glfw_win = None;
+    self.win = None;
   }
 
   fn build_hex_mesh_for_picking(&mut self) {
@@ -366,7 +366,7 @@ impl Visualizer {
   }
 
   fn _pick_tile(&self, x: i32, y: i32) -> Option<Vec2<int>> {
-    let (_, height) = self.glfw_win().get_size();
+    let (_, height) = self.win().get_size();
     let reverted_y = height - y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
     unsafe {
