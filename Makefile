@@ -9,8 +9,19 @@ RUSTC = rustc ${RUSTC_FLAGS}
 
 all: marauder
 
-marauder: main.rs visualizer.rs misc.rs camera.rs gl_helpers.rs glfw_events.rs map.rs
+SRC = \
+  camera.rs \
+  gl_helpers.rs \
+  glfw_events.rs \
+  main.rs \
+  misc.rs \
+  map.rs \
+  visualizer.rs
+
+marauder: Makefile ${SRC}
 	${RUSTC} main.rs -o marauder
 
 clean:
 	rm -f marauder
+
+# vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
