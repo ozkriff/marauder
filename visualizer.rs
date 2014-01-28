@@ -78,8 +78,8 @@ struct TilePicker {
   color_buffer_obj: GLuint,
   mat_id: GLint,
   vertex_buffer_obj: GLuint,
-  vertex_data: ~[GLfloat],
-  color_data: ~[GLfloat],
+  vertex_data: ~[Vec3<GLfloat>],
+  color_data: ~[Vec3<GLfloat>],
   selected_tile_pos: Option<Vec2<int>>
 }
 
@@ -125,25 +125,10 @@ pub struct Visualizer {
   vertex_buffer_obj: GLuint,
   mat_id: GLint,
   win: Option<glfw::Window>,
-  vertex_data: ~[GLfloat],
+  vertex_data: ~[Vec3<GLfloat>],
   mouse_pos: Vec2<f32>,
   camera: Camera,
   picker: TilePicker
-}
-
-fn add_point<T: Num>(
-  vertex_data: &mut ~[T],
-  pos: &Vec3<T>, x: T, y: T, z: T)
-{
-  vertex_data.push(x + pos.x);
-  vertex_data.push(y + pos.y);
-  vertex_data.push(z + pos.z);
-}
-
-fn add_color<T>(color_data: &mut ~[T], r: T, g: T, b: T) {
-  color_data.push(r);
-  color_data.push(g);
-  color_data.push(b);
 }
 
 fn init_win() -> glfw::Window {
@@ -174,7 +159,7 @@ impl Visualizer {
       mat_id: 0,
       win: Some(win),
       vertex_data: ~[],
-      mouse_pos: Vec2{x: 0.0f32, y: 0.0},
+      mouse_pos: Vec2::zero(),
       camera: Camera::new(),
       picker: TilePicker::new()
     };
@@ -217,9 +202,9 @@ impl Visualizer {
         let vertex = self.index_to_hex_vertex(num);
         let next_vertex = self.index_to_hex_vertex(num + 1);
         let data = &mut self.vertex_data;
-        add_point(data, &pos3d, vertex.x, vertex.y, 0.0);
-        add_point(data, &pos3d, next_vertex.x, next_vertex.y, 0.0);
-        add_point(data, &pos3d, 0.0, 0.0, 0.0);
+        data.push(pos3d + vertex.extend(0.0));
+        data.push(pos3d + next_vertex.extend(0.0));
+        data.push(pos3d + Vec3::zero());
       }
     }
   }
@@ -230,7 +215,7 @@ impl Visualizer {
       gl::UseProgram(self.program);
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-      glh::fill_current_vbo(self.vertex_data);
+      glh::fill_current_coord_vbo(self.vertex_data);
       let pos_attr = glh::get_attr(self.program, "position");
       gl::EnableVertexAttribArray(pos_attr);
       glh::define_array_of_generic_attr_data(pos_attr);
@@ -322,12 +307,13 @@ impl Visualizer {
         let col_y = tile_pos.y as f32 / 255.0;
         let c_data = &mut self.picker.color_data;
         let v_data = &mut self.picker.vertex_data;
-        add_point(v_data, &pos3d, vertex.x, vertex.y, 0.0);
-        add_color(c_data, col_x, col_y, 1.0);
-        add_point(v_data, &pos3d, next_vertex.x, next_vertex.y, 0.0);
-        add_color(c_data, col_x, col_y, 1.0);
-        add_point(v_data, &pos3d, 0.0, 0.0, 0.0);
-        add_color(c_data, col_x, col_y, 1.0);
+        let color = Vec3{x: col_x, y: col_y, z: 1.0};
+        v_data.push(pos3d + vertex.extend(0.0));
+        c_data.push(color);
+        v_data.push(pos3d + next_vertex.extend(0.0));
+        c_data.push(color);
+        v_data.push(pos3d + Vec3::zero());
+        c_data.push(color);
       }
     }
   }
@@ -338,13 +324,13 @@ impl Visualizer {
       gl::UseProgram(self.picker.program);
       gl::GenBuffers(1, &mut self.picker.vertex_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
-      glh::fill_current_vbo(self.picker.vertex_data);
+      glh::fill_current_coord_vbo(self.picker.vertex_data);
       let pos_attr = glh::get_attr(self.picker.program, "position");
       gl::EnableVertexAttribArray(pos_attr);
       glh::define_array_of_generic_attr_data(pos_attr);
       gl::GenBuffers(1, &mut self.picker.color_buffer_obj);
       gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
-      glh::fill_current_vbo(self.picker.color_data);
+      glh::fill_current_color_vbo(self.picker.color_data);
       let color_attr = glh::get_attr(self.picker.program, "color");
       gl::EnableVertexAttribArray(color_attr);
       glh::define_array_of_generic_attr_data(color_attr);

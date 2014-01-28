@@ -96,7 +96,7 @@ pub fn get_uniform(program: GLuint, name: &str) -> GLint {
 
 pub fn draw_mesh<T>(mesh: &[T]) {
   let starting_index = 0;
-  let len = mesh.len() as i32;
+  let len = mesh.len() as i32 * 3;
   gl::DrawArrays(gl::TRIANGLES, starting_index, len);
 }
 
@@ -126,9 +126,9 @@ pub fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
-pub fn fill_current_vbo(data: &[GLfloat]) {
+pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
   let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * glfloat_size) as gl::types::GLsizeiptr;
+  let buffer_size = (data.len() * 3 * glfloat_size) as gl::types::GLsizeiptr;
   unsafe {
     gl::BufferData(
       gl::ARRAY_BUFFER,
@@ -137,6 +137,10 @@ pub fn fill_current_vbo(data: &[GLfloat]) {
       gl::STATIC_DRAW
     );
   }
+}
+
+pub fn fill_current_color_vbo(data: &[Vec3<GLfloat>]) {
+  fill_current_coord_vbo(data); // May change later
 }
 
 pub fn define_array_of_generic_attr_data(attr: GLuint) {
