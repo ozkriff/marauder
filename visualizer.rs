@@ -29,6 +29,7 @@ use cgmath::vector::{
 use glh = gl_helpers;
 use camera::Camera;
 use glfw_events::EventHandlers;
+use map::TileIterator;
 
 static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
 
@@ -130,16 +131,6 @@ pub struct Visualizer {
   picker: TilePicker
 }
 
-// TODO: use iterator?
-fn for_each_tile(f: |Vec2<i32>|) {
-  let map_size = Vec2{x: 3, y: 4};
-  for y in range(0i32, map_size.y) {
-    for x in range(0i32, map_size.x) {
-      f(Vec2{x: x, y: y});
-    }
-  }
-}
-
 fn add_point<T: Num>(
   vertex_data: &mut ~[T],
   pos: &Vec3<T>, x: T, y: T, z: T)
@@ -220,7 +211,7 @@ impl Visualizer {
   }
 
   fn build_hex_mesh(&mut self) {
-    for_each_tile(|tile_pos| {
+    for tile_pos in TileIterator::new() {
       let pos3d = self.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
         let vertex = self.index_to_hex_vertex(num);
@@ -230,7 +221,7 @@ impl Visualizer {
         add_point(data, &pos3d, next_vertex.x, next_vertex.y, 0.0);
         add_point(data, &pos3d, 0.0, 0.0, 0.0);
       }
-    });
+    }
   }
 
   fn init_model(&mut self) {
@@ -322,7 +313,7 @@ impl Visualizer {
   }
 
   fn build_hex_mesh_for_picking(&mut self) {
-    for_each_tile(|tile_pos| {
+    for tile_pos in TileIterator::new() {
       let pos3d = self.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
         let vertex = self.index_to_hex_vertex(num);
@@ -338,7 +329,7 @@ impl Visualizer {
         add_point(v_data, &pos3d, 0.0, 0.0, 0.0);
         add_color(c_data, col_x, col_y, 1.0);
       }
-    });
+    }
   }
 
   fn init_tile_picker(&mut self) {

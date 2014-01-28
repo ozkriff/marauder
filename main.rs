@@ -19,6 +19,7 @@ mod visualizer;
 mod gl_helpers;
 mod glfw_events;
 mod camera;
+mod map;
 
 fn main() {
   let mut visualizer = Visualizer::new();
