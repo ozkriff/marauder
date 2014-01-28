@@ -18,9 +18,7 @@ use gl::types::{
   GLint,
   GLuint
 };
-use cgmath::matrix::{
-  Matrix
-};
+use cgmath::matrix::Matrix;
 use cgmath::vector::{
   Vec3,
   Vec2,

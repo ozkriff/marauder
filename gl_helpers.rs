@@ -15,9 +15,7 @@ use cgmath::matrix::{
   Mat3,
   ToMat4
 };
-use cgmath::vector::{
-  Vec3
-};
+use cgmath::vector::Vec3;
 use cgmath::angle;
 use misc::{
   c_str,

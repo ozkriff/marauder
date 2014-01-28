@@ -6,12 +6,8 @@ use std::num::{
 };
 use cgmath::projection;
 use cgmath::angle;
-use cgmath::matrix::{
-  Mat4
-};
-use cgmath::vector::{
-  Vec3
-};
+use cgmath::matrix::Mat4;
+use cgmath::vector::Vec3;
 use glh = gl_helpers;
 use misc::deg_to_rad;
 
@@ -29,8 +25,7 @@ fn get_projection_mat() -> Mat4<f32> {
   let display_range_min = 0.1;
   let display_range_max = 100.0;
   projection::perspective(
-    fov, ratio, display_range_min, display_range_max
-  )
+    fov, ratio, display_range_min, display_range_max)
 }
 
 impl Camera {
