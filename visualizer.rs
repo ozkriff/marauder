@@ -28,6 +28,7 @@ use glh = gl_helpers;
 use camera::Camera;
 use glfw_events::EventHandlers;
 use map::TileIterator;
+use color::Color3;
 
 static VERTEX_SHADER_SRC: &'static str = "
   #version 130
@@ -75,7 +76,7 @@ struct TilePicker {
   mat_id: GLint,
   vertex_buffer_obj: GLuint,
   vertex_data: ~[Vec3<GLfloat>],
-  color_data: ~[Vec3<GLfloat>],
+  color_data: ~[Color3],
   selected_tile_pos: Option<Vec2<int>>
 }
 
@@ -304,7 +305,7 @@ impl Visualizer {
         let col_y = tile_pos.y as f32 / 255.0;
         let c_data = &mut self.picker.color_data;
         let v_data = &mut self.picker.vertex_data;
-        let color = Vec3{x: col_x, y: col_y, z: 1.0};
+        let color = Color3{r: col_x, g: col_y, b: 1.0};
         v_data.push(pos3d + vertex.extend(0.0));
         c_data.push(color);
         v_data.push(pos3d + next_vertex.extend(0.0));

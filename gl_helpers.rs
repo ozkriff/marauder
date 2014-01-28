@@ -21,6 +21,7 @@ use misc::{
   c_str,
   deg_to_rad
 };
+use color::Color3;
 
 pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
   let shader = gl::CreateShader(shader_type);
@@ -137,8 +138,17 @@ pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
   }
 }
 
-pub fn fill_current_color_vbo(data: &[Vec3<GLfloat>]) {
-  fill_current_coord_vbo(data); // May change later
+pub fn fill_current_color_vbo(data: &[Color3]) {
+  let color3_size = std::mem::size_of::<Color3>();
+  let buffer_size = (data.len() * color3_size) as gl::types::GLsizeiptr;
+  unsafe {
+    gl::BufferData(
+      gl::ARRAY_BUFFER,
+      buffer_size,
+      std::cast::transmute(&data[0]),
+      gl::STATIC_DRAW
+    );
+  }
 }
 
 pub fn define_array_of_generic_attr_data(attr: GLuint) {
