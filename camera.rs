@@ -38,7 +38,7 @@ impl Camera {
     Camera {
       x_angle: 45.0,
       z_angle: 0.0,
-      pos: Vec3{x: 0.0, y: 0.0, z: 0.0},
+      pos: Vec3::zero(),
       zoom: 10.0,
       projection_mat: get_projection_mat(),
     }
@@ -46,7 +46,7 @@ impl Camera {
 
   pub fn mat(&self) -> Mat4<f32> {
     let mut mvp_mat = self.projection_mat;
-    mvp_mat = glh::tr(mvp_mat, Vec3{x: 0.0f32, y: 0.0, z: -self.zoom});
+    mvp_mat = glh::tr(mvp_mat, Vec3::<f32>{x: 0.0, y: 0.0, z: -self.zoom});
     mvp_mat = glh::rot_x(mvp_mat, -self.x_angle);
     mvp_mat = glh::rot_z(mvp_mat, -self.z_angle);
     mvp_mat = glh::tr(mvp_mat, self.pos);
