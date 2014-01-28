@@ -29,10 +29,8 @@ pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
   unsafe {
     gl::ShaderSource(shader, 1, &c_str(src), std::ptr::null());
     gl::CompileShader(shader);
-
     let mut status = gl::FALSE as GLint;
     gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
-
     if status != (gl::TRUE as GLint) {
       let mut len = 0;
       gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
@@ -55,7 +53,6 @@ pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
   unsafe {
     let mut status = gl::FALSE as GLint;
     gl::GetProgramiv(program, gl::LINK_STATUS, &mut status);
-
     if status != (gl::TRUE as GLint) {
       let mut len: GLint = 0;
       gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
