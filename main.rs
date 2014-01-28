@@ -23,7 +23,7 @@ mod camera;
 fn main() {
   let mut visualizer = Visualizer::new();
   while visualizer.is_running() {
-    visualizer.process_events();
+    visualizer.handle_events();
     visualizer.pick_tile();
     visualizer.draw();
   }

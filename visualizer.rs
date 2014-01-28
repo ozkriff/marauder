@@ -281,10 +281,8 @@ impl Visualizer {
     return !self.win().should_close()
   }
 
-  pub fn process_events(&mut self) {
-    glfw::poll_events();
-    let eh = &self.glfw_event_handlers;
-    eh.key_handler.handle(|event| {
+  pub fn handle_key_events(&mut self) {
+    self.glfw_event_handlers.key_handler.handle(|event| {
       if event.action != glfw::Press {
         return;
       }
@@ -299,7 +297,10 @@ impl Visualizer {
         _ => {}
       }
     });
-    eh.cursor_pos_handler.handle(|event| {
+  }
+
+  pub fn handle_cursor_pos_events(&mut self) {
+    self.glfw_event_handlers.cursor_pos_handler.handle(|event| {
       let button = self.win().get_mouse_button(glfw::MouseButtonRight);
       if button == glfw::Press {
         self.camera.z_angle += self.mouse_pos.x - event.x;
@@ -307,6 +308,12 @@ impl Visualizer {
       }
       self.mouse_pos = Vec2{x: event.x, y: event.y};
     });
+  }
+
+  pub fn handle_events(&mut self) {
+    glfw::poll_events();
+    self.handle_key_events();
+    self.handle_cursor_pos_events();
   }
 
   fn close_window(&mut self) {
