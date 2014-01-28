@@ -31,8 +31,6 @@ use camera::Camera;
 use glfw_events::EventHandlers;
 use map::TileIterator;
 
-static WIN_SIZE: Vec2<u32> = Vec2{x: 640, y: 480};
-
 static VERTEX_SHADER_SRC: &'static str = "
   #version 130
   in vec3 position;
@@ -131,12 +129,12 @@ pub struct Visualizer {
   picker: TilePicker
 }
 
-fn init_win() -> glfw::Window {
+fn init_win(win_size: Vec2<int>) -> glfw::Window {
   glfw::set_error_callback(~glfw::LogErrorHandler);
   glfw::init();
   let win = glfw::Window::create(
-    WIN_SIZE.x,
-    WIN_SIZE.y,
+    win_size.x as u32,
+    win_size.y as u32,
     "OpenGL",
     glfw::Windowed
   ).unwrap();
@@ -149,7 +147,8 @@ impl Visualizer {
     let hex_ex_radius: GLfloat = 1.0 / 2.0;
     let hex_in_radius = sqrt(
         pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
-    let win = init_win();
+    let win_size = Vec2::<int>{x: 640, y: 480};
+    let win = init_win(win_size);
     let mut vis = ~Visualizer {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius,
