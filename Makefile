@@ -11,6 +11,7 @@ all: marauder
 
 SRC = \
   camera.rs \
+  color.rs \
   gl_helpers.rs \
   glfw_events.rs \
   main.rs \
