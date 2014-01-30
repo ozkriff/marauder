@@ -77,7 +77,6 @@ struct TilePicker {
   vertex_buffer_obj: GLuint,
   vertex_data: ~[Vec3<GLfloat>],
   color_data: ~[Color3],
-  selected_tile_pos: Option<Vec2<int>>
 }
 
 impl TilePicker {
@@ -89,7 +88,6 @@ impl TilePicker {
       mat_id: 0,
       vertex_data: ~[],
       color_data: ~[],
-      selected_tile_pos: None
     }
   }
 
@@ -106,6 +104,88 @@ impl TilePicker {
       gl::DeleteBuffers(1, &self.color_buffer_obj);
     }
   }
+
+  fn build_hex_mesh_for_picking(&mut self, geom: &Geom) {
+    for tile_pos in TileIterator::new() {
+      let pos3d = geom.v2i_to_v2f(tile_pos).extend(0.0);
+      for num in range(0, 6) {
+        let vertex = geom.index_to_hex_vertex(num);
+        let next_vertex = geom.index_to_hex_vertex(num + 1);
+        let col_x = tile_pos.x as f32 / 255.0;
+        let col_y = tile_pos.y as f32 / 255.0;
+        let c_data = &mut self.color_data;
+        let v_data = &mut self.vertex_data;
+        let color = Color3{r: col_x, g: col_y, b: 1.0};
+        v_data.push(pos3d + vertex.extend(0.0));
+        c_data.push(color);
+        v_data.push(pos3d + next_vertex.extend(0.0));
+        c_data.push(color);
+        v_data.push(pos3d + Vec3::zero());
+        c_data.push(color);
+      }
+    }
+  }
+
+  // TODO: Call from 'new'?
+  fn init(&mut self, geom: &Geom) {
+    self.build_hex_mesh_for_picking(geom);
+    unsafe {
+      gl::UseProgram(self.program);
+      gl::GenBuffers(1, &mut self.vertex_buffer_obj);
+      gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
+      glh::fill_current_coord_vbo(self.vertex_data);
+      let pos_attr = glh::get_attr(self.program, "position");
+      gl::EnableVertexAttribArray(pos_attr);
+      glh::define_array_of_generic_attr_data(pos_attr);
+      gl::GenBuffers(1, &mut self.color_buffer_obj);
+      gl::BindBuffer(gl::ARRAY_BUFFER, self.color_buffer_obj);
+      glh::fill_current_color_vbo(self.color_data);
+      let color_attr = glh::get_attr(self.program, "color");
+      gl::EnableVertexAttribArray(color_attr);
+      glh::define_array_of_generic_attr_data(color_attr);
+      self.mat_id = glh::get_uniform(self.program, "mvp_mat");
+    }
+  }
+
+  fn _pick_tile(
+    &self,
+    win_size: (i32, i32),
+    mouse_pos: Vec2<i32>
+  ) -> Option<Vec2<i32>> {
+    let (_, height) = win_size;
+    let reverted_y = height - mouse_pos.y;
+    let data: [u8, ..4] = [0, 0, 0, 0]; // mut
+    unsafe {
+      let data_ptr = std::cast::transmute(&data[0]);
+      gl::ReadPixels(
+        mouse_pos.x, reverted_y, 1, 1,
+        gl::RGBA,
+        gl::UNSIGNED_BYTE,
+        data_ptr
+      );
+    }
+    if data[2] != 0 {
+      Some(Vec2{x: data[0] as i32, y: data[1] as i32})
+    } else {
+      None
+    }
+  }
+
+  pub fn pick_tile(
+    &mut self,
+    win_size: (i32, i32),
+    camera: &Camera,
+    mouse_pos: Vec2<i32>
+  ) -> Option<Vec2<i32>> {
+    gl::UseProgram(self.program);
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.color_buffer_obj);
+    glh::uniform_mat4f(self.mat_id, &camera.mat());
+    gl::ClearColor(0.0, 0.0, 0.0, 1.0);
+    gl::Clear(gl::COLOR_BUFFER_BIT);
+    glh::draw_mesh(self.vertex_data);
+    self._pick_tile(win_size, mouse_pos)
+  }
 }
 
 impl Drop for TilePicker {
@@ -114,57 +194,20 @@ impl Drop for TilePicker {
   }
 }
 
-pub struct Visualizer {
+struct Geom {
   hex_ex_radius: GLfloat,
   hex_in_radius: GLfloat,
-  glfw_event_handlers: EventHandlers,
-  program: GLuint,
-  vertex_buffer_obj: GLuint,
-  mat_id: GLint,
-  win: Option<glfw::Window>,
-  vertex_data: ~[Vec3<GLfloat>],
-  mouse_pos: Vec2<f32>,
-  camera: Camera,
-  picker: TilePicker
 }
 
-fn init_win(win_size: Vec2<int>) -> glfw::Window {
-  glfw::set_error_callback(~glfw::LogErrorHandler);
-  glfw::init();
-  let win = glfw::Window::create(
-    win_size.x as u32,
-    win_size.y as u32,
-    "OpenGL",
-    glfw::Windowed
-  ).unwrap();
-  win.make_context_current();
-  win
-}
-
-impl Visualizer {
-  pub fn new() -> ~Visualizer {
+impl Geom {
+  pub fn new() -> Geom {
     let hex_ex_radius: GLfloat = 1.0 / 2.0;
     let hex_in_radius = sqrt(
         pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
-    let win_size = Vec2::<int>{x: 640, y: 480};
-    let win = init_win(win_size);
-    let mut vis = ~Visualizer {
+    Geom {
       hex_ex_radius: hex_ex_radius,
       hex_in_radius: hex_in_radius,
-      glfw_event_handlers: EventHandlers::new(&win),
-      program: 0,
-      vertex_buffer_obj: 0,
-      mat_id: 0,
-      win: Some(win),
-      vertex_data: ~[],
-      mouse_pos: Vec2::zero(),
-      camera: Camera::new(),
-      picker: TilePicker::new()
-    };
-    vis.init_opengl();
-    vis.init_model();
-    vis.init_tile_picker();
-    vis
+    }
   }
 
   pub fn v2i_to_v2f(&self, i: Vec2<i32>) -> Vec2<f32> {
@@ -187,6 +230,57 @@ impl Visualizer {
   pub fn index_to_hex_vertex(&self, i: int) -> Vec2<f32> {
     self.index_to_circle_vertex(6, i)
   }
+}
+
+pub struct Visualizer {
+  glfw_event_handlers: EventHandlers,
+  program: GLuint,
+  vertex_buffer_obj: GLuint,
+  mat_id: GLint,
+  win: Option<glfw::Window>,
+  vertex_data: ~[Vec3<GLfloat>],
+  mouse_pos: Vec2<f32>,
+  camera: Camera,
+  picker: TilePicker,
+  selected_tile_pos: Option<Vec2<i32>>,
+  geom: Geom
+}
+
+fn init_win(win_size: Vec2<int>) -> glfw::Window {
+  glfw::set_error_callback(~glfw::LogErrorHandler);
+  glfw::init();
+  let win = glfw::Window::create(
+    win_size.x as u32,
+    win_size.y as u32,
+    "OpenGL",
+    glfw::Windowed
+  ).unwrap();
+  win.make_context_current();
+  win
+}
+
+impl Visualizer {
+  pub fn new() -> ~Visualizer {
+    let win_size = Vec2::<int>{x: 640, y: 480};
+    let win = init_win(win_size);
+    let mut vis = ~Visualizer {
+      glfw_event_handlers: EventHandlers::new(&win),
+      program: 0,
+      vertex_buffer_obj: 0,
+      mat_id: 0,
+      win: Some(win),
+      vertex_data: ~[],
+      mouse_pos: Vec2::zero(),
+      camera: Camera::new(),
+      picker: TilePicker::new(),
+      selected_tile_pos: None,
+      geom: Geom::new()
+    };
+    vis.init_opengl();
+    vis.init_model();
+    vis.picker.init(&vis.geom);
+    vis
+  }
 
 
   fn win<'a>(&'a self) -> &'a glfw::Window {
@@ -195,10 +289,10 @@ impl Visualizer {
 
   fn build_hex_mesh(&mut self) {
     for tile_pos in TileIterator::new() {
-      let pos3d = self.v2i_to_v2f(tile_pos).extend(0.0);
+      let pos3d = self.geom.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
-        let vertex = self.index_to_hex_vertex(num);
-        let next_vertex = self.index_to_hex_vertex(num + 1);
+        let vertex = self.geom.index_to_hex_vertex(num);
+        let next_vertex = self.geom.index_to_hex_vertex(num + 1);
         let data = &mut self.vertex_data;
         data.push(pos3d + vertex.extend(0.0));
         data.push(pos3d + next_vertex.extend(0.0));
@@ -295,80 +389,15 @@ impl Visualizer {
     self.win = None;
   }
 
-  fn build_hex_mesh_for_picking(&mut self) {
-    for tile_pos in TileIterator::new() {
-      let pos3d = self.v2i_to_v2f(tile_pos).extend(0.0);
-      for num in range(0, 6) {
-        let vertex = self.index_to_hex_vertex(num);
-        let next_vertex = self.index_to_hex_vertex(num + 1);
-        let col_x = tile_pos.x as f32 / 255.0;
-        let col_y = tile_pos.y as f32 / 255.0;
-        let c_data = &mut self.picker.color_data;
-        let v_data = &mut self.picker.vertex_data;
-        let color = Color3{r: col_x, g: col_y, b: 1.0};
-        v_data.push(pos3d + vertex.extend(0.0));
-        c_data.push(color);
-        v_data.push(pos3d + next_vertex.extend(0.0));
-        c_data.push(color);
-        v_data.push(pos3d + Vec3::zero());
-        c_data.push(color);
-      }
-    }
-  }
-
-  fn init_tile_picker(&mut self) {
-    self.build_hex_mesh_for_picking();
-    unsafe {
-      gl::UseProgram(self.picker.program);
-      gl::GenBuffers(1, &mut self.picker.vertex_buffer_obj);
-      gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
-      glh::fill_current_coord_vbo(self.picker.vertex_data);
-      let pos_attr = glh::get_attr(self.picker.program, "position");
-      gl::EnableVertexAttribArray(pos_attr);
-      glh::define_array_of_generic_attr_data(pos_attr);
-      gl::GenBuffers(1, &mut self.picker.color_buffer_obj);
-      gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
-      glh::fill_current_color_vbo(self.picker.color_data);
-      let color_attr = glh::get_attr(self.picker.program, "color");
-      gl::EnableVertexAttribArray(color_attr);
-      glh::define_array_of_generic_attr_data(color_attr);
-      self.picker.mat_id = glh::get_uniform(self.picker.program, "mvp_mat");
-    }
-  }
-
-  fn _pick_tile(&self, x: i32, y: i32) -> Option<Vec2<int>> {
-    let (_, height) = self.win().get_size();
-    let reverted_y = height - y;
-    let data: [u8, ..4] = [0, 0, 0, 0]; // mut
-    unsafe {
-      let data_ptr = std::cast::transmute(&data[0]);
-      gl::ReadPixels(
-        x, reverted_y, 1, 1,
-        gl::RGBA,
-        gl::UNSIGNED_BYTE,
-        data_ptr
-      );
-    }
-    if data[2] != 0 {
-      Some(Vec2{x: data[0] as int, y: data[1] as int})
-    } else {
-      None
-    }
-  }
-
   pub fn pick_tile(&mut self) {
-    gl::UseProgram(self.picker.program);
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.vertex_buffer_obj);
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.picker.color_buffer_obj);
-    glh::uniform_mat4f(self.picker.mat_id, &self.camera.mat());
-    gl::ClearColor(0.0, 0.0, 0.0, 1.0);
-    gl::Clear(gl::COLOR_BUFFER_BIT);
-    glh::draw_mesh(self.picker.vertex_data);
-    self.picker.selected_tile_pos = self._pick_tile(
-      self.mouse_pos.x as i32,
-      self.mouse_pos.y as i32
-    );
-    println!("selected: {:?}", self.picker.selected_tile_pos);
+    let mouse_pos = Vec2 {
+      x: self.mouse_pos.x as i32,
+      y: self.mouse_pos.y as i32
+    };
+    let win_size = self.win().get_size();
+    self.selected_tile_pos = self.picker.pick_tile(
+      win_size, &self.camera, mouse_pos);
+    println!("selected: {:?}", self.selected_tile_pos);
   }
 }
 
