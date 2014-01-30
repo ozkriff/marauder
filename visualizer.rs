@@ -248,7 +248,10 @@ pub struct Visualizer {
 
 fn init_win(win_size: Vec2<int>) -> glfw::Window {
   glfw::set_error_callback(~glfw::LogErrorHandler);
-  glfw::init();
+  let init_status = glfw::init();
+  if !init_status.is_ok() {
+    fail!("Failed to initialize GLFW");
+  }
   let win = glfw::Window::create(
     win_size.x as u32,
     win_size.y as u32,
