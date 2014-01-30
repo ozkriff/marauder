@@ -3,13 +3,13 @@
 use cgmath::vector::Vec2;
 
 pub struct TileIterator {
-  cursor: Vec2<i32>
+  cursor: Vec2<i32>,
 }
 
 impl TileIterator {
   pub fn new() -> TileIterator {
     TileIterator {
-      cursor: Vec2::zero()
+      cursor: Vec2::zero(),
     }
   }
 }
