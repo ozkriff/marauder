@@ -7,19 +7,19 @@ use gl::types::{
   GLint,
   GLuint,
   GLchar,
-  GLenum
+  GLenum,
 };
 use cgmath::matrix::{
   Matrix,
   Mat4,
   Mat3,
-  ToMat4
+  ToMat4,
 };
 use cgmath::vector::Vec3;
 use cgmath::angle;
 use misc::{
   c_str,
-  deg_to_rad
+  deg_to_rad,
 };
 use color::Color3;
 
@@ -68,7 +68,7 @@ pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
 
 pub fn compile_program(
   vertex_shader_src: &str,
-  frag_shader_src: &str
+  frag_shader_src: &str,
 ) -> GLuint {
   let vertex_shader = compile_shader(
     vertex_shader_src, gl::VERTEX_SHADER);
@@ -133,7 +133,7 @@ pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
       gl::ARRAY_BUFFER,
       buffer_size,
       std::cast::transmute(&data[0]),
-      gl::STATIC_DRAW
+      gl::STATIC_DRAW,
     );
   }
 }
@@ -146,7 +146,7 @@ pub fn fill_current_color_vbo(data: &[Color3]) {
       gl::ARRAY_BUFFER,
       buffer_size,
       std::cast::transmute(&data[0]),
-      gl::STATIC_DRAW
+      gl::STATIC_DRAW,
     );
   }
 }
@@ -162,7 +162,7 @@ pub fn define_array_of_generic_attr_data(attr: GLuint) {
       gl::FLOAT,
       normalized,
       stride,
-      std::ptr::null()
+      std::ptr::null(),
     );
   }
 }

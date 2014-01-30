@@ -2,7 +2,7 @@
 
 use std::num::{
   sin,
-  cos
+  cos,
 };
 use cgmath::projection;
 use cgmath::angle;

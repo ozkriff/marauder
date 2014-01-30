@@ -2,13 +2,13 @@
 
 use std::f32::consts::{
   PI,
-  FRAC_PI_2
+  FRAC_PI_2,
 };
 use std::num::{
   sqrt,
   pow,
   sin,
-  cos
+  cos,
 };
 use glfw;
 use gl;
@@ -16,13 +16,13 @@ use std;
 use gl::types::{
   GLfloat,
   GLint,
-  GLuint
+  GLuint,
 };
 use cgmath::matrix::Matrix;
 use cgmath::vector::{
   Vec3,
   Vec2,
-  Vector
+  Vector,
 };
 use glh = gl_helpers;
 use camera::Camera;
@@ -243,7 +243,7 @@ pub struct Visualizer {
   camera: Camera,
   picker: TilePicker,
   selected_tile_pos: Option<Vec2<i32>>,
-  geom: Geom
+  geom: Geom,
 }
 
 fn init_win(win_size: Vec2<int>) -> glfw::Window {
@@ -253,7 +253,7 @@ fn init_win(win_size: Vec2<int>) -> glfw::Window {
     win_size.x as u32,
     win_size.y as u32,
     "OpenGL",
-    glfw::Windowed
+    glfw::Windowed,
   ).unwrap();
   win.make_context_current();
   win
@@ -274,7 +274,7 @@ impl Visualizer {
       camera: Camera::new(),
       picker: TilePicker::new(),
       selected_tile_pos: None,
-      geom: Geom::new()
+      geom: Geom::new(),
     };
     vis.init_opengl();
     vis.init_model();
@@ -319,7 +319,8 @@ impl Visualizer {
     gl::load_with(glfw::get_proc_address);
     self.program = glh::compile_program(
       VERTEX_SHADER_SRC,
-      FRAGMENT_SHADER_SRC);
+      FRAGMENT_SHADER_SRC,
+    );
     self.picker.init_opengl();
   }
 
@@ -362,7 +363,7 @@ impl Visualizer {
         glfw::KeyDown  => self.camera.move(90.0),
         glfw::KeyRight => self.camera.move(0.0),
         glfw::KeyLeft  => self.camera.move(180.0),
-        _ => {}
+        _ => {},
       }
     });
   }
@@ -392,7 +393,7 @@ impl Visualizer {
   pub fn pick_tile(&mut self) {
     let mouse_pos = Vec2 {
       x: self.mouse_pos.x as i32,
-      y: self.mouse_pos.y as i32
+      y: self.mouse_pos.y as i32,
     };
     let win_size = self.win().get_size();
     self.selected_tile_pos = self.picker.pick_tile(

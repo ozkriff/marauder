@@ -3,36 +3,36 @@
 use std::comm::{
   Port,
   Chan,
-  Data
+  Data,
 };
 use std;
 use glfw;
 
 pub struct CursorPosEvent {
   x: f32,
-  y: f32
+  y: f32,
 }
 
 struct CursorPosContext {
-  chan: Chan<CursorPosEvent>
+  chan: Chan<CursorPosEvent>,
 }
 
 impl glfw::CursorPosCallback for CursorPosContext {
   fn call(&self, _: &glfw::Window, xpos: f64, ypos: f64) {
     self.chan.send(CursorPosEvent {
       x: xpos as f32,
-      y: ypos as f32
+      y: ypos as f32,
     });
   }
 }
 
 pub struct KeyEvent {
   key: glfw::Key,
-  action: glfw::Action
+  action: glfw::Action,
 }
 
 struct KeyContext {
-  chan: Chan<KeyEvent>
+  chan: Chan<KeyEvent>,
 }
 
 impl glfw::KeyCallback for KeyContext {
@@ -65,7 +65,7 @@ impl<T: Send> EventHandler<T> {
     loop {
       match self.port.try_recv() {
         Data(e) => f(e),
-        _ => break
+        _ => break,
       }
     }
   }
