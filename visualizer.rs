@@ -80,15 +80,17 @@ struct TilePicker {
 }
 
 impl TilePicker {
-  fn new() -> TilePicker {
-    TilePicker {
+  fn new(geom: &Geom) -> TilePicker {
+    let mut picker = TilePicker {
       color_buffer_obj: 0,
       program: 0,
       vertex_buffer_obj: 0,
       mat_id: 0,
       vertex_data: ~[],
       color_data: ~[],
-    }
+    };
+    picker.init(geom);
+    picker
   }
 
   fn init_opengl(&mut self) {
@@ -126,7 +128,6 @@ impl TilePicker {
     }
   }
 
-  // TODO: Call from 'new'?
   fn init(&mut self, geom: &Geom) {
     self.build_hex_mesh_for_picking(geom);
     unsafe {
@@ -266,6 +267,7 @@ impl Visualizer {
   pub fn new() -> ~Visualizer {
     let win_size = Vec2::<int>{x: 640, y: 480};
     let win = init_win(win_size);
+    let geom = Geom::new();
     let mut vis = ~Visualizer {
       glfw_event_handlers: EventHandlers::new(&win),
       program: 0,
@@ -275,13 +277,12 @@ impl Visualizer {
       vertex_data: ~[],
       mouse_pos: Vec2::zero(),
       camera: Camera::new(),
-      picker: TilePicker::new(),
+      picker: TilePicker::new(&geom),
       selected_tile_pos: None,
-      geom: Geom::new(),
+      geom: geom,
     };
     vis.init_opengl();
     vis.init_model();
-    vis.picker.init(&vis.geom);
     vis
   }
 
@@ -332,7 +333,6 @@ impl Visualizer {
     unsafe {
       gl::DeleteBuffers(1, &self.vertex_buffer_obj);
     }
-    self.picker.cleanup_opengl();
   }
 
   fn draw_map(&self) {
