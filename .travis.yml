@@ -8,9 +8,8 @@ install:
   - sudo apt-get install rust-nightly
   - sudo apt-get install libXxf86vm-dev
 
-script:
   # Download, build and install dependencies
   - ./make_deps.sh
 
-  # Build Marauder
+script:
   - make
