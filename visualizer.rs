@@ -80,8 +80,8 @@ struct TilePicker {
 }
 
 impl TilePicker {
-  fn new(geom: &Geom) -> TilePicker {
-    let mut picker = TilePicker {
+  fn new() -> TilePicker {
+    let picker = TilePicker {
       color_buffer_obj: 0,
       program: 0,
       vertex_buffer_obj: 0,
@@ -89,7 +89,6 @@ impl TilePicker {
       vertex_data: ~[],
       color_data: ~[],
     };
-    picker.init(geom);
     picker
   }
 
@@ -277,11 +276,12 @@ impl Visualizer {
       vertex_data: ~[],
       mouse_pos: Vec2::zero(),
       camera: Camera::new(),
-      picker: TilePicker::new(&geom),
+      picker: TilePicker::new(),
       selected_tile_pos: None,
       geom: geom,
     };
     vis.init_opengl();
+    vis.picker.init(&geom);
     vis.init_model();
     vis
   }
