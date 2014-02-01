@@ -61,12 +61,6 @@ impl TilePicker {
     picker
   }
 
-  pub fn init_opengl(&mut self) {
-    self.program = glh::compile_program(
-      PICK_VERTEX_SHADER_SRC,
-      PICK_FRAGMENT_SHADER_SRC);
-  }
-
   pub fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
     unsafe {
@@ -98,6 +92,9 @@ impl TilePicker {
 
   pub fn init(&mut self, geom: &Geom) {
     self.build_hex_mesh_for_picking(geom);
+    self.program = glh::compile_program(
+      PICK_VERTEX_SHADER_SRC,
+      PICK_FRAGMENT_SHADER_SRC);
     unsafe {
       gl::UseProgram(self.program);
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);

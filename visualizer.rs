@@ -111,6 +111,10 @@ impl Visualizer {
 
   fn init_model(&mut self) {
     self.build_hex_mesh();
+    self.program = glh::compile_program(
+      VERTEX_SHADER_SRC,
+      FRAGMENT_SHADER_SRC,
+    );
     unsafe {
       gl::UseProgram(self.program);
       gl::GenBuffers(1, &mut self.vertex_buffer_obj);
@@ -125,11 +129,6 @@ impl Visualizer {
 
   fn init_opengl(&mut self) {
     gl::load_with(glfw::get_proc_address);
-    self.program = glh::compile_program(
-      VERTEX_SHADER_SRC,
-      FRAGMENT_SHADER_SRC,
-    );
-    self.picker.init_opengl();
   }
 
   pub fn cleanup_opengl(&self) {
