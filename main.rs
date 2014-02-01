@@ -21,6 +21,7 @@ mod glfw_events;
 mod camera;
 mod map;
 mod color;
+mod geom;
 
 fn main() {
   let mut visualizer = Visualizer::new();
