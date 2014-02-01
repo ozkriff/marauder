@@ -22,6 +22,7 @@ mod camera;
 mod map;
 mod color;
 mod geom;
+mod tile_picker;
 
 fn main() {
   let mut visualizer = Visualizer::new();

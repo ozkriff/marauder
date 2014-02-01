@@ -18,6 +18,7 @@ SRC = \
   main.rs \
   misc.rs \
   map.rs \
+  tile_picker.rs \
   visualizer.rs
 
 marauder: Makefile ${SRC}
