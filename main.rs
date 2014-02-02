@@ -1,7 +1,5 @@
 // See LICENSE file for copyright and license details.
 
-// Marauder is turn-based strategy game with hex grid.
-
 #[deny(non_camel_case_types)];
 #[deny(non_uppercase_statics)];
 #[deny(unnecessary_qualification)];
