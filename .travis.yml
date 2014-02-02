@@ -1,7 +1,7 @@
 # See LICENSE file for copyright and license details.
 
 before_install:
-  - yes | sudo add-apt-repository ppa:hansjorg/rust
+  - sudo add-apt-repository -y ppa:hansjorg/rust
   - sudo apt-get update
 
 install:
@@ -13,3 +13,5 @@ install:
 
 script:
   - make
+
+# vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
