@@ -19,19 +19,19 @@ cd ..
 echo Downloading glfw-rs...
 git clone --depth=1 https://github.com/bjz/glfw-rs
 echo Building glfw-rs...
-rustc --dylib glfw-rs/src/lib/lib.rs --out-dir .
+rustc glfw-rs/src/lib/lib.rs --out-dir .
 
 # gl-rs
 echo Downloading gl-rs...
 git clone --depth=1 https://github.com/bjz/gl-rs
 echo Building gl-rs...
-rustc --dylib gl-rs/src/gl/lib.rs --out-dir .
+rustc gl-rs/src/gl/lib.rs --out-dir .
 
 # cgmath-rs
 echo Downloading cgmath-rs...
 git clone --depth=1 https://github.com/bjz/cgmath-rs
 echo Building cgmath-rs...
-rustc --dylib cgmath-rs/src/cgmath/lib.rs --out-dir .
+rustc cgmath-rs/src/cgmath/lib.rs --out-dir .
 
 # Return from 'deps' dir
 cd ..
