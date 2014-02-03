@@ -151,7 +151,7 @@ pub fn fill_current_color_vbo(data: &[Color3]) {
   }
 }
 
-pub fn define_array_of_generic_attr_data(attr: GLuint) {
+pub fn vertex_attrib_pointer(attr: GLuint) {
   let components_count = 3;
   let normalized = gl::FALSE;
   let stride = 0;

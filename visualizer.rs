@@ -1,5 +1,10 @@
 // See LICENSE file for copyright and license details.
 
+use std::io::{
+  BufferedReader,
+  File
+};
+use std::str::Words;
 use glfw;
 use gl;
 use gl::types::{
@@ -36,10 +41,106 @@ static FRAGMENT_SHADER_SRC: &'static str = "
   }
 ";
 
+struct ObjFace {
+  vertex: [int, ..3],
+  texture: [int, ..3],
+  normal: [int, ..3],
+}
+
+struct ObjModel {
+  coords: ~[Vec3<GLfloat>],
+  normals: ~[Vec3<GLfloat>],
+  texture_coords: ~[Vec2<GLfloat>],
+  faces: ~[ObjFace],
+}
+
+// TODO: unwrap() -> ...
+impl ObjModel {
+  fn new(filename: &str) -> ObjModel {
+    let mut obj = ObjModel {
+      coords: ~[],
+      normals: ~[],
+      texture_coords: ~[],
+      faces: ~[],
+    };
+    obj.read(filename);
+    obj
+  }
+
+  fn read_v_or_vn(words: &mut Words) -> Vec3<GLfloat> {
+    Vec3 {
+      x: from_str(words.next().unwrap()).unwrap(),
+      y: from_str(words.next().unwrap()).unwrap(),
+      z: from_str(words.next().unwrap()).unwrap(),
+    }
+  }
+
+  fn read_vt(words: &mut Words) -> Vec2<GLfloat> {
+    // TODO: y = 1.0 - y; // flip vertically
+    Vec2 {
+      x: from_str(words.next().unwrap()).unwrap(),
+      y: from_str(words.next().unwrap()).unwrap(),
+    }
+  }
+
+  fn read_f(words: &mut Words) -> ObjFace {
+    let mut face = ObjFace {
+      vertex: [0, 0, 0],
+      texture: [0, 0, 0],
+      normal: [0, 0, 0],
+    };
+    let mut i = 0;
+    for group in *words {
+      let mut w = group.split('/');
+      face.vertex[i] = from_str(w.next().unwrap()).unwrap();
+      face.texture[i] = from_str(w.next().unwrap()).unwrap();
+      face.normal[i] = from_str(w.next().unwrap()).unwrap();
+      i += 1;
+    }
+    face
+  }
+
+  fn read(&mut self, filename: &str) {
+    let path = Path::new(filename);
+    let mut file = BufferedReader::new(File::open(&path));
+    for line in file.lines() {
+      let mut words = line.words(); // TODO: Remove mut
+      fn is_correct_tag(tag: &str) -> bool {
+        tag.len() != 0 && tag[0] != ('#' as u8)
+      }
+      let tag = match words.next() {
+        Some(w) if is_correct_tag(w) => w,
+        _ => "", // TODO: ???
+      };
+      match tag {
+        &"v" => self.coords.push(ObjModel::read_v_or_vn(&mut words)),
+        &"vn" => self.normals.push(ObjModel::read_v_or_vn(&mut words)),
+        &"vt" => self.texture_coords.push(ObjModel::read_vt(&mut words)),
+        &"f" => self.faces.push(ObjModel::read_f(&mut words)),
+        _ => print!("."),
+      }
+    }
+  }
+
+  fn build(&self) -> ~[Vec3<GLfloat>]{
+    let mut mesh = ~[];
+    for face in self.faces.iter() {
+      for i in range(0, 3) {
+        let vertex_id = face.vertex[i] - 1;
+        // let texture_coord_id = face.texture[i] - 1; // TODO
+        mesh.push(self.coords[vertex_id]);
+      }
+    }
+    mesh
+  }
+}
+
 pub struct Visualizer {
   glfw_event_handlers: EventHandlers,
   program: GLuint,
   vertex_buffer_obj: GLuint,
+  unit_buffer_obj: GLuint,
+  unit_mesh: ~[Vec3<GLfloat>],
   mat_id: GLint,
   win: Option<glfw::Window>,
   vertex_data: ~[Vec3<GLfloat>],
@@ -48,6 +149,7 @@ pub struct Visualizer {
   picker: TilePicker,
   selected_tile_pos: Option<Vec2<i32>>,
   geom: Geom,
+  obj: ObjModel,
 }
 
 fn init_win(win_size: Vec2<int>) -> glfw::Window {
@@ -75,6 +177,8 @@ impl Visualizer {
       glfw_event_handlers: EventHandlers::new(&win),
       program: 0,
       vertex_buffer_obj: 0,
+      unit_buffer_obj: 0,
+      unit_mesh: ~[],
       mat_id: 0,
       win: Some(win),
       vertex_data: ~[],
@@ -83,6 +187,7 @@ impl Visualizer {
       picker: TilePicker::new(),
       selected_tile_pos: None,
       geom: geom,
+      obj: ObjModel::new("tank.obj"),
     };
     vis.init_opengl();
     vis.picker.init(&geom);
@@ -115,15 +220,26 @@ impl Visualizer {
       VERTEX_SHADER_SRC,
       FRAGMENT_SHADER_SRC,
     );
-    unsafe {
-      gl::UseProgram(self.program);
-      gl::GenBuffers(1, &mut self.vertex_buffer_obj);
+    gl::UseProgram(self.program);
+    self.mat_id = glh::get_uniform(self.program, "mvp_mat");
+    {
+      unsafe {
+        gl::GenBuffers(1, &mut self.vertex_buffer_obj);
+      }
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
       glh::fill_current_coord_vbo(self.vertex_data);
       let pos_attr = glh::get_attr(self.program, "position");
-      gl::EnableVertexAttribArray(pos_attr);
-      glh::define_array_of_generic_attr_data(pos_attr);
-      self.mat_id = glh::get_uniform(self.program, "mvp_mat");
+      glh::vertex_attrib_pointer(pos_attr);
+    }
+
+    // prepare model
+    {
+      self.unit_mesh = self.obj.build();
+      unsafe {
+        gl::GenBuffers(1, &mut self.unit_buffer_obj);
+      }
+      gl::BindBuffer(gl::ARRAY_BUFFER, self.unit_buffer_obj);
+      glh::fill_current_coord_vbo(self.unit_mesh);
     }
   }
 
@@ -135,20 +251,29 @@ impl Visualizer {
     gl::DeleteProgram(self.program);
     unsafe {
       gl::DeleteBuffers(1, &self.vertex_buffer_obj);
+      gl::DeleteBuffers(1, &self.unit_buffer_obj);
     }
   }
 
   fn draw_map(&self) {
-    gl::UseProgram(self.program);
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-    glh::uniform_mat4f(self.mat_id, &self.camera.mat());
+    glh::vertex_attrib_pointer(glh::get_attr(self.program, "position"));
     glh::draw_mesh(self.vertex_data);
+  }
+
+  fn draw_model(&self) {
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.unit_buffer_obj);
+    glh::vertex_attrib_pointer(glh::get_attr(self.program, "position"));
+    glh::draw_mesh(self.unit_mesh);
   }
 
   pub fn draw(&self) {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
+    gl::UseProgram(self.program);
+    glh::uniform_mat4f(self.mat_id, &self.camera.mat());
     self.draw_map();
+    self.draw_model();
     self.win().swap_buffers();
   }
 
