@@ -195,7 +195,6 @@ impl Visualizer {
     vis
   }
 
-
   fn win<'a>(&'a self) -> &'a glfw::Window {
     self.win.get_ref()
   }
