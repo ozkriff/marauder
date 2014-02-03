@@ -21,6 +21,7 @@ mod map;
 mod color;
 mod geom;
 mod tile_picker;
+mod obj;
 
 fn main() {
   let mut visualizer = Visualizer::new();

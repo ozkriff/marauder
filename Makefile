@@ -18,6 +18,7 @@ SRC = \
   main.rs \
   misc.rs \
   map.rs \
+  obj.rs \
   tile_picker.rs \
   visualizer.rs
 
