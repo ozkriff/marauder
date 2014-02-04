@@ -26,9 +26,7 @@ mod obj;
 fn main() {
   let mut visualizer = Visualizer::new();
   while visualizer.is_running() {
-    visualizer.handle_events();
-    visualizer.pick_tile();
-    visualizer.draw();
+    visualizer.tick();
   }
 }
 

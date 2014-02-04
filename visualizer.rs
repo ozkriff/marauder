@@ -148,7 +148,7 @@ impl Visualizer {
     gl::load_with(glfw::get_proc_address);
   }
 
-  pub fn cleanup_opengl(&self) {
+  fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
     unsafe {
       gl::DeleteBuffers(1, &self.vertex_buffer_obj);
@@ -168,7 +168,7 @@ impl Visualizer {
     glh::draw_mesh(self.unit_mesh);
   }
 
-  pub fn draw(&self) {
+  fn draw(&self) {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     gl::UseProgram(self.program);
@@ -182,7 +182,7 @@ impl Visualizer {
     return !self.win().should_close()
   }
 
-  pub fn handle_key_events(&mut self) {
+  fn handle_key_events(&mut self) {
     self.glfw_event_handlers.key_handler.handle(|event| {
       if event.action != glfw::Press {
         return;
@@ -200,7 +200,7 @@ impl Visualizer {
     });
   }
 
-  pub fn handle_cursor_pos_events(&mut self) {
+  fn handle_cursor_pos_events(&mut self) {
     self.glfw_event_handlers.cursor_pos_handler.handle(|event| {
       let button = self.win().get_mouse_button(glfw::MouseButtonRight);
       if button == glfw::Press {
@@ -211,7 +211,7 @@ impl Visualizer {
     });
   }
 
-  pub fn handle_events(&mut self) {
+  fn handle_events(&mut self) {
     glfw::poll_events();
     self.handle_key_events();
     self.handle_cursor_pos_events();
@@ -222,7 +222,7 @@ impl Visualizer {
     self.win = None;
   }
 
-  pub fn pick_tile(&mut self) {
+  fn pick_tile(&mut self) {
     let mouse_pos = Vec2 {
       x: self.mouse_pos.x as i32,
       y: self.mouse_pos.y as i32,
@@ -231,6 +231,12 @@ impl Visualizer {
     self.selected_tile_pos = self.picker.pick_tile(
       win_size, &self.camera, mouse_pos);
     println!("selected: {:?}", self.selected_tile_pos);
+  }
+
+  pub fn tick(&mut self) {
+    self.handle_events();
+    self.pick_tile();
+    self.draw();
   }
 }
 
