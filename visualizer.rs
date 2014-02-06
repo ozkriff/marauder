@@ -18,6 +18,7 @@ use map::TileIterator;
 use geom::Geom;
 use tile_picker::TilePicker;
 use obj;
+use mesh::Mesh;
 
 static VERTEX_SHADER_SRC: &'static str = "
   #version 130
@@ -40,18 +41,15 @@ static FRAGMENT_SHADER_SRC: &'static str = "
 pub struct Visualizer {
   glfw_event_handlers: EventHandlers,
   program: GLuint,
-  vertex_buffer_obj: GLuint,
-  unit_buffer_obj: GLuint,
-  unit_mesh: ~[Vec3<GLfloat>],
+  map_mesh: Mesh,
+  unit_mesh: Mesh,
   mat_id: GLint,
   win: Option<glfw::Window>,
-  vertex_data: ~[Vec3<GLfloat>],
   mouse_pos: Vec2<f32>,
   camera: Camera,
   picker: TilePicker,
   selected_tile_pos: Option<Vec2<i32>>,
   geom: Geom,
-  obj: obj::Model,
 }
 
 fn init_win(win_size: Vec2<int>) -> glfw::Window {
@@ -78,22 +76,19 @@ impl Visualizer {
     let mut vis = ~Visualizer {
       glfw_event_handlers: EventHandlers::new(&win),
       program: 0,
-      vertex_buffer_obj: 0,
-      unit_buffer_obj: 0,
-      unit_mesh: ~[],
+      map_mesh: Mesh::new(),
+      unit_mesh: Mesh::new(),
       mat_id: 0,
       win: Some(win),
-      vertex_data: ~[],
       mouse_pos: Vec2::zero(),
       camera: Camera::new(),
       picker: TilePicker::new(),
       selected_tile_pos: None,
       geom: geom,
-      obj: obj::Model::new("tank.obj"),
     };
     vis.init_opengl();
     vis.picker.init(&geom);
-    vis.init_model();
+    vis.init_models();
     vis
   }
 
@@ -101,35 +96,23 @@ impl Visualizer {
     self.win.get_ref()
   }
 
-  fn build_hex_mesh(&mut self) {
+  fn build_hex_mesh(&self) -> ~[Vec3<GLfloat>] {
+    let mut vertex_data = ~[];
     for tile_pos in TileIterator::new() {
       let pos3d = self.geom.v2i_to_v2f(tile_pos).extend(0.0);
       for num in range(0, 6) {
         let vertex = self.geom.index_to_hex_vertex(num);
         let next_vertex = self.geom.index_to_hex_vertex(num + 1);
-        let data = &mut self.vertex_data;
+        let data = &mut vertex_data;
         data.push(pos3d + vertex.extend(0.0));
         data.push(pos3d + next_vertex.extend(0.0));
         data.push(pos3d + Vec3::zero());
       }
     }
+    vertex_data
   }
 
-  fn init_map_model(&mut self) {
-    self.vertex_buffer_obj = glh::gen_buffer();
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-    glh::fill_current_coord_vbo(self.vertex_data);
-  }
-
-  fn init_unit_model(&mut self) {
-    self.unit_mesh = self.obj.build();
-    self.unit_buffer_obj = glh::gen_buffer();
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.unit_buffer_obj);
-    glh::fill_current_coord_vbo(self.unit_mesh);
-  }
-
-  fn init_model(&mut self) {
-    self.build_hex_mesh();
+  fn init_models(&mut self) {
     self.program = glh::compile_program(
       VERTEX_SHADER_SRC,
       FRAGMENT_SHADER_SRC,
@@ -138,8 +121,10 @@ impl Visualizer {
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
     let pos_attr = glh::get_attr(self.program, "position");
     glh::vertex_attrib_pointer(pos_attr);
-    self.init_map_model();
-    self.init_unit_model();
+    let map_vertex_data = self.build_hex_mesh();
+    self.map_mesh.init(map_vertex_data);
+    let unit_obj = obj::Model::new("tank.obj");
+    self.unit_mesh.init(unit_obj.build());
   }
 
   fn init_opengl(&mut self) {
@@ -148,20 +133,6 @@ impl Visualizer {
 
   fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
-    glh::delete_buffer(self.vertex_buffer_obj);
-    glh::delete_buffer(self.unit_buffer_obj);
-  }
-
-  fn draw_map(&self) {
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-    glh::vertex_attrib_pointer(glh::get_attr(self.program, "position"));
-    glh::draw_mesh(self.vertex_data);
-  }
-
-  fn draw_model(&self) {
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.unit_buffer_obj);
-    glh::vertex_attrib_pointer(glh::get_attr(self.program, "position"));
-    glh::draw_mesh(self.unit_mesh);
   }
 
   fn draw(&self) {
@@ -169,8 +140,8 @@ impl Visualizer {
     gl::Clear(gl::COLOR_BUFFER_BIT);
     gl::UseProgram(self.program);
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
-    self.draw_map();
-    self.draw_model();
+    self.map_mesh.draw(self.program);
+    self.unit_mesh.draw(self.program);
     self.win().swap_buffers();
   }
 

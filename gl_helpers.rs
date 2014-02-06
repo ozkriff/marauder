@@ -99,6 +99,13 @@ pub fn draw_mesh<T>(mesh: &[T]) {
   gl::DrawArrays(gl::TRIANGLES, starting_index, len);
 }
 
+// TODO: Remove other version, rename this
+pub fn draw_mesh_2(faces_count: int) {
+  let starting_index = 0;
+  let vertices_count = faces_count as i32 * 3;
+  gl::DrawArrays(gl::TRIANGLES, starting_index, vertices_count);
+}
+
 pub fn uniform_mat4f(mat_id: GLint, mat: &Mat4<GLfloat>) {
   unsafe {
     gl::UniformMatrix4fv(mat_id, 1, gl::FALSE, mat.cr(0, 0));

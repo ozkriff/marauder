@@ -20,6 +20,7 @@ mod color;
 mod geom;
 mod tile_picker;
 mod obj;
+mod mesh;
 
 fn main() {
   let mut visualizer = visualizer::Visualizer::new();
