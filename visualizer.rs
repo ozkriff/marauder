@@ -116,18 +116,14 @@ impl Visualizer {
   }
 
   fn init_map_model(&mut self) {
-    unsafe {
-      gl::GenBuffers(1, &mut self.vertex_buffer_obj);
-    }
+    self.vertex_buffer_obj = glh::gen_buffer();
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
     glh::fill_current_coord_vbo(self.vertex_data);
   }
 
   fn init_unit_model(&mut self) {
     self.unit_mesh = self.obj.build();
-    unsafe {
-      gl::GenBuffers(1, &mut self.unit_buffer_obj);
-    }
+    self.unit_buffer_obj = glh::gen_buffer();
     gl::BindBuffer(gl::ARRAY_BUFFER, self.unit_buffer_obj);
     glh::fill_current_coord_vbo(self.unit_mesh);
   }

@@ -97,7 +97,7 @@ impl TilePicker {
       PICK_FRAGMENT_SHADER_SRC);
     unsafe {
       gl::UseProgram(self.program);
-      gl::GenBuffers(1, &mut self.vertex_buffer_obj);
+      self.vertex_buffer_obj = glh::gen_buffer();
       gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
       glh::fill_current_coord_vbo(self.vertex_data);
       let pos_attr = glh::get_attr(self.program, "position");

@@ -138,6 +138,14 @@ pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
   }
 }
 
+pub fn gen_buffer() -> GLuint {
+  let mut n = 0 as GLuint;
+  unsafe {
+    gl::GenBuffers(1, &mut n);
+  }
+  n
+}
+
 pub fn fill_current_color_vbo(data: &[Color3]) {
   let color3_size = std::mem::size_of::<Color3>();
   let buffer_size = (data.len() * color3_size) as gl::types::GLsizeiptr;
