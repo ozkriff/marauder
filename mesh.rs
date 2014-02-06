@@ -31,7 +31,7 @@ impl Mesh {
   pub fn draw(&self, program: GLuint) {
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
     glh::vertex_attrib_pointer(glh::get_attr(program, "position"));
-    glh::draw_mesh_2(self.len);
+    glh::draw_mesh(self.len);
   }
 }
 

@@ -93,14 +93,7 @@ pub fn get_uniform(program: GLuint, name: &str) -> GLint {
   }
 }
 
-pub fn draw_mesh<T>(mesh: &[T]) {
-  let starting_index = 0;
-  let len = mesh.len() as i32 * 3;
-  gl::DrawArrays(gl::TRIANGLES, starting_index, len);
-}
-
-// TODO: Remove other version, rename this
-pub fn draw_mesh_2(faces_count: int) {
+pub fn draw_mesh(faces_count: int) {
   let starting_index = 0;
   let vertices_count = faces_count as i32 * 3;
   gl::DrawArrays(gl::TRIANGLES, starting_index, vertices_count);
