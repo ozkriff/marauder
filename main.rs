@@ -10,8 +10,6 @@ extern mod cgmath;
 extern mod glfw;
 extern mod gl;
 
-use visualizer::Visualizer;
-
 mod misc;
 mod visualizer;
 mod gl_helpers;
@@ -24,7 +22,7 @@ mod tile_picker;
 mod obj;
 
 fn main() {
-  let mut visualizer = Visualizer::new();
+  let mut visualizer = visualizer::Visualizer::new();
   while visualizer.is_running() {
     visualizer.tick();
   }
