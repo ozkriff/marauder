@@ -115,6 +115,23 @@ impl Visualizer {
     }
   }
 
+  fn init_map_model(&mut self) {
+    unsafe {
+      gl::GenBuffers(1, &mut self.vertex_buffer_obj);
+    }
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
+    glh::fill_current_coord_vbo(self.vertex_data);
+  }
+
+  fn init_unit_model(&mut self) {
+    self.unit_mesh = self.obj.build();
+    unsafe {
+      gl::GenBuffers(1, &mut self.unit_buffer_obj);
+    }
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.unit_buffer_obj);
+    glh::fill_current_coord_vbo(self.unit_mesh);
+  }
+
   fn init_model(&mut self) {
     self.build_hex_mesh();
     self.program = glh::compile_program(
@@ -123,25 +140,10 @@ impl Visualizer {
     );
     gl::UseProgram(self.program);
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
-    {
-      unsafe {
-        gl::GenBuffers(1, &mut self.vertex_buffer_obj);
-      }
-      gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-      glh::fill_current_coord_vbo(self.vertex_data);
-      let pos_attr = glh::get_attr(self.program, "position");
-      glh::vertex_attrib_pointer(pos_attr);
-    }
-
-    // prepare model
-    {
-      self.unit_mesh = self.obj.build();
-      unsafe {
-        gl::GenBuffers(1, &mut self.unit_buffer_obj);
-      }
-      gl::BindBuffer(gl::ARRAY_BUFFER, self.unit_buffer_obj);
-      glh::fill_current_coord_vbo(self.unit_mesh);
-    }
+    let pos_attr = glh::get_attr(self.program, "position");
+    glh::vertex_attrib_pointer(pos_attr);
+    self.init_map_model();
+    self.init_unit_model();
   }
 
   fn init_opengl(&mut self) {
