@@ -93,22 +93,20 @@ impl TilePicker {
     self.program = glh::compile_program(
       PICK_VERTEX_SHADER_SRC,
       PICK_FRAGMENT_SHADER_SRC);
-    unsafe {
-      gl::UseProgram(self.program);
-      self.vertex_buffer_obj = glh::gen_buffer();
-      gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-      glh::fill_current_coord_vbo(self.vertex_data);
-      let pos_attr = glh::get_attr(self.program, "position");
-      gl::EnableVertexAttribArray(pos_attr);
-      glh::vertex_attrib_pointer(pos_attr);
-      gl::GenBuffers(1, &mut self.color_buffer_obj);
-      gl::BindBuffer(gl::ARRAY_BUFFER, self.color_buffer_obj);
-      glh::fill_current_color_vbo(self.color_data);
-      let color_attr = glh::get_attr(self.program, "color");
-      gl::EnableVertexAttribArray(color_attr);
-      glh::vertex_attrib_pointer(color_attr);
-      self.mat_id = glh::get_uniform(self.program, "mvp_mat");
-    }
+    gl::UseProgram(self.program);
+    self.vertex_buffer_obj = glh::gen_buffer();
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
+    glh::fill_current_coord_vbo(self.vertex_data);
+    let pos_attr = glh::get_attr(self.program, "position");
+    gl::EnableVertexAttribArray(pos_attr);
+    glh::vertex_attrib_pointer(pos_attr);
+    self.color_buffer_obj = glh::gen_buffer();
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.color_buffer_obj);
+    glh::fill_current_color_vbo(self.color_data);
+    let color_attr = glh::get_attr(self.program, "color");
+    gl::EnableVertexAttribArray(color_attr);
+    glh::vertex_attrib_pointer(color_attr);
+    self.mat_id = glh::get_uniform(self.program, "mvp_mat");
   }
 
   fn _pick_tile(
