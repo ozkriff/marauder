@@ -63,10 +63,8 @@ impl TilePicker {
 
   pub fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
-    unsafe {
-      gl::DeleteBuffers(1, &self.vertex_buffer_obj);
-      gl::DeleteBuffers(1, &self.color_buffer_obj);
-    }
+    glh::delete_buffer(self.vertex_buffer_obj);
+    glh::delete_buffer(self.color_buffer_obj);
   }
 
   fn build_hex_mesh_for_picking(&mut self, geom: &Geom) {

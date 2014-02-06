@@ -146,6 +146,12 @@ pub fn gen_buffer() -> GLuint {
   n
 }
 
+pub fn delete_buffer(buffer: GLuint) {
+  unsafe {
+    gl::DeleteBuffers(1, &buffer);
+  }
+}
+
 pub fn fill_current_color_vbo(data: &[Color3]) {
   let color3_size = std::mem::size_of::<Color3>();
   let buffer_size = (data.len() * color3_size) as gl::types::GLsizeiptr;

@@ -148,10 +148,8 @@ impl Visualizer {
 
   fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
-    unsafe {
-      gl::DeleteBuffers(1, &self.vertex_buffer_obj);
-      gl::DeleteBuffers(1, &self.unit_buffer_obj);
-    }
+    glh::delete_buffer(self.vertex_buffer_obj);
+    glh::delete_buffer(self.unit_buffer_obj);
   }
 
   fn draw_map(&self) {
