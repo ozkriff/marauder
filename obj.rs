@@ -70,25 +70,31 @@ impl Model {
     face
   }
 
+  fn read_line(&mut self, line: &str) {
+    let mut words = line.words();
+    fn is_correct_tag(tag: &str) -> bool {
+      tag.len() != 0 && tag[0] != ('#' as u8)
+    }
+    match words.next() {
+      Some(tag) if is_correct_tag(tag) => {
+        let w = &mut words;
+        match tag {
+          &"v" => self.coords.push(Model::read_v_or_vn(w)),
+          &"vn" => self.normals.push(Model::read_v_or_vn(w)),
+          &"vt" => self.texture_coords.push(Model::read_vt(w)),
+          &"f" => self.faces.push(Model::read_f(w)),
+          _ => {},
+        }
+      }
+      _ => {},
+    };
+  }
+
   fn read(&mut self, filename: &str) {
     let path = Path::new(filename);
     let mut file = BufferedReader::new(File::open(&path));
     for line in file.lines() {
-      let mut words = line.words(); // TODO: Remove mut
-      fn is_correct_tag(tag: &str) -> bool {
-        tag.len() != 0 && tag[0] != ('#' as u8)
-      }
-      let tag = match words.next() {
-        Some(w) if is_correct_tag(w) => w,
-        _ => "", // TODO: ???
-      };
-      match tag {
-        &"v" => self.coords.push(Model::read_v_or_vn(&mut words)),
-        &"vn" => self.normals.push(Model::read_v_or_vn(&mut words)),
-        &"vt" => self.texture_coords.push(Model::read_vt(&mut words)),
-        &"f" => self.faces.push(Model::read_f(&mut words)),
-        _ => print!("."),
-      }
+      self.read_line(line);
     }
   }
 
