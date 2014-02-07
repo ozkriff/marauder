@@ -48,7 +48,7 @@ impl TilePicker {
 
   fn build_hex_mesh_for_picking(&mut self, geom: &Geom) {
     for tile_pos in TileIterator::new() {
-      let pos3d = geom.v2i_to_v2f(tile_pos).extend(0.0);
+      let pos3d = geom.map_pos_to_world_pos(tile_pos).extend(0.0);
       for num in range(0, 6) {
         let vertex = geom.index_to_hex_vertex(num);
         let next_vertex = geom.index_to_hex_vertex(num + 1);

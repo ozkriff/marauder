@@ -25,7 +25,7 @@ use misc::read_file;
 fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
   let mut vertex_data = ~[];
   for tile_pos in TileIterator::new() {
-    let pos3d = geom.v2i_to_v2f(tile_pos).extend(0.0);
+    let pos3d = geom.map_pos_to_world_pos(tile_pos).extend(0.0);
     for num in range(0, 6) {
       let vertex = geom.index_to_hex_vertex(num);
       let next_vertex = geom.index_to_hex_vertex(num + 1);
@@ -133,7 +133,7 @@ impl Visualizer {
   }
 
   fn draw_unit_at(&self, pos: Vec2<i32>) {
-    let world_pos = self.geom.v2i_to_v2f(pos).extend(0.0);
+    let world_pos = self.geom.map_pos_to_world_pos(pos).extend(0.0);
     let m = glh::tr(self.camera.mat(), world_pos);
     glh::uniform_mat4f(self.mat_id, &m);
     self.unit_mesh.draw(self.program);
