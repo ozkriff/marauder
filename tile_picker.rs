@@ -18,6 +18,28 @@ use camera::Camera;
 use geom::Geom;
 use misc::read_file;
 
+fn build_hex_map_mesh(geom: &Geom) -> (~[Vec3<GLfloat>], ~[Color3]) {
+  let mut c_data = ~[];
+  let mut v_data = ~[];
+  for tile_pos in TileIterator::new() {
+    let pos3d = geom.map_pos_to_world_pos(tile_pos).extend(0.0);
+    for num in range(0, 6) {
+      let vertex = geom.index_to_hex_vertex(num);
+      let next_vertex = geom.index_to_hex_vertex(num + 1);
+      let col_x = tile_pos.x as f32 / 255.0;
+      let col_y = tile_pos.y as f32 / 255.0;
+      let color = Color3{r: col_x, g: col_y, b: 1.0};
+      v_data.push(pos3d + vertex.extend(0.0));
+      c_data.push(color);
+      v_data.push(pos3d + next_vertex.extend(0.0));
+      c_data.push(color);
+      v_data.push(pos3d + Vec3::zero());
+      c_data.push(color);
+    }
+  }
+  (v_data, c_data)
+}
+
 pub struct TilePicker {
   program: GLuint,
   color_buffer_obj: GLuint,
@@ -46,29 +68,10 @@ impl TilePicker {
     glh::delete_buffer(self.color_buffer_obj);
   }
 
-  fn build_hex_mesh_for_picking(&mut self, geom: &Geom) {
-    for tile_pos in TileIterator::new() {
-      let pos3d = geom.map_pos_to_world_pos(tile_pos).extend(0.0);
-      for num in range(0, 6) {
-        let vertex = geom.index_to_hex_vertex(num);
-        let next_vertex = geom.index_to_hex_vertex(num + 1);
-        let col_x = tile_pos.x as f32 / 255.0;
-        let col_y = tile_pos.y as f32 / 255.0;
-        let c_data = &mut self.color_data;
-        let v_data = &mut self.vertex_data;
-        let color = Color3{r: col_x, g: col_y, b: 1.0};
-        v_data.push(pos3d + vertex.extend(0.0));
-        c_data.push(color);
-        v_data.push(pos3d + next_vertex.extend(0.0));
-        c_data.push(color);
-        v_data.push(pos3d + Vec3::zero());
-        c_data.push(color);
-      }
-    }
-  }
-
   pub fn init(&mut self, geom: &Geom) {
-    self.build_hex_mesh_for_picking(geom);
+    let (vertex_data, color_data) =  build_hex_map_mesh(geom);
+    self.vertex_data = vertex_data;
+    self.color_data = color_data;
     self.program = glh::compile_program(
       read_file(&Path::new("pick.vs.glsl")),
       read_file(&Path::new("pick.fs.glsl")),
