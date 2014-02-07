@@ -48,8 +48,7 @@ fn init_win(win_size: Vec2<int>) -> glfw::Window {
     glfw::Windowed,
   ).unwrap();
   win.make_context_current();
-  win.set_cursor_pos_polling(true);
-  win.set_key_polling(true);
+  win.set_all_polling(true);
   win
 }
 
