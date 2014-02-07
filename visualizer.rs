@@ -132,13 +132,23 @@ impl Visualizer {
     gl::DeleteProgram(self.program);
   }
 
+  fn draw_unit_at(&self, pos: Vec2<i32>) {
+    let world_pos = self.geom.v2i_to_v2f(pos).extend(0.0);
+    let m = glh::tr(self.camera.mat(), world_pos);
+    glh::uniform_mat4f(self.mat_id, &m);
+    self.unit_mesh.draw(self.program);
+  }
+
   fn draw(&self) {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
     gl::UseProgram(self.program);
+    self.draw_unit_at(Vec2{x: 0, y: 0});
+    self.draw_unit_at(Vec2{x: 1, y: 0});
+    self.draw_unit_at(Vec2{x: 2, y: 0});
+    self.draw_unit_at(Vec2{x: 1, y: 1});
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
     self.map_mesh.draw(self.program);
-    self.unit_mesh.draw(self.program);
     self.win().swap_buffers();
   }
 
