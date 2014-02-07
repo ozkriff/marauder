@@ -53,7 +53,7 @@ pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
     let mut status = gl::FALSE as GLint;
     gl::GetProgramiv(program, gl::LINK_STATUS, &mut status);
     if status != (gl::TRUE as GLint) {
-      let mut len: GLint = 0;
+      let mut len = 0;
       gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
       // subtract 1 to skip the trailing null character
       let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
