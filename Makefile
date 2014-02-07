@@ -14,7 +14,6 @@ SRC = \
   color.rs \
   geom.rs \
   gl_helpers.rs \
-  glfw_events.rs \
   main.rs \
   misc.rs \
   map.rs \

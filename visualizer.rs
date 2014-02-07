@@ -13,7 +13,6 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use camera::Camera;
-use glfw_events::EventHandlers;
 use map::TileIterator;
 use geom::Geom;
 use tile_picker::TilePicker;
@@ -39,7 +38,6 @@ static FRAGMENT_SHADER_SRC: &'static str = "
 ";
 
 pub struct Visualizer {
-  glfw_event_handlers: EventHandlers,
   program: GLuint,
   map_mesh: Mesh,
   unit_mesh: Mesh,
@@ -65,16 +63,17 @@ fn init_win(win_size: Vec2<int>) -> glfw::Window {
     glfw::Windowed,
   ).unwrap();
   win.make_context_current();
+  win.set_cursor_pos_polling(true);
+  win.set_key_polling(true);
   win
 }
 
 impl Visualizer {
   pub fn new() -> ~Visualizer {
-    let win_size = Vec2::<int>{x: 640, y: 480};
+    let win_size = Vec2::<int>{x: 640 / 4, y: 480 / 4};
     let win = init_win(win_size);
     let geom = Geom::new();
     let mut vis = ~Visualizer {
-      glfw_event_handlers: EventHandlers::new(&win),
       program: 0,
       map_mesh: Mesh::new(),
       unit_mesh: Mesh::new(),
@@ -149,39 +148,55 @@ impl Visualizer {
     return !self.win().should_close()
   }
 
-  fn handle_key_events(&mut self) {
-    self.glfw_event_handlers.key_handler.handle(|event| {
-      if event.action != glfw::Press {
-        return;
-      }
-      match event.key {
-        glfw::KeyEscape | glfw::KeyQ
-                       => self.win().set_should_close(true),
-        glfw::KeySpace => println!("space"),
-        glfw::KeyUp    => self.camera.move(270.0),
-        glfw::KeyDown  => self.camera.move(90.0),
-        glfw::KeyRight => self.camera.move(0.0),
-        glfw::KeyLeft  => self.camera.move(180.0),
-        _ => {},
-      }
-    });
+  fn handle_key_event(&mut self, key: glfw::Key) {
+    match key {
+      glfw::KeyEscape | glfw::KeyQ => {
+        self.win().set_should_close(true);
+      },
+      glfw::KeySpace => println!("space"),
+      glfw::KeyUp => self.camera.move(270.0),
+      glfw::KeyDown => self.camera.move(90.0),
+      glfw::KeyRight => self.camera.move(0.0),
+      glfw::KeyLeft => self.camera.move(180.0),
+      _ => {},
+    }
   }
 
-  fn handle_cursor_pos_events(&mut self) {
-    self.glfw_event_handlers.cursor_pos_handler.handle(|event| {
-      let button = self.win().get_mouse_button(glfw::MouseButtonRight);
-      if button == glfw::Press {
-        self.camera.z_angle += self.mouse_pos.x - event.x;
-        self.camera.x_angle += self.mouse_pos.y - event.y;
-      }
-      self.mouse_pos = Vec2{x: event.x, y: event.y};
-    });
+  fn handle_cursor_pos_event(&mut self, pos: Vec2<f32>) {
+    let button = self.win().get_mouse_button(glfw::MouseButtonRight);
+    if button == glfw::Press {
+      self.camera.z_angle += self.mouse_pos.x - pos.x;
+      self.camera.x_angle += self.mouse_pos.y - pos.y;
+    }
+    self.mouse_pos = pos;
+  }
+
+  fn get_events(&mut self) -> ~[glfw::WindowEvent]{
+    glfw::poll_events();
+    let mut events = ~[];
+    for (_, event) in self.win().flush_events() {
+      events.push(event);
+    }
+    events
+  }
+
+  fn handle_event(&mut self, event: glfw::WindowEvent) {
+    match event {
+      glfw::KeyEvent(key, _, glfw::Press, _) => {
+        self.handle_key_event(key);
+      },
+      glfw::CursorPosEvent(x, y) => {
+        let p = Vec2{x: x as f32, y: y as f32};
+        self.handle_cursor_pos_event(p);
+      },
+      _ => {},
+    }
   }
 
   fn handle_events(&mut self) {
-    glfw::poll_events();
-    self.handle_key_events();
-    self.handle_cursor_pos_events();
+    for event in self.get_events().iter() {
+      self.handle_event(*event);
+    }
   }
 
   fn close_window(&mut self) {

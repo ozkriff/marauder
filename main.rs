@@ -7,13 +7,12 @@
 
 extern mod native;
 extern mod cgmath;
-extern mod glfw;
+extern mod glfw = "glfw-rs";
 extern mod gl;
 
 mod misc;
 mod visualizer;
 mod gl_helpers;
-mod glfw_events;
 mod camera;
 mod map;
 mod color;
