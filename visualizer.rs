@@ -22,6 +22,22 @@ use obj;
 use mesh::Mesh;
 use misc::read_file;
 
+fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
+  let mut vertex_data = ~[];
+  for tile_pos in TileIterator::new() {
+    let pos3d = geom.v2i_to_v2f(tile_pos).extend(0.0);
+    for num in range(0, 6) {
+      let vertex = geom.index_to_hex_vertex(num);
+      let next_vertex = geom.index_to_hex_vertex(num + 1);
+      let data = &mut vertex_data;
+      data.push(pos3d + vertex.extend(0.0));
+      data.push(pos3d + next_vertex.extend(0.0));
+      data.push(pos3d + Vec3::zero());
+    }
+  }
+  vertex_data
+}
+
 pub struct Visualizer {
   program: GLuint,
   map_mesh: Mesh,
@@ -93,22 +109,6 @@ impl Visualizer {
     self.win.get_ref()
   }
 
-  fn build_hex_mesh(&self) -> ~[Vec3<GLfloat>] {
-    let mut vertex_data = ~[];
-    for tile_pos in TileIterator::new() {
-      let pos3d = self.geom.v2i_to_v2f(tile_pos).extend(0.0);
-      for num in range(0, 6) {
-        let vertex = self.geom.index_to_hex_vertex(num);
-        let next_vertex = self.geom.index_to_hex_vertex(num + 1);
-        let data = &mut vertex_data;
-        data.push(pos3d + vertex.extend(0.0));
-        data.push(pos3d + next_vertex.extend(0.0));
-        data.push(pos3d + Vec3::zero());
-      }
-    }
-    vertex_data
-  }
-
   fn init_models(&mut self) {
     self.program = glh::compile_program(
       read_file(&Path::new("normal.vs.glsl")),
@@ -118,7 +118,7 @@ impl Visualizer {
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
     let pos_attr = glh::get_attr(self.program, "position");
     glh::vertex_attrib_pointer(pos_attr);
-    let map_vertex_data = self.build_hex_mesh();
+    let map_vertex_data = build_hex_mesh(&self.geom);
     self.map_mesh.init(map_vertex_data);
     let unit_obj = obj::Model::new("tank.obj");
     self.unit_mesh.init(unit_obj.build());
