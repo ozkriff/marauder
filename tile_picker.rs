@@ -16,28 +16,7 @@ use map::TileIterator;
 use color::Color3;
 use camera::Camera;
 use geom::Geom;
-
-static PICK_VERTEX_SHADER_SRC: &'static str = "
-  #version 130
-  in vec3 position;
-  in vec3 color;
-  out vec3 pass_color;
-  uniform mat4 mvp_mat;
-  void main() {
-    vec4 v = vec4(position, 1);
-    gl_Position = mvp_mat * v;
-    pass_color = color;
-  }
-";
-
-static PICK_FRAGMENT_SHADER_SRC: &'static str = "
-  #version 130
-  in vec3 pass_color;
-  out vec4 out_color;
-  void main() {
-    out_color = vec4(pass_color, 1.0);
-  }
-";
+use misc::read_file;
 
 pub struct TilePicker {
   program: GLuint,
@@ -91,8 +70,9 @@ impl TilePicker {
   pub fn init(&mut self, geom: &Geom) {
     self.build_hex_mesh_for_picking(geom);
     self.program = glh::compile_program(
-      PICK_VERTEX_SHADER_SRC,
-      PICK_FRAGMENT_SHADER_SRC);
+      read_file(&Path::new("pick.vs.glsl")),
+      read_file(&Path::new("pick.fs.glsl")),
+    );
     gl::UseProgram(self.program);
     self.vertex_buffer_obj = glh::gen_buffer();
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);

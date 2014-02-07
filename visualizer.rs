@@ -18,24 +18,7 @@ use geom::Geom;
 use tile_picker::TilePicker;
 use obj;
 use mesh::Mesh;
-
-static VERTEX_SHADER_SRC: &'static str = "
-  #version 130
-  in vec3 position;
-  uniform mat4 mvp_mat;
-  void main() {
-    vec4 v = vec4(position, 1);
-    gl_Position = mvp_mat * v;
-  }
-";
-
-static FRAGMENT_SHADER_SRC: &'static str = "
-  #version 130
-  out vec4 out_color;
-  void main() {
-    out_color = vec4(1.0, 1.0, 1.0, 1.0);
-  }
-";
+use misc::read_file;
 
 pub struct Visualizer {
   program: GLuint,
@@ -113,8 +96,8 @@ impl Visualizer {
 
   fn init_models(&mut self) {
     self.program = glh::compile_program(
-      VERTEX_SHADER_SRC,
-      FRAGMENT_SHADER_SRC,
+      read_file(&Path::new("normal.vs.glsl")),
+      read_file(&Path::new("normal.fs.glsl")),
     );
     gl::UseProgram(self.program);
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
