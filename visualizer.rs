@@ -1,5 +1,7 @@
 // See LICENSE file for copyright and license details.
 
+use extra::json;
+use serialize::Decodable;
 use glfw;
 use gl;
 use gl::types::{
@@ -51,9 +53,23 @@ fn init_win(win_size: Vec2<int>) -> glfw::Window {
   win
 }
 
+#[deriving(Decodable)]
+struct Size2<T> {
+  x: T,
+  y: T,
+}
+
+fn read_win_size(config_path: &str) -> Vec2<int> {
+  let path = Path::new(config_path);
+  let json = json::from_str(read_file(&path)).unwrap();
+  let mut decoder = json::Decoder::new(json);
+  let size: Size2<int> = Decodable::decode(&mut decoder);
+  Vec2{x: size.x, y: size.y}
+}
+
 impl Visualizer {
   pub fn new() -> ~Visualizer {
-    let win_size = Vec2::<int>{x: 640, y: 480};
+    let win_size = read_win_size("config.json");
     let win = init_win(win_size);
     let geom = Geom::new();
     let mut vis = ~Visualizer {

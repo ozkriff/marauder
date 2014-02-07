@@ -6,6 +6,8 @@
 #[deny(unnecessary_typecast)];
 
 extern mod native;
+extern mod extra;
+extern mod serialize;
 extern mod cgmath;
 extern mod glfw = "glfw-rs";
 extern mod gl;
