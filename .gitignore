@@ -1,4 +1,6 @@
 marauder
+deps
+data
 
 # vim tmp files
 *.swp
