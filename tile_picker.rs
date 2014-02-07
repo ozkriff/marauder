@@ -22,16 +22,16 @@ fn build_hex_map_mesh(geom: &Geom) -> (~[Vec3<GLfloat>], ~[Color3]) {
   let mut c_data = ~[];
   let mut v_data = ~[];
   for tile_pos in TileIterator::new() {
-    let pos3d = geom.map_pos_to_world_pos(tile_pos).extend(0.0);
+    let pos3d = geom.map_pos_to_world_pos(tile_pos);
     for num in range(0, 6) {
       let vertex = geom.index_to_hex_vertex(num);
       let next_vertex = geom.index_to_hex_vertex(num + 1);
       let col_x = tile_pos.x as f32 / 255.0;
       let col_y = tile_pos.y as f32 / 255.0;
       let color = Color3{r: col_x, g: col_y, b: 1.0};
-      v_data.push(pos3d + vertex.extend(0.0));
+      v_data.push(pos3d + vertex);
       c_data.push(color);
-      v_data.push(pos3d + next_vertex.extend(0.0));
+      v_data.push(pos3d + next_vertex);
       c_data.push(color);
       v_data.push(pos3d + Vec3::zero());
       c_data.push(color);

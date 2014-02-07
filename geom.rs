@@ -15,6 +15,7 @@ use gl::types::{
 };
 use cgmath::vector::{
   Vec2,
+  Vec3,
   Vector,
 };
 
@@ -34,24 +35,24 @@ impl Geom {
     }
   }
 
-  pub fn map_pos_to_world_pos(&self, i: Vec2<i32>) -> Vec2<f32> {
+  pub fn map_pos_to_world_pos(&self, i: Vec2<i32>) -> Vec3<f32> {
     let v = Vec2 {
       x: (i.x as f32) * self.hex_in_radius * 2.0,
-      y: (i.y as f32) * self.hex_ex_radius * 1.5
+      y: (i.y as f32) * self.hex_ex_radius * 1.5,
     };
     if i.y % 2 == 0 {
-      Vec2{x: v.x + self.hex_in_radius, y: v.y}
+      Vec3{x: v.x + self.hex_in_radius, y: v.y, z: 0.0}
     } else {
-      v
+      v.extend(0.0)
     }
   }
 
-  pub fn index_to_circle_vertex(&self, count: int, i: int) -> Vec2<f32> {
+  pub fn index_to_circle_vertex(&self, count: int, i: int) -> Vec3<f32> {
     let n = FRAC_PI_2 + 2.0 * PI * (i as f32) / (count as f32);
-    Vec2{x: cos(n), y: sin(n)}.mul_s(self.hex_ex_radius)
+    Vec3{x: cos(n), y: sin(n), z: 0.0}.mul_s(self.hex_ex_radius)
   }
 
-  pub fn index_to_hex_vertex(&self, i: int) -> Vec2<f32> {
+  pub fn index_to_hex_vertex(&self, i: int) -> Vec3<f32> {
     self.index_to_circle_vertex(6, i)
   }
 }
