@@ -70,7 +70,7 @@ fn init_win(win_size: Vec2<int>) -> glfw::Window {
 
 impl Visualizer {
   pub fn new() -> ~Visualizer {
-    let win_size = Vec2::<int>{x: 640 / 4, y: 480 / 4};
+    let win_size = Vec2::<int>{x: 640, y: 480};
     let win = init_win(win_size);
     let geom = Geom::new();
     let mut vis = ~Visualizer {
