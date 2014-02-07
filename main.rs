@@ -11,6 +11,7 @@ extern mod serialize;
 extern mod cgmath;
 extern mod glfw = "glfw-rs";
 extern mod gl;
+extern mod stb_image;
 
 mod misc;
 mod visualizer;

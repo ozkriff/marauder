@@ -33,6 +33,16 @@ git clone --depth=1 https://github.com/bjz/cgmath-rs
 echo Building cgmath-rs...
 rustc cgmath-rs/src/cgmath/lib.rs --out-dir .
 
+# rust-stb-image
+echo Downloading rust-stb-image...
+git clone --depth=1 https://github.com/mozilla-servo/rust-stb-image
+echo Building rust-stb-image...
+cd rust-stb-image
+./configure
+make
+cp *.rlib *.a ..
+cd ..
+
 # Return from 'deps' dir
 cd ..
 
