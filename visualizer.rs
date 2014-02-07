@@ -147,6 +147,10 @@ impl Visualizer {
     self.draw_unit_at(Vec2{x: 1, y: 0});
     self.draw_unit_at(Vec2{x: 2, y: 0});
     self.draw_unit_at(Vec2{x: 1, y: 1});
+    if !self.selected_tile_pos.is_none() {
+      let p = self.selected_tile_pos.unwrap();
+      self.draw_unit_at(p);
+    }
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
     self.map_mesh.draw(self.program);
     self.win().swap_buffers();
