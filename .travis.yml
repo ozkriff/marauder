@@ -11,6 +11,8 @@ install:
   # Download, build and install dependencies
   - ./make_deps.sh
 
+  - git clone --depth=1 https://github.com/ozkriff/marauder-data data
+
 script:
   - make
 

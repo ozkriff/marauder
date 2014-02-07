@@ -13,6 +13,11 @@ system on [ozkriff/marauder](https://github.com/ozkriff/marauder).
 Any feedback would be much appreciated!
 
 
+## Data
+
+    git clone --depth=1 https://github.com/ozkriff/marauder-data data
+
+
 ## Compilation
 
     ./make_deps.sh

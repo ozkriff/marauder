@@ -120,7 +120,7 @@ impl Visualizer {
     glh::vertex_attrib_pointer(pos_attr);
     let map_vertex_data = build_hex_mesh(&self.geom);
     self.map_mesh.init(map_vertex_data);
-    let unit_obj = obj::Model::new("tank.obj");
+    let unit_obj = obj::Model::new("data/tank.obj");
     self.unit_mesh.init(unit_obj.build());
   }
 
