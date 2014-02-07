@@ -28,7 +28,7 @@ static VERTEX_SHADER_SRC: &'static str = "
     gl_Position = mvp_mat * v;
   }
 ";
- 
+
 static FRAGMENT_SHADER_SRC: &'static str = "
   #version 130
   out vec4 out_color;
