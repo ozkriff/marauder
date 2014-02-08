@@ -16,6 +16,7 @@ use map::TileIterator;
 use color::Color3;
 use camera::Camera;
 use geom::Geom;
+use mesh::Mesh;
 use misc::read_file;
 
 fn build_hex_map_mesh(geom: &Geom) -> (~[Vec3<GLfloat>], ~[Color3]) {
@@ -42,53 +43,39 @@ fn build_hex_map_mesh(geom: &Geom) -> (~[Vec3<GLfloat>], ~[Color3]) {
 
 pub struct TilePicker {
   program: GLuint,
-  color_buffer_obj: GLuint,
+  map_mesh: Mesh,
   mat_id: GLint,
-  vertex_buffer_obj: GLuint,
-  vertex_data: ~[Vec3<GLfloat>],
-  color_data: ~[Color3],
 }
 
 impl TilePicker {
   pub fn new() -> TilePicker {
     let picker = TilePicker {
-      color_buffer_obj: 0,
       program: 0,
-      vertex_buffer_obj: 0,
+      map_mesh: Mesh::new(),
       mat_id: 0,
-      vertex_data: ~[],
-      color_data: ~[],
     };
     picker
   }
 
   pub fn cleanup_opengl(&self) {
     gl::DeleteProgram(self.program);
-    glh::delete_buffer(self.vertex_buffer_obj);
-    glh::delete_buffer(self.color_buffer_obj);
   }
 
   pub fn init(&mut self, geom: &Geom) {
-    let (vertex_data, color_data) =  build_hex_map_mesh(geom);
-    self.vertex_data = vertex_data;
-    self.color_data = color_data;
     self.program = glh::compile_program(
       read_file(&Path::new("pick.vs.glsl")),
       read_file(&Path::new("pick.fs.glsl")),
     );
     gl::UseProgram(self.program);
-    self.vertex_buffer_obj = glh::gen_buffer();
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-    glh::fill_current_coord_vbo(self.vertex_data);
-    let pos_attr = glh::get_attr(self.program, "position");
-    gl::EnableVertexAttribArray(pos_attr);
-    glh::vertex_attrib_pointer(pos_attr);
-    self.color_buffer_obj = glh::gen_buffer();
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.color_buffer_obj);
-    glh::fill_current_color_vbo(self.color_data);
+    let position_attr = glh::get_attr(self.program, "position");
     let color_attr = glh::get_attr(self.program, "color");
+    gl::EnableVertexAttribArray(position_attr);
     gl::EnableVertexAttribArray(color_attr);
+    glh::vertex_attrib_pointer(position_attr);
     glh::vertex_attrib_pointer(color_attr);
+    let (vertex_data, color_data) =  build_hex_map_mesh(geom);
+    self.map_mesh.init(vertex_data);
+    self.map_mesh.set_color(color_data);
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
   }
 
@@ -123,12 +110,10 @@ impl TilePicker {
     mouse_pos: Vec2<i32>
   ) -> Option<Vec2<i32>> {
     gl::UseProgram(self.program);
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_buffer_obj);
-    gl::BindBuffer(gl::ARRAY_BUFFER, self.color_buffer_obj);
     glh::uniform_mat4f(self.mat_id, &camera.mat());
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT);
-    glh::draw_mesh(self.vertex_data.len() as int);
+    self.map_mesh.draw(self.program);
     self._pick_tile(win_size, mouse_pos)
   }
 }

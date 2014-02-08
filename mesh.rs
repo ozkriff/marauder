@@ -7,9 +7,11 @@ use gl::types::{
 };
 use cgmath::vector::Vec3;
 use glh = gl_helpers;
+use color::Color3;
 
 pub struct Mesh {
   vbo: GLuint,
+  color_vbo: Option<GLuint>,
   len: int,
 }
 
@@ -17,6 +19,7 @@ impl Mesh {
   pub fn new() -> Mesh {
     Mesh {
       vbo: 0,
+      color_vbo: None,
       len: 0,
     }
   }
@@ -28,7 +31,18 @@ impl Mesh {
     glh::fill_current_coord_vbo(data);
   }
 
+  pub fn set_color(&mut self, data: &[Color3]) {
+    self.len = data.len() as int;
+    self.color_vbo = Some(glh::gen_buffer());
+    gl::BindBuffer(gl::ARRAY_BUFFER, self.color_vbo.unwrap());
+    glh::fill_current_color_vbo(data);
+  }
+
   pub fn draw(&self, program: GLuint) {
+    if !self.color_vbo.is_none() {
+      gl::BindBuffer(gl::ARRAY_BUFFER, self.color_vbo.unwrap());
+      glh::vertex_attrib_pointer(glh::get_attr(program, "color"));
+    }
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
     glh::vertex_attrib_pointer(glh::get_attr(program, "position"));
     glh::draw_mesh(self.len);
