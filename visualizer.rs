@@ -210,6 +210,9 @@ impl Visualizer {
         let p = Vec2{x: x as f32, y: y as f32};
         self.handle_cursor_pos_event(p);
       },
+      glfw::SizeEvent(w, h) => {
+        gl::Viewport(0, 0, w, h);
+      },
       _ => {},
     }
   }
