@@ -60,7 +60,7 @@ fn init_win(win_size: Vec2<int>) -> glfw::Window {
   let win = glfw::Window::create(
     win_size.x as u32,
     win_size.y as u32,
-    "OpenGL",
+    "Marauder",
     glfw::Windowed,
   ).unwrap();
   win.make_context_current();
