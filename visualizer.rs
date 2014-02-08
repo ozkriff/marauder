@@ -139,10 +139,7 @@ impl Visualizer {
     self.unit_mesh.draw(self.program);
   }
 
-  fn draw(&self) {
-    gl::ClearColor(0.3, 0.3, 0.3, 1.0);
-    gl::Clear(gl::COLOR_BUFFER_BIT);
-    gl::UseProgram(self.program);
+  fn draw_units(&self) {
     self.draw_unit_at(Vec2{x: 0, y: 0});
     self.draw_unit_at(Vec2{x: 1, y: 0});
     self.draw_unit_at(Vec2{x: 2, y: 0});
@@ -151,8 +148,19 @@ impl Visualizer {
       let p = self.selected_tile_pos.unwrap();
       self.draw_unit_at(p);
     }
+  }
+
+  fn draw_map(&self) {
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
     self.map_mesh.draw(self.program);
+  }
+
+  fn draw(&self) {
+    gl::ClearColor(0.3, 0.3, 0.3, 1.0);
+    gl::Clear(gl::COLOR_BUFFER_BIT);
+    gl::UseProgram(self.program);
+    self.draw_units();
+    self.draw_map();
     self.win().swap_buffers();
   }
 
