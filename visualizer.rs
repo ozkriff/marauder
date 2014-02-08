@@ -236,7 +236,6 @@ impl Visualizer {
     let win_size = self.win().get_size();
     self.selected_tile_pos = self.picker.pick_tile(
       win_size, &self.camera, mouse_pos);
-    println!("selected: {:?}", self.selected_tile_pos);
   }
 
   pub fn tick(&mut self) {
