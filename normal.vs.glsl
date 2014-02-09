@@ -1,3 +1,5 @@
+// See LICENSE file for copyright and license details.
+
 #version 130
 
 in vec3 position;
@@ -10,3 +12,5 @@ void main() {
   vec4 v = vec4(position, 1);
   gl_Position = mvp_mat * v;
 }
+
+// vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
