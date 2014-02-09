@@ -179,6 +179,8 @@ impl Visualizer {
       glfw::KeyDown => self.camera.move(90.0),
       glfw::KeyRight => self.camera.move(0.0),
       glfw::KeyLeft => self.camera.move(180.0),
+      glfw::KeyMinus => self.camera.zoom += 1.0,
+      glfw::KeyEqual => self.camera.zoom -= 1.0,
       _ => {},
     }
   }
