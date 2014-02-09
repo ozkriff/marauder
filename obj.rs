@@ -46,10 +46,9 @@ impl Model {
   }
 
   fn read_vt(words: &mut Words) -> Vec2<GLfloat> {
-    // TODO: y = 1.0 - y; // flip vertically
     Vec2 {
       x: from_str(words.next().unwrap()).unwrap(),
-      y: 1.0 - from_str(words.next().unwrap()).unwrap(),
+      y: 1.0 - from_str(words.next().unwrap()).unwrap(), // flip
     }
   }
 
