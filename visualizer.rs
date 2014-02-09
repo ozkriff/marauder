@@ -188,8 +188,8 @@ impl Visualizer {
   fn handle_cursor_pos_event(&mut self, pos: Vec2<f32>) {
     let button = self.win().get_mouse_button(glfw::MouseButtonRight);
     if button == glfw::Press {
-      self.camera.z_angle += self.mouse_pos.x - pos.x;
-      self.camera.x_angle += self.mouse_pos.y - pos.y;
+      self.camera.z_angle += (self.mouse_pos.x - pos.x) / 2.0;
+      self.camera.x_angle += (self.mouse_pos.y - pos.y) / 2.0;
     }
     self.mouse_pos = pos;
   }
