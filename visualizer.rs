@@ -169,9 +169,8 @@ impl Visualizer {
 
   fn draw_units(&self) {
     gl::UseProgram(self.program);
-    let baic_texture_loc = glh::get_uniform(self.program, "basic_texture");
-    // TODO: use gl::Uniform1i (?), gl::GetError
-    gl::Uniform1ui(baic_texture_loc, self.unit_texture_id);
+    let baic_texture_loc = glh::get_uniform(self.program, "basic_texture!");
+    gl::Uniform1ui(baic_texture_loc, 0);
     gl::ActiveTexture(gl::TEXTURE0);
     gl::BindTexture(gl::TEXTURE_2D, self.unit_texture_id);
     self.draw_unit_at(Vec2{x: 0, y: 0});
@@ -185,9 +184,8 @@ impl Visualizer {
   }
 
   fn draw_map(&self) {
-    let baic_texture_loc = glh::get_uniform(self.program, "basic_texture");
-    // TODO: use gl::Uniform1i (?), gl::GetError
-    gl::Uniform1ui(baic_texture_loc, self.floor_texture_id);
+    let baic_texture_loc = glh::get_uniform(self.program, "basic_texture!");
+    gl::Uniform1ui(baic_texture_loc, 0);
     gl::ActiveTexture(gl::TEXTURE0);
     gl::BindTexture(gl::TEXTURE_2D, self.floor_texture_id);
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
