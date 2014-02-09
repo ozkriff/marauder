@@ -169,7 +169,7 @@ impl Visualizer {
 
   fn draw_units(&self) {
     gl::UseProgram(self.program);
-    let basic_texture_loc = glh::get_uniform(self.program, "basic_texture!");
+    let basic_texture_loc = glh::get_uniform(self.program, "basic_texture");
     gl::Uniform1ui(basic_texture_loc, 0);
     gl::ActiveTexture(gl::TEXTURE0);
     gl::BindTexture(gl::TEXTURE_2D, self.unit_texture_id);
@@ -184,7 +184,7 @@ impl Visualizer {
   }
 
   fn draw_map(&self) {
-    let basic_texture_loc = glh::get_uniform(self.program, "basic_texture!");
+    let basic_texture_loc = glh::get_uniform(self.program, "basic_texture");
     gl::Uniform1ui(basic_texture_loc, 0);
     gl::ActiveTexture(gl::TEXTURE0);
     gl::BindTexture(gl::TEXTURE_2D, self.floor_texture_id);
