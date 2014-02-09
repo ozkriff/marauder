@@ -223,11 +223,6 @@ impl Visualizer {
     }
   }
 
-  fn close_window(&mut self) {
-    // destroy glfw::Window before terminating glfw
-    self.win = None;
-  }
-
   fn pick_tile(&mut self) {
     let mouse_pos = Vec2 {
       x: self.mouse_pos.x as i32,
@@ -248,8 +243,6 @@ impl Visualizer {
 impl Drop for Visualizer {
   fn drop(&mut self) {
     self.cleanup_opengl();
-    self.close_window();
-    glfw::terminate();
   }
 }
 
