@@ -49,7 +49,7 @@ impl Model {
     // TODO: y = 1.0 - y; // flip vertically
     Vec2 {
       x: from_str(words.next().unwrap()).unwrap(),
-      y: from_str(words.next().unwrap()).unwrap(),
+      y: 1.0 - from_str(words.next().unwrap()).unwrap(),
     }
   }
 
@@ -103,11 +103,21 @@ impl Model {
     for face in self.faces.iter() {
       for i in range(0, 3) {
         let vertex_id = face.vertex[i] - 1;
-        // let texture_coord_id = face.texture[i] - 1; // TODO
         mesh.push(self.coords[vertex_id]);
       }
     }
     mesh
+  }
+
+  pub fn build_tex_coord(&self) -> ~[Vec2<GLfloat>]{
+    let mut tex_coords = ~[];
+    for face in self.faces.iter() {
+      for i in range(0, 3) {
+        let texture_coord_id = face.texture[i] - 1;
+        tex_coords.push(self.texture_coords[texture_coord_id]);
+      }
+    }
+    tex_coords
   }
 }
 

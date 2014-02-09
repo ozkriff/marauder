@@ -29,10 +29,21 @@ fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
     for num in range(0, 6) {
       let vertex = geom.index_to_hex_vertex(num);
       let next_vertex = geom.index_to_hex_vertex(num + 1);
-      let data = &mut vertex_data;
-      data.push(pos3d + vertex);
-      data.push(pos3d + next_vertex);
-      data.push(pos3d + Vec3::zero());
+      vertex_data.push(pos3d + vertex);
+      vertex_data.push(pos3d + next_vertex);
+      vertex_data.push(pos3d + Vec3::zero());
+    }
+  }
+  vertex_data
+}
+
+fn build_hex_tex_coord() -> ~[Vec2<GLfloat>] {
+  let mut vertex_data = ~[];
+  for _ in TileIterator::new() {
+    for _ in range(0, 6) {
+      vertex_data.push(Vec2{x: 0.0, y: 0.0});
+      vertex_data.push(Vec2{x: 1.0, y: 0.0});
+      vertex_data.push(Vec2{x: 0.5, y: 0.5});
     }
   }
   vertex_data
@@ -49,6 +60,8 @@ pub struct Visualizer {
   picker: TilePicker,
   selected_tile_pos: Option<Vec2<i32>>,
   geom: Geom,
+  unit_texture_id: GLuint,
+  floor_texture_id: GLuint,
 }
 
 fn init_win(win_size: Vec2<int>) -> glfw::Window {
@@ -98,11 +111,19 @@ impl Visualizer {
       picker: TilePicker::new(),
       selected_tile_pos: None,
       geom: geom,
+      unit_texture_id: 0,
+      floor_texture_id: 0,
     };
     vis.init_opengl();
     vis.picker.init(&geom);
     vis.init_models();
+    vis.init_textures();
     vis
+  }
+
+  fn init_textures(&mut self) {
+    self.unit_texture_id = glh::load_texture(~"data/tank.png");
+    self.floor_texture_id = glh::load_texture(~"data/floor.png");
   }
 
   fn win<'a>(&'a self) -> &'a glfw::Window {
@@ -118,11 +139,16 @@ impl Visualizer {
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
     let position_attr = glh::get_attr(self.program, "position");
     gl::EnableVertexAttribArray(position_attr);
-    glh::vertex_attrib_pointer(position_attr);
+    glh::vertex_attrib_pointer(position_attr, 3);
+    let vt_attr = glh::get_attr(self.program, "vt");
+    gl::EnableVertexAttribArray(vt_attr);
+    glh::vertex_attrib_pointer(vt_attr, 3);
     let map_vertex_data = build_hex_mesh(&self.geom);
     self.map_mesh.init(map_vertex_data);
+    self.map_mesh.set_vt(build_hex_tex_coord());
     let unit_obj = obj::Model::new("data/tank.obj");
     self.unit_mesh.init(unit_obj.build());
+    self.unit_mesh.set_vt(unit_obj.build_tex_coord());
   }
 
   fn init_opengl(&mut self) {
@@ -142,6 +168,12 @@ impl Visualizer {
   }
 
   fn draw_units(&self) {
+    gl::UseProgram(self.program);
+    let baic_texture_loc = glh::get_uniform(self.program, "basic_texture");
+    // TODO: use gl::Uniform1i (?), gl::GetError
+    gl::Uniform1ui(baic_texture_loc, self.unit_texture_id);
+    gl::ActiveTexture(gl::TEXTURE0);
+    gl::BindTexture(gl::TEXTURE_2D, self.unit_texture_id);
     self.draw_unit_at(Vec2{x: 0, y: 0});
     self.draw_unit_at(Vec2{x: 1, y: 0});
     self.draw_unit_at(Vec2{x: 2, y: 0});
@@ -153,6 +185,11 @@ impl Visualizer {
   }
 
   fn draw_map(&self) {
+    let baic_texture_loc = glh::get_uniform(self.program, "basic_texture");
+    // TODO: use gl::Uniform1i (?), gl::GetError
+    gl::Uniform1ui(baic_texture_loc, self.floor_texture_id);
+    gl::ActiveTexture(gl::TEXTURE0);
+    gl::BindTexture(gl::TEXTURE_2D, self.floor_texture_id);
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
     self.map_mesh.draw(self.program);
   }

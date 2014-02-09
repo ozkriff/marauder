@@ -71,8 +71,8 @@ impl TilePicker {
     let color_attr = glh::get_attr(self.program, "color");
     gl::EnableVertexAttribArray(position_attr);
     gl::EnableVertexAttribArray(color_attr);
-    glh::vertex_attrib_pointer(position_attr);
-    glh::vertex_attrib_pointer(color_attr);
+    glh::vertex_attrib_pointer(position_attr, 3);
+    glh::vertex_attrib_pointer(color_attr, 3);
     let (vertex_data, color_data) =  build_hex_map_mesh(geom);
     self.map_mesh.init(vertex_data);
     self.map_mesh.set_color(color_data);

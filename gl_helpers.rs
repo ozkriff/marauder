@@ -15,8 +15,12 @@ use cgmath::matrix::{
   Mat3,
   ToMat4,
 };
-use cgmath::vector::Vec3;
+use cgmath::vector::{
+  Vec3,
+  Vec2,
+};
 use cgmath::angle;
+use stb_image::image;
 use misc::{
   c_str,
   deg_to_rad,
@@ -165,8 +169,20 @@ pub fn fill_current_color_vbo(data: &[Color3]) {
   }
 }
 
-pub fn vertex_attrib_pointer(attr: GLuint) {
-  let components_count = 3;
+pub fn fill_current_vt_vbo(data: &[Vec2<GLfloat>]) {
+  let glfloat_size = std::mem::size_of::<GLfloat>();
+  let buffer_size = (data.len() * 2 * glfloat_size) as gl::types::GLsizeiptr;
+  unsafe {
+    gl::BufferData(
+      gl::ARRAY_BUFFER,
+      buffer_size,
+      std::cast::transmute(&data[0]),
+      gl::STATIC_DRAW,
+    );
+  }
+}
+
+pub fn vertex_attrib_pointer(attr: GLuint, components_count: i32) {
   let normalized = gl::FALSE;
   let stride = 0;
   unsafe {
@@ -179,6 +195,65 @@ pub fn vertex_attrib_pointer(attr: GLuint) {
       std::ptr::null(),
     );
   }
+}
+
+fn load_image(path: ~str) -> image::Image<u8> {
+  let load_result = image::load(path);
+  match load_result {
+    image::ImageU8(image) => {
+      image
+    },
+    image::Error(message) => {
+      fail!("{}", message);
+    },
+    _ => {
+      fail!("unkn");
+    }
+  }
+}
+
+pub fn load_texture(path: ~str) -> GLuint {
+  let image = load_image(path);
+  let mut id = 0;
+  unsafe {
+    gl::GenTextures(1, &mut id)
+  };
+  gl::ActiveTexture(gl::TEXTURE0);
+  gl::BindTexture(gl::TEXTURE_2D, id);
+  unsafe {
+    if image.depth == 4 {
+      gl::TexImage2D(
+        gl::TEXTURE_2D,
+        0,
+        gl::RGBA as GLint,
+        image.width as gl::types::GLsizei,
+        image.height as gl::types::GLsizei,
+        0,
+        gl::RGBA,
+        gl::UNSIGNED_BYTE,
+        std::cast::transmute(&image.data[0]),
+      );
+    } else if image.depth == 3 {
+      gl::TexImage2D(
+        gl::TEXTURE_2D,
+        0,
+        gl::RGB as GLint,
+        image.width as gl::types::GLsizei,
+        image.height as gl::types::GLsizei,
+        0,
+        gl::RGB,
+        gl::UNSIGNED_BYTE,
+        std::cast::transmute(&image.data[0]),
+      );
+    } else {
+      fail!("depth");
+    }
+  }
+  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as GLint);
+  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as GLint);
+  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
+  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
+  id
 }
 
 // vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:

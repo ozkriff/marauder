@@ -1,7 +1,9 @@
 #version 130
 
+uniform sampler2D basic_texture;
+in vec2 texture_coordinates;
 out vec4 out_color;
 
 void main() {
-  out_color = vec4(1.0, 1.0, 1.0, 1.0);
+  out_color = texture(basic_texture, texture_coordinates);
 }
