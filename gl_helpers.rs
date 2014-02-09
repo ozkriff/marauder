@@ -220,39 +220,34 @@ pub fn load_texture(path: ~str) -> GLuint {
   };
   gl::ActiveTexture(gl::TEXTURE0);
   gl::BindTexture(gl::TEXTURE_2D, id);
+  let format = match image.depth {
+    4 => gl::RGBA,
+    3 => gl::RGB,
+    _ => fail!("wrong depth"),
+  };
   unsafe {
-    if image.depth == 4 {
-      gl::TexImage2D(
-        gl::TEXTURE_2D,
-        0,
-        gl::RGBA as GLint,
-        image.width as gl::types::GLsizei,
-        image.height as gl::types::GLsizei,
-        0,
-        gl::RGBA,
-        gl::UNSIGNED_BYTE,
-        std::cast::transmute(&image.data[0]),
-      );
-    } else if image.depth == 3 {
-      gl::TexImage2D(
-        gl::TEXTURE_2D,
-        0,
-        gl::RGB as GLint,
-        image.width as gl::types::GLsizei,
-        image.height as gl::types::GLsizei,
-        0,
-        gl::RGB,
-        gl::UNSIGNED_BYTE,
-        std::cast::transmute(&image.data[0]),
-      );
-    } else {
-      fail!("depth");
-    }
+    let level = 0;
+    let border = 0;
+    gl::TexImage2D(
+      gl::TEXTURE_2D,
+      level,
+      format as GLint,
+      image.width as gl::types::GLsizei,
+      image.height as gl::types::GLsizei,
+      border,
+      format,
+      gl::UNSIGNED_BYTE,
+      std::cast::transmute(&image.data[0]),
+    );
   }
-  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as GLint);
-  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as GLint);
-  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
-  gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
+  gl::TexParameteri(gl::TEXTURE_2D,
+    gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as GLint);
+  gl::TexParameteri(gl::TEXTURE_2D,
+    gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as GLint);
+  gl::TexParameteri(gl::TEXTURE_2D,
+    gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
+  gl::TexParameteri(gl::TEXTURE_2D,
+    gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
   id
 }
 
