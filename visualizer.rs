@@ -127,6 +127,7 @@ impl Visualizer {
 
   fn init_opengl(&mut self) {
     gl::load_with(glfw::get_proc_address);
+    gl::Enable(gl::DEPTH_TEST);
   }
 
   fn cleanup_opengl(&self) {
@@ -158,7 +159,7 @@ impl Visualizer {
 
   fn draw(&self) {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
-    gl::Clear(gl::COLOR_BUFFER_BIT);
+    gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
     gl::UseProgram(self.program);
     self.draw_units();
     self.draw_map();

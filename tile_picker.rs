@@ -112,7 +112,7 @@ impl TilePicker {
     gl::UseProgram(self.program);
     glh::uniform_mat4f(self.mat_id, &camera.mat());
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
-    gl::Clear(gl::COLOR_BUFFER_BIT);
+    gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
     self.map_mesh.draw(self.program);
     self._pick_tile(win_size, mouse_pos)
   }
