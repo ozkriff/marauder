@@ -144,10 +144,10 @@ impl Visualizer {
     gl::EnableVertexAttribArray(vt_attr);
     glh::vertex_attrib_pointer(vt_attr, 3);
     let map_vertex_data = build_hex_mesh(&self.geom);
-    self.map_mesh.init(map_vertex_data);
+    self.map_mesh.set_vertex_coords(map_vertex_data);
     self.map_mesh.set_vt(build_hex_tex_coord());
     let unit_obj = obj::Model::new("data/tank.obj");
-    self.unit_mesh.init(unit_obj.build());
+    self.unit_mesh.set_vertex_coords(unit_obj.build());
     self.unit_mesh.set_vt(unit_obj.build_tex_coord());
   }
 

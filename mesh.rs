@@ -29,7 +29,7 @@ impl Mesh {
     }
   }
 
-  pub fn init(&mut self, data: &[Vec3<GLfloat>]) {
+  pub fn set_vertex_coords(&mut self, data: &[Vec3<GLfloat>]) {
     self.len = data.len() as int;
     self.vbo = glh::gen_buffer();
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
