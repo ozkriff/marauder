@@ -79,7 +79,7 @@ impl TilePicker {
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
   }
 
-  fn _pick_tile(
+  fn read_coords_from_image_buffer(
     &self,
     win_size: (i32, i32),
     mouse_pos: Vec2<i32>
@@ -114,7 +114,7 @@ impl TilePicker {
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
     self.map_mesh.draw(self.program);
-    self._pick_tile(win_size, mouse_pos)
+    self.read_coords_from_image_buffer(win_size, mouse_pos)
   }
 }
 
