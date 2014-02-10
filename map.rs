@@ -16,7 +16,7 @@ impl TileIterator {
 
 impl Iterator<Vec2<i32>> for TileIterator {
   fn next(&mut self) -> Option<Vec2<i32>> {
-    let map_size = Vec2::<i32>{x: 3, y: 4};
+    let map_size = Vec2{x: 3, y: 4};
     let current_pos = if self.cursor.y > map_size.y {
       None
     } else {
