@@ -163,7 +163,7 @@ pub fn fill_current_color_vbo(data: &[Color3]) {
   fill_buffer(buffer_size, data);
 }
 
-pub fn fill_current_vt_vbo(data: &[Vec2<GLfloat>]) {
+pub fn fill_current_texture_coords_vbo(data: &[Vec2<GLfloat>]) {
   let glfloat_size = std::mem::size_of::<GLfloat>();
   let buffer_size = (data.len() * 2 * glfloat_size) as GLsizeiptr;
   fill_buffer(buffer_size, data);
