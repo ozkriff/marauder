@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use extra::json;
+use std::hashmap::HashMap;
 use serialize::Decodable;
 use glfw;
 use gl;
@@ -49,6 +50,10 @@ fn build_hex_tex_coord() -> ~[Vec2<GLfloat>] {
   vertex_data
 }
 
+pub struct SceneNode {
+  pos: Vec3<f32>,
+}
+
 pub struct Visualizer {
   program: GLuint,
   map_mesh: Mesh,
@@ -62,6 +67,7 @@ pub struct Visualizer {
   geom: Geom,
   unit_texture_id: GLuint,
   floor_texture_id: GLuint,
+  scene_nodes: HashMap<i32, SceneNode>,
 }
 
 fn init_win(win_size: Vec2<int>) -> glfw::Window {
@@ -113,11 +119,13 @@ impl Visualizer {
       geom: geom,
       unit_texture_id: 0,
       floor_texture_id: 0,
+      scene_nodes: HashMap::new(),
     };
     vis.init_opengl();
     vis.picker.init(&geom);
     vis.init_models();
     vis.init_textures();
+    vis.init_units();
     vis
   }
 
@@ -151,6 +159,18 @@ impl Visualizer {
     self.unit_mesh.set_texture_coords(unit_obj.build_tex_coord());
   }
 
+  fn add_unit(&mut self, id: i32, pos: Vec2<i32>) {
+    let world_pos = self.geom.map_pos_to_world_pos(pos);
+    self.scene_nodes.insert(id, SceneNode{pos: world_pos});
+  }
+
+  fn init_units(&mut self) {
+    self.add_unit(0, Vec2{x: 0, y: 0});
+    self.add_unit(1, Vec2{x: 0, y: 1});
+    self.add_unit(2, Vec2{x: 1, y: 0});
+    self.add_unit(2, Vec2{x: 1, y: 1});
+  }
+
   fn init_opengl(&mut self) {
     gl::load_with(glfw::get_proc_address);
     gl::Enable(gl::DEPTH_TEST);
@@ -160,26 +180,16 @@ impl Visualizer {
     gl::DeleteProgram(self.program);
   }
 
-  fn draw_unit_at(&self, pos: Vec2<i32>) {
-    let world_pos = self.geom.map_pos_to_world_pos(pos);
-    let m = glh::tr(self.camera.mat(), world_pos);
-    glh::uniform_mat4f(self.mat_id, &m);
-    self.unit_mesh.draw(self.program);
-  }
-
   fn draw_units(&self) {
     gl::UseProgram(self.program);
     let basic_texture_loc = glh::get_uniform(self.program, "basic_texture");
     gl::Uniform1ui(basic_texture_loc, 0);
     gl::ActiveTexture(gl::TEXTURE0);
     gl::BindTexture(gl::TEXTURE_2D, self.unit_texture_id);
-    self.draw_unit_at(Vec2{x: 0, y: 0});
-    self.draw_unit_at(Vec2{x: 1, y: 0});
-    self.draw_unit_at(Vec2{x: 2, y: 0});
-    self.draw_unit_at(Vec2{x: 1, y: 1});
-    if !self.selected_tile_pos.is_none() {
-      let p = self.selected_tile_pos.unwrap();
-      self.draw_unit_at(p);
+    for (_, unit) in self.scene_nodes.iter() {
+      let m = glh::tr(self.camera.mat(), unit.pos);
+      glh::uniform_mat4f(self.mat_id, &m);
+      self.unit_mesh.draw(self.program);
     }
   }
 
@@ -269,6 +279,12 @@ impl Visualizer {
     let win_size = self.win().get_size();
     self.selected_tile_pos = self.picker.pick_tile(
       win_size, &self.camera, mouse_pos);
+    if !self.selected_tile_pos.is_none() {
+      let map_pos = self.selected_tile_pos.unwrap();
+      let pos = self.geom.map_pos_to_world_pos(map_pos);
+      let unit_id = 0;
+      self.scene_nodes.get_mut(&unit_id).pos = pos;
+    }
   }
 
   pub fn tick(&mut self) {
