@@ -130,19 +130,6 @@ pub fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
-fn fill_buffer<T>(buffer_size: i64, data: &[T]) {
-  unsafe {
-    let data_ptr = std::cast::transmute(&data[0]);
-    gl::BufferData(gl::ARRAY_BUFFER, buffer_size, data_ptr, gl::STATIC_DRAW);
-  }
-}
-
-pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
-  let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * 3 * glfloat_size) as GLsizeiptr;
-  fill_buffer(buffer_size, data);
-}
-
 pub fn gen_buffer() -> GLuint {
   let mut n = 0 as GLuint;
   unsafe {
@@ -155,6 +142,19 @@ pub fn delete_buffer(buffer: GLuint) {
   unsafe {
     gl::DeleteBuffers(1, &buffer);
   }
+}
+
+fn fill_buffer<T>(buffer_size: i64, data: &[T]) {
+  unsafe {
+    let data_ptr = std::cast::transmute(&data[0]);
+    gl::BufferData(gl::ARRAY_BUFFER, buffer_size, data_ptr, gl::STATIC_DRAW);
+  }
+}
+
+pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
+  let glfloat_size = std::mem::size_of::<GLfloat>();
+  let buffer_size = (data.len() * 3 * glfloat_size) as GLsizeiptr;
+  fill_buffer(buffer_size, data);
 }
 
 pub fn fill_current_color_vbo(data: &[Color3]) {
