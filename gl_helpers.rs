@@ -9,6 +9,7 @@ use gl::types::{
   GLchar,
   GLenum,
   GLsizeiptr,
+  GLsizei,
 };
 use cgmath::matrix::{
   Matrix,
@@ -219,8 +220,8 @@ pub fn load_texture(path: ~str) -> GLuint {
       gl::TEXTURE_2D,
       level,
       format as GLint,
-      image.width as gl::types::GLsizei,
-      image.height as gl::types::GLsizei,
+      image.width as GLsizei,
+      image.height as GLsizei,
       border,
       format,
       gl::UNSIGNED_BYTE,
