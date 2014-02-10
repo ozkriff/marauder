@@ -8,6 +8,7 @@ use gl::types::{
   GLuint,
   GLchar,
   GLenum,
+  GLsizeiptr,
 };
 use cgmath::matrix::{
   Matrix,
@@ -129,17 +130,17 @@ pub fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
   m.mul_m(&r)
 }
 
+fn fill_buffer<T>(buffer_size: i64, data: &[T]) {
+  unsafe {
+    let data_ptr = std::cast::transmute(&data[0]);
+    gl::BufferData(gl::ARRAY_BUFFER, buffer_size, data_ptr, gl::STATIC_DRAW);
+  }
+}
+
 pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
   let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * 3 * glfloat_size) as gl::types::GLsizeiptr;
-  unsafe {
-    gl::BufferData(
-      gl::ARRAY_BUFFER,
-      buffer_size,
-      std::cast::transmute(&data[0]),
-      gl::STATIC_DRAW,
-    );
-  }
+  let buffer_size = (data.len() * 3 * glfloat_size) as GLsizeiptr;
+  fill_buffer(buffer_size, data);
 }
 
 pub fn gen_buffer() -> GLuint {
@@ -158,28 +159,14 @@ pub fn delete_buffer(buffer: GLuint) {
 
 pub fn fill_current_color_vbo(data: &[Color3]) {
   let color3_size = std::mem::size_of::<Color3>();
-  let buffer_size = (data.len() * color3_size) as gl::types::GLsizeiptr;
-  unsafe {
-    gl::BufferData(
-      gl::ARRAY_BUFFER,
-      buffer_size,
-      std::cast::transmute(&data[0]),
-      gl::STATIC_DRAW,
-    );
-  }
+  let buffer_size = (data.len() * color3_size) as GLsizeiptr;
+  fill_buffer(buffer_size, data);
 }
 
 pub fn fill_current_vt_vbo(data: &[Vec2<GLfloat>]) {
   let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * 2 * glfloat_size) as gl::types::GLsizeiptr;
-  unsafe {
-    gl::BufferData(
-      gl::ARRAY_BUFFER,
-      buffer_size,
-      std::cast::transmute(&data[0]),
-      gl::STATIC_DRAW,
-    );
-  }
+  let buffer_size = (data.len() * 2 * glfloat_size) as GLsizeiptr;
+  fill_buffer(buffer_size, data);
 }
 
 pub fn vertex_attrib_pointer(attr: GLuint, components_count: i32) {
