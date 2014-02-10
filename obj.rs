@@ -97,7 +97,7 @@ impl Model {
     }
   }
 
-  pub fn build(&self) -> ~[Vec3<GLfloat>]{
+  pub fn build(&self) -> ~[Vec3<GLfloat>] {
     let mut mesh = ~[];
     for face in self.faces.iter() {
       for i in range(0, 3) {
@@ -108,7 +108,7 @@ impl Model {
     mesh
   }
 
-  pub fn build_tex_coord(&self) -> ~[Vec2<GLfloat>]{
+  pub fn build_tex_coord(&self) -> ~[Vec2<GLfloat>] {
     let mut tex_coords = ~[];
     for face in self.faces.iter() {
       for i in range(0, 3) {

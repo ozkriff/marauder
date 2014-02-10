@@ -230,7 +230,7 @@ impl Visualizer {
     self.mouse_pos = pos;
   }
 
-  fn get_events(&mut self) -> ~[glfw::WindowEvent]{
+  fn get_events(&mut self) -> ~[glfw::WindowEvent] {
     glfw::poll_events();
     let mut events = ~[];
     for (_, event) in self.win().flush_events() {
