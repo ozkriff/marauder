@@ -53,14 +53,17 @@ impl Mesh {
   pub fn draw(&self, program: GLuint) {
     if !self.texture_coords_vbo.is_none() {
       gl::BindBuffer(gl::ARRAY_BUFFER, self.texture_coords_vbo.unwrap());
-      glh::vertex_attrib_pointer(glh::get_attr(program, "vt"), 2);
+      let p = glh::get_attr(program, "in_texture_coordinates");
+      glh::vertex_attrib_pointer(p, 2);
     }
     if !self.color_vbo.is_none() {
       gl::BindBuffer(gl::ARRAY_BUFFER, self.color_vbo.unwrap());
-      glh::vertex_attrib_pointer(glh::get_attr(program, "color"), 3);
+      let p = glh::get_attr(program, "color");
+      glh::vertex_attrib_pointer(p, 3);
     }
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_coords_vbo);
-    glh::vertex_attrib_pointer(glh::get_attr(program, "position"), 3);
+    let p = glh::get_attr(program, "in_vertex_coordinates");
+    glh::vertex_attrib_pointer(p, 3);
     glh::draw_mesh(self.length);
   }
 }

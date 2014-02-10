@@ -67,7 +67,7 @@ impl TilePicker {
       read_file(&Path::new("pick.fs.glsl")),
     );
     gl::UseProgram(self.program);
-    let position_attr = glh::get_attr(self.program, "position");
+    let position_attr = glh::get_attr(self.program, "in_vertex_coordinates");
     let color_attr = glh::get_attr(self.program, "color");
     gl::EnableVertexAttribArray(position_attr);
     gl::EnableVertexAttribArray(color_attr);
