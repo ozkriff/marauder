@@ -1,9 +1,9 @@
-# marauder
+# Marauder
 
-[![Build Status](https://travis-ci.org/ozkriff/marauder.png?branch=master)](https://travis-ci.org/ozkriff/marauder)
+[![Build Status][build_status_img]](https://travis-ci.org/ozkriff/marauder)
 
-Marauder is turn-based post-apocalyptic hexagonal wargame
-written in [Rust](https://rust-lang.org).
+Marauder is turn-based post-apocalyptic hexagonal strategy game
+written in [Rust][rust].
 
 
 ## Contribute
@@ -27,3 +27,7 @@ Any feedback would be much appreciated!
 ## License
 
 Marauder is licensed under the MIT license (see the "LICENSE" file).
+
+
+[build_status_img]: https://travis-ci.org/ozkriff/marauder.png?branch=master
+[rust]: https://rust-lang.org
