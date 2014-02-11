@@ -54,20 +54,18 @@ pub struct SceneNode {
   pos: Vec3<f32>,
 }
 
-pub struct Visualizer {
-  program: GLuint,
-  map_mesh: Mesh,
-  unit_mesh: Mesh,
-  mat_id: GLint,
-  win: Option<glfw::Window>,
-  mouse_pos: Vec2<f32>,
-  camera: Camera,
-  picker: TilePicker,
-  selected_tile_pos: Option<Vec2<i32>>,
-  geom: Geom,
-  unit_texture_id: GLuint,
-  floor_texture_id: GLuint,
-  scene_nodes: HashMap<i32, SceneNode>,
+#[deriving(Decodable)]
+struct Size2<T> {
+  x: T,
+  y: T,
+}
+
+fn read_win_size(config_path: &str) -> Vec2<int> {
+  let path = Path::new(config_path);
+  let json = json::from_str(read_file(&path)).unwrap();
+  let mut decoder = json::Decoder::new(json);
+  let size: Size2<int> = Decodable::decode(&mut decoder);
+  Vec2{x: size.x, y: size.y}
 }
 
 fn init_win(win_size: Vec2<int>) -> glfw::Window {
@@ -87,18 +85,20 @@ fn init_win(win_size: Vec2<int>) -> glfw::Window {
   win
 }
 
-#[deriving(Decodable)]
-struct Size2<T> {
-  x: T,
-  y: T,
-}
-
-fn read_win_size(config_path: &str) -> Vec2<int> {
-  let path = Path::new(config_path);
-  let json = json::from_str(read_file(&path)).unwrap();
-  let mut decoder = json::Decoder::new(json);
-  let size: Size2<int> = Decodable::decode(&mut decoder);
-  Vec2{x: size.x, y: size.y}
+pub struct Visualizer {
+  program: GLuint,
+  map_mesh: Mesh,
+  unit_mesh: Mesh,
+  mat_id: GLint,
+  win: Option<glfw::Window>,
+  mouse_pos: Vec2<f32>,
+  camera: Camera,
+  picker: TilePicker,
+  selected_tile_pos: Option<Vec2<i32>>,
+  geom: Geom,
+  unit_texture_id: GLuint,
+  floor_texture_id: GLuint,
+  scene_nodes: HashMap<i32, SceneNode>,
 }
 
 impl Visualizer {
