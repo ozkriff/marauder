@@ -228,6 +228,15 @@ impl Visualizer {
     self.mouse_pos = pos;
   }
 
+  fn handle_mouse_button_event(&mut self) {
+    if !self.selected_tile_pos.is_none() {
+      let map_pos = self.selected_tile_pos.unwrap();
+      let pos = self.geom.map_pos_to_world_pos(map_pos);
+      let unit_id = 0;
+      self.scene_nodes.get_mut(&unit_id).pos = pos;
+    }
+  }
+
   fn get_events(&mut self) -> ~[glfw::WindowEvent] {
     glfw::poll_events();
     let mut events = ~[];
@@ -245,6 +254,9 @@ impl Visualizer {
       glfw::CursorPosEvent(x, y) => {
         let p = Vec2{x: x as f32, y: y as f32};
         self.handle_cursor_pos_event(p);
+      },
+      glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
+        self.handle_mouse_button_event();
       },
       glfw::SizeEvent(w, h) => {
         gl::Viewport(0, 0, w, h);
@@ -267,12 +279,6 @@ impl Visualizer {
     let win_size = self.win().get_size();
     self.selected_tile_pos = self.picker.pick_tile(
       win_size, &self.camera, mouse_pos);
-    if !self.selected_tile_pos.is_none() {
-      let map_pos = self.selected_tile_pos.unwrap();
-      let pos = self.geom.map_pos_to_world_pos(map_pos);
-      let unit_id = 0;
-      self.scene_nodes.get_mut(&unit_id).pos = pos;
-    }
   }
 
   pub fn tick(&mut self) {
