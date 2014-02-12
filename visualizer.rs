@@ -120,12 +120,8 @@ impl Visualizer {
     vis.init_opengl();
     vis.picker.init(&geom);
     vis.init_models();
-    vis.init_textures();
     vis.init_units();
     vis
-  }
-
-  fn init_textures(&mut self) {
   }
 
   fn win<'a>(&'a self) -> &'a glfw::Window {
