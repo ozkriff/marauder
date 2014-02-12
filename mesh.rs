@@ -16,6 +16,7 @@ pub struct Mesh {
   vertex_coords_vbo: GLuint,
   color_vbo: Option<GLuint>,
   texture_coords_vbo: Option<GLuint>,
+  texture_id: Option<GLuint>,
   length: int,
 }
 
@@ -25,6 +26,7 @@ impl Mesh {
       vertex_coords_vbo: 0,
       color_vbo: None,
       texture_coords_vbo: None,
+      texture_id: None,
       length: 0,
     }
   }
@@ -50,7 +52,17 @@ impl Mesh {
     glh::fill_current_texture_coords_vbo(data);
   }
 
+  pub fn set_texture(&mut self, texture_id: GLuint) {
+    self.texture_id = Some(texture_id);
+  }
+
   pub fn draw(&self, program: GLuint) {
+    if !self.texture_id.is_none() {
+      let basic_texture_loc = glh::get_uniform(program, "basic_texture");
+      gl::Uniform1ui(basic_texture_loc, 0);
+      gl::ActiveTexture(gl::TEXTURE0);
+      gl::BindTexture(gl::TEXTURE_2D, self.texture_id.unwrap());
+    }
     if !self.texture_coords_vbo.is_none() {
       gl::BindBuffer(gl::ARRAY_BUFFER, self.texture_coords_vbo.unwrap());
       let p = glh::get_attr(program, "in_texture_coordinates");

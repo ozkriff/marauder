@@ -96,8 +96,6 @@ pub struct Visualizer {
   picker: TilePicker,
   selected_tile_pos: Option<Vec2<i32>>,
   geom: Geom,
-  unit_texture_id: GLuint,
-  floor_texture_id: GLuint,
   scene_nodes: HashMap<i32, SceneNode>,
 }
 
@@ -117,8 +115,6 @@ impl Visualizer {
       picker: TilePicker::new(),
       selected_tile_pos: None,
       geom: geom,
-      unit_texture_id: 0,
-      floor_texture_id: 0,
       scene_nodes: HashMap::new(),
     };
     vis.init_opengl();
@@ -130,8 +126,6 @@ impl Visualizer {
   }
 
   fn init_textures(&mut self) {
-    self.unit_texture_id = glh::load_texture(~"data/tank.png");
-    self.floor_texture_id = glh::load_texture(~"data/floor.png");
   }
 
   fn win<'a>(&'a self) -> &'a glfw::Window {
@@ -154,9 +148,11 @@ impl Visualizer {
     let map_vertex_data = build_hex_mesh(&self.geom);
     self.map_mesh.set_vertex_coords(map_vertex_data);
     self.map_mesh.set_texture_coords(build_hex_tex_coord());
+    self.map_mesh.set_texture(glh::load_texture(~"data/floor.png"));
     let unit_obj = obj::Model::new("data/tank.obj");
     self.unit_mesh.set_vertex_coords(unit_obj.build());
     self.unit_mesh.set_texture_coords(unit_obj.build_tex_coord());
+    self.unit_mesh.set_texture(glh::load_texture(~"data/tank.png"));
   }
 
   fn add_unit(&mut self, id: i32, pos: Vec2<i32>) {
@@ -182,10 +178,6 @@ impl Visualizer {
 
   fn draw_units(&self) {
     gl::UseProgram(self.program);
-    let basic_texture_loc = glh::get_uniform(self.program, "basic_texture");
-    gl::Uniform1ui(basic_texture_loc, 0);
-    gl::ActiveTexture(gl::TEXTURE0);
-    gl::BindTexture(gl::TEXTURE_2D, self.unit_texture_id);
     for (_, unit) in self.scene_nodes.iter() {
       let m = glh::tr(self.camera.mat(), unit.pos);
       glh::uniform_mat4f(self.mat_id, &m);
@@ -194,10 +186,6 @@ impl Visualizer {
   }
 
   fn draw_map(&self) {
-    let basic_texture_loc = glh::get_uniform(self.program, "basic_texture");
-    gl::Uniform1ui(basic_texture_loc, 0);
-    gl::ActiveTexture(gl::TEXTURE0);
-    gl::BindTexture(gl::TEXTURE_2D, self.floor_texture_id);
     glh::uniform_mat4f(self.mat_id, &self.camera.mat());
     self.map_mesh.draw(self.program);
   }
