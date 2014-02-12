@@ -10,9 +10,7 @@ use std::num::{
   sin,
   cos,
 };
-use gl::types::{
-  GLfloat,
-};
+use gl::types::GLfloat;
 use cgmath::vector::{
   Vec2,
   Vec3,
