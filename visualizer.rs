@@ -135,12 +135,14 @@ impl Visualizer {
     );
     gl::UseProgram(self.program);
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");
-    let position_attr = glh::get_attr(self.program, "in_vertex_coordinates");
-    gl::EnableVertexAttribArray(position_attr);
-    glh::vertex_attrib_pointer(position_attr, 3);
-    let vt_attr = glh::get_attr(self.program, "in_texture_coordinates");
-    gl::EnableVertexAttribArray(vt_attr);
-    glh::vertex_attrib_pointer(vt_attr, 3);
+    let vertex_coordinates_attr = glh::get_attr(
+      self.program, "in_vertex_coordinates");
+    gl::EnableVertexAttribArray(vertex_coordinates_attr);
+    glh::vertex_attrib_pointer(vertex_coordinates_attr, 3);
+    let texture_coords_attr = glh::get_attr(
+      self.program, "in_texture_coordinates");
+    gl::EnableVertexAttribArray(texture_coords_attr);
+    glh::vertex_attrib_pointer(texture_coords_attr, 3);
     let map_vertex_data = build_hex_mesh(&self.geom);
     self.map_mesh.set_vertex_coords(map_vertex_data);
     self.map_mesh.set_texture_coords(build_hex_tex_coord());
