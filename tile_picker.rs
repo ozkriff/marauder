@@ -45,16 +45,22 @@ pub struct TilePicker {
   program: GLuint,
   map_mesh: Mesh,
   mat_id: GLint,
+  win_size: Vec2<i32>,
 }
 
 impl TilePicker {
-  pub fn new() -> TilePicker {
+  pub fn new(win_size: Vec2<i32>) -> TilePicker {
     let picker = TilePicker {
       program: 0,
       map_mesh: Mesh::new(),
       mat_id: 0,
+      win_size: win_size,
     };
     picker
+  }
+
+  pub fn set_win_size(&mut self, win_size: Vec2<i32>) {
+    self.win_size = win_size;
   }
 
   pub fn cleanup_opengl(&self) {
@@ -81,10 +87,9 @@ impl TilePicker {
 
   fn read_coords_from_image_buffer(
     &self,
-    win_size: (i32, i32),
     mouse_pos: Vec2<i32>
   ) -> Option<Vec2<i32>> {
-    let (_, height) = win_size;
+    let height = self.win_size.y;
     let reverted_y = height - mouse_pos.y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
     unsafe {
@@ -105,7 +110,6 @@ impl TilePicker {
 
   pub fn pick_tile(
     &mut self,
-    win_size: (i32, i32),
     camera: &Camera,
     mouse_pos: Vec2<i32>
   ) -> Option<Vec2<i32>> {
@@ -114,7 +118,7 @@ impl TilePicker {
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
     self.map_mesh.draw(self.program);
-    self.read_coords_from_image_buffer(win_size, mouse_pos)
+    self.read_coords_from_image_buffer(mouse_pos)
   }
 }
 

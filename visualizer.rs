@@ -60,15 +60,15 @@ struct Size2<T> {
   y: T,
 }
 
-fn read_win_size(config_path: &str) -> Vec2<int> {
+fn read_win_size(config_path: &str) -> Vec2<i32> {
   let path = Path::new(config_path);
   let json = json::from_str(read_file(&path)).unwrap();
   let mut decoder = json::Decoder::new(json);
-  let size: Size2<int> = Decodable::decode(&mut decoder);
+  let size: Size2<i32> = Decodable::decode(&mut decoder);
   Vec2{x: size.x, y: size.y}
 }
 
-fn init_win(win_size: Vec2<int>) -> glfw::Window {
+fn init_win(win_size: Vec2<i32>) -> glfw::Window {
   glfw::set_error_callback(~glfw::LogErrorHandler);
   let init_status = glfw::init();
   if !init_status.is_ok() {
@@ -112,7 +112,7 @@ impl Visualizer {
       win: Some(win),
       mouse_pos: Vec2::zero(),
       camera: Camera::new(),
-      picker: TilePicker::new(),
+      picker: TilePicker::new(win_size),
       selected_tile_pos: None,
       geom: geom,
       scene_nodes: HashMap::new(),
@@ -258,6 +258,7 @@ impl Visualizer {
       },
       glfw::SizeEvent(w, h) => {
         gl::Viewport(0, 0, w, h);
+        self.picker.set_win_size(Vec2{x: w, y: h});
       },
       _ => {},
     }
@@ -274,9 +275,7 @@ impl Visualizer {
       x: self.mouse_pos.x as i32,
       y: self.mouse_pos.y as i32,
     };
-    let win_size = self.win().get_size();
-    self.selected_tile_pos = self.picker.pick_tile(
-      win_size, &self.camera, mouse_pos);
+    self.selected_tile_pos = self.picker.pick_tile(&self.camera, mouse_pos);
   }
 
   pub fn tick(&mut self) {
