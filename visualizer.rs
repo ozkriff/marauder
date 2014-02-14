@@ -90,7 +90,7 @@ pub struct Visualizer {
   map_mesh: Mesh,
   unit_mesh: Mesh,
   mat_id: GLint,
-  win: Option<glfw::Window>,
+  win: glfw::Window,
   mouse_pos: Vec2<f32>,
   camera: Camera,
   picker: TilePicker,
@@ -109,7 +109,7 @@ impl Visualizer {
       map_mesh: Mesh::new(),
       unit_mesh: Mesh::new(),
       mat_id: 0,
-      win: Some(win),
+      win: win,
       mouse_pos: Vec2::zero(),
       camera: Camera::new(),
       picker: TilePicker::new(win_size),
@@ -125,7 +125,7 @@ impl Visualizer {
   }
 
   fn win<'a>(&'a self) -> &'a glfw::Window {
-    self.win.get_ref()
+    &self.win
   }
 
   fn init_models(&mut self) {
