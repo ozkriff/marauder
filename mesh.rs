@@ -39,14 +39,14 @@ impl Mesh {
   }
 
   pub fn set_color(&mut self, data: &[Color3]) {
-    self.length = data.len() as int;
+    assert_eq!(self.length, data.len() as int);
     self.color_vbo = Some(glh::gen_buffer());
     gl::BindBuffer(gl::ARRAY_BUFFER, self.color_vbo.unwrap());
     glh::fill_current_color_vbo(data);
   }
 
   pub fn set_texture_coords(&mut self, data: &[Vec2<GLfloat>]) {
-    self.length = data.len() as int;
+    assert_eq!(self.length, data.len() as int);
     self.texture_coords_vbo = Some(glh::gen_buffer());
     gl::BindBuffer(gl::ARRAY_BUFFER, self.texture_coords_vbo.unwrap());
     glh::fill_current_texture_coords_vbo(data);
