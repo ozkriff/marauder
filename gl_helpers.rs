@@ -195,7 +195,7 @@ fn load_image(path: ~str) -> image::Image<u8> {
       fail!("{}", message);
     },
     _ => {
-      fail!("unkn");
+      fail!("Unknown image format");
     }
   }
 }
