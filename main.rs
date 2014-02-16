@@ -5,13 +5,13 @@
 #[deny(unnecessary_qualification)];
 #[deny(unnecessary_typecast)];
 
-extern mod native;
-extern mod extra;
-extern mod serialize;
-extern mod cgmath;
-extern mod glfw = "glfw-rs";
-extern mod gl;
-extern mod stb_image;
+extern crate native;
+extern crate extra;
+extern crate serialize;
+extern crate cgmath;
+extern crate glfw = "glfw-rs";
+extern crate gl;
+extern crate stb_image;
 
 mod misc;
 mod visualizer;
