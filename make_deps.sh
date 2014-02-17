@@ -40,7 +40,7 @@ echo Building rust-stb-image...
 cd rust-stb-image
 ./configure
 make
-cp *.rlib
+cp *.rlib *.a
 cd ..
 
 # Return from 'deps' dir
