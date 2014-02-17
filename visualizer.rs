@@ -25,7 +25,7 @@ use misc::read_file;
 
 fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
   let mut vertex_data = ~[];
-  for tile_pos in TileIterator::new() {
+  for tile_pos in TileIterator::new(Vec2{x: 3, y: 4}) {
     let pos = geom.map_pos_to_world_pos(tile_pos);
     for num in range(0, 6) {
       let vertex = geom.index_to_hex_vertex(num);
@@ -40,7 +40,7 @@ fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
 
 fn build_hex_tex_coord() -> ~[Vec2<GLfloat>] {
   let mut vertex_data = ~[];
-  for _ in TileIterator::new() {
+  for _ in TileIterator::new(Vec2{x: 3, y: 4}) {
     for _ in range(0, 6) {
       vertex_data.push(Vec2{x: 0.0, y: 0.0});
       vertex_data.push(Vec2{x: 1.0, y: 0.0});

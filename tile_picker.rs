@@ -22,7 +22,7 @@ use misc::read_file;
 fn build_hex_map_mesh(geom: &Geom) -> (~[Vec3<GLfloat>], ~[Color3]) {
   let mut c_data = ~[];
   let mut v_data = ~[];
-  for tile_pos in TileIterator::new() {
+  for tile_pos in TileIterator::new(Vec2{x:3, y: 4}) {
     let pos3d = geom.map_pos_to_world_pos(tile_pos);
     for num in range(0, 6) {
       let vertex = geom.index_to_hex_vertex(num);
