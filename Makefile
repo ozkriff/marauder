@@ -22,6 +22,7 @@ SRC = \
   event_visualizer.rs \
   obj.rs \
   tile_picker.rs \
+  core_types.rs \
   visualizer.rs
 
 marauder: Makefile ${SRC}

@@ -27,6 +27,7 @@ mod core;
 mod event_visualizer;
 mod scene;
 mod world_pos;
+mod core_types;
 
 fn main() {
   let mut visualizer = visualizer::Visualizer::new();

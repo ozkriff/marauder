@@ -2,10 +2,15 @@
 
 use std::hashmap::HashMap;
 use cgmath::vector::Vec2;
+use core_types::{
+  Size2,
+  Int,
+  Bool,
+};
 
-pub type PlayerId = i32;
-pub type UnitId = i32;
-pub type MapPos = Vec2<i32>;
+pub type PlayerId = Int;
+pub type UnitId = Int;
+pub type MapPos = Vec2<Int>;
 
 pub enum Command {
   CommandMove(UnitId, MapPos),
@@ -32,7 +37,7 @@ pub struct Core<'a> {
   current_player_id: PlayerId,
   event_list: ~[~Event],
   event_view_lists: HashMap<PlayerId, ~[EventView]>,
-  map_size: Vec2<i32>,
+  map_size: Size2<Int>,
 }
 
 fn get_event_view_lists() -> HashMap<PlayerId, ~[EventView]> {
@@ -50,7 +55,7 @@ impl<'a> Core<'a> {
       current_player_id: 0,
       event_list: ~[],
       event_view_lists: get_event_view_lists(),
-      map_size: Vec2{x: 4, y: 8},
+      map_size: Size2{x: 4, y: 8},
     }
   }
 
@@ -87,7 +92,7 @@ impl<'a> Core<'a> {
     }
   }
 
-  pub fn is_unit_at(&'a self, pos: MapPos) -> bool {
+  pub fn is_unit_at(&'a self, pos: MapPos) -> Bool {
     self.units.iter().find(|u| u.pos == pos).is_some()
   }
 
@@ -123,7 +128,7 @@ impl<'a> Core<'a> {
 trait Event {
   fn apply(&self, core: &mut Core);
   fn get_view(&self) -> EventView;
-  // TODO: fn is_visible(&self) -> bool;
+  // TODO: fn is_visible(&self) -> Bool;
 }
 
 struct EventMove {
@@ -160,7 +165,7 @@ struct EventEndTurn {
 impl EventEndTurn {
   fn new(core: &Core) -> ~EventEndTurn {
     let old_id = core.current_player_id;
-    let max_id = core.players.len() as i32;
+    let max_id = core.players.len() as Int;
     let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
     ~EventEndTurn{old_id: old_id, new_id: new_id}
   }

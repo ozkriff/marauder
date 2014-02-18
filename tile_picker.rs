@@ -19,13 +19,17 @@ use geom::Geom;
 use mesh::Mesh;
 use misc::read_file;
 use core::MapPos;
+use core_types::{
+  Int,
+  Size2,
+};
 
-fn build_hex_map_mesh(geom: &Geom, map_size: Vec2<i32>) -> (~[Vec3<GLfloat>], ~[Color3]) {
+fn build_hex_map_mesh(geom: &Geom, map_size: Size2<Int>) -> (~[Vec3<GLfloat>], ~[Color3]) {
   let mut c_data = ~[];
   let mut v_data = ~[];
   for tile_pos in TileIterator::new(map_size) {
     let pos3d = geom.map_pos_to_world_pos(tile_pos);
-    for num in range(0, 6) {
+    for num in range(0 as Int, 6) {
       let vertex = geom.index_to_hex_vertex(num);
       let next_vertex = geom.index_to_hex_vertex(num + 1);
       let col_x = tile_pos.x as f32 / 255.0;
@@ -46,11 +50,11 @@ pub struct TilePicker {
   program: GLuint,
   map_mesh: Mesh,
   mat_id: GLint,
-  win_size: Vec2<i32>,
+  win_size: Size2<Int>,
 }
 
 impl TilePicker {
-  pub fn new(win_size: Vec2<i32>) -> TilePicker {
+  pub fn new(win_size: Size2<Int>) -> TilePicker {
     let picker = TilePicker {
       program: 0,
       map_mesh: Mesh::new(),
@@ -60,7 +64,7 @@ impl TilePicker {
     picker
   }
 
-  pub fn set_win_size(&mut self, win_size: Vec2<i32>) {
+  pub fn set_win_size(&mut self, win_size: Size2<Int>) {
     self.win_size = win_size;
   }
 
@@ -68,7 +72,7 @@ impl TilePicker {
     gl::DeleteProgram(self.program);
   }
 
-  pub fn init(&mut self, geom: &Geom, map_size: Vec2<i32>) {
+  pub fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
     self.program = glh::compile_program(
       read_file(&Path::new("pick.vs.glsl")),
       read_file(&Path::new("pick.fs.glsl")),
@@ -88,7 +92,7 @@ impl TilePicker {
 
   fn read_coords_from_image_buffer(
     &self,
-    mouse_pos: Vec2<i32>
+    mouse_pos: Vec2<Int>
   ) -> Option<MapPos> {
     let height = self.win_size.y;
     let reverted_y = height - mouse_pos.y;
@@ -103,7 +107,7 @@ impl TilePicker {
       );
     }
     if data[2] != 0 {
-      Some(Vec2{x: data[0] as i32, y: data[1] as i32})
+      Some(Vec2{x: data[0] as Int, y: data[1] as Int})
     } else {
       None
     }
@@ -112,7 +116,7 @@ impl TilePicker {
   pub fn pick_tile(
     &mut self,
     camera: &Camera,
-    mouse_pos: Vec2<i32>
+    mouse_pos: Vec2<Int>
   ) -> Option<MapPos> {
     gl::UseProgram(self.program);
     glh::uniform_mat4f(self.mat_id, &camera.mat());

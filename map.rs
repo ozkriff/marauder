@@ -2,14 +2,18 @@
 
 use cgmath::vector::Vec2;
 use core::MapPos;
+use core_types::{
+  Size2,
+  Int,
+};
 
 pub struct TileIterator {
   cursor: MapPos,
-  map_size: Vec2<i32>,
+  map_size: Size2<Int>,
 }
 
 impl TileIterator {
-  pub fn new(map_size: Vec2<i32>) -> TileIterator {
+  pub fn new(map_size: Size2<Int>) -> TileIterator {
     TileIterator {
       cursor: Vec2::zero(),
       map_size: map_size,

@@ -17,6 +17,9 @@ use cgmath::vector::{
   Vector,
 };
 use core::MapPos;
+use core_types::{
+  Int,
+};
 use world_pos::WorldPos;
 
 pub struct Geom {
@@ -37,8 +40,8 @@ impl Geom {
 
   pub fn map_pos_to_world_pos(&self, i: MapPos) -> WorldPos {
     let v = Vec2 {
-      x: (i.x as f32) * self.hex_in_radius * 2.0,
-      y: (i.y as f32) * self.hex_ex_radius * 1.5,
+      x: (i.x as GLfloat) * self.hex_in_radius * 2.0,
+      y: (i.y as GLfloat) * self.hex_ex_radius * 1.5,
     };
     if i.y % 2 == 0 {
       Vec3{x: v.x + self.hex_in_radius, y: v.y, z: 0.0}
@@ -47,12 +50,12 @@ impl Geom {
     }
   }
 
-  pub fn index_to_circle_vertex(&self, count: int, i: int) -> Vec3<f32> {
-    let n = FRAC_PI_2 + 2.0 * PI * (i as f32) / (count as f32);
+  pub fn index_to_circle_vertex(&self, count: Int, i: Int) -> Vec3<GLfloat> {
+    let n = FRAC_PI_2 + 2.0 * PI * (i as GLfloat) / (count as GLfloat);
     Vec3{x: cos(n), y: sin(n), z: 0.0}.mul_s(self.hex_ex_radius)
   }
 
-  pub fn index_to_hex_vertex(&self, i: int) -> Vec3<f32> {
+  pub fn index_to_hex_vertex(&self, i: Int) -> Vec3<GLfloat> {
     self.index_to_circle_vertex(6, i)
   }
 }

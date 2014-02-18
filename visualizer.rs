@@ -38,17 +38,22 @@ use scene::{
   SceneNode,
   Scene,
 };
+use core_types::{
+  Size2,
+  Int,
+  Bool,
+};
 use event_visualizer::{
   EventVisualizer,
   EventMoveVisualizer,
   EventEndTurnVisualizer,
 };
 
-fn build_hex_mesh(&geom: &Geom, map_size: Vec2<i32>) -> ~[Vec3<GLfloat>] {
+fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[Vec3<GLfloat>] {
   let mut vertex_data = ~[];
   for tile_pos in TileIterator::new(map_size) {
     let pos = geom.map_pos_to_world_pos(tile_pos);
-    for num in range(0, 6) {
+    for num in range(0 as Int, 6) {
       let vertex = geom.index_to_hex_vertex(num);
       let next_vertex = geom.index_to_hex_vertex(num + 1);
       vertex_data.push(pos + vertex);
@@ -59,7 +64,7 @@ fn build_hex_mesh(&geom: &Geom, map_size: Vec2<i32>) -> ~[Vec3<GLfloat>] {
   vertex_data
 }
 
-fn build_hex_tex_coord(map_size: Vec2<i32>) -> ~[Vec2<GLfloat>] {
+fn build_hex_tex_coord(map_size: Size2<Int>) -> ~[Vec2<GLfloat>] {
   let mut vertex_data = ~[];
   for _ in TileIterator::new(map_size) {
     for _ in range(0, 6) {
@@ -71,21 +76,15 @@ fn build_hex_tex_coord(map_size: Vec2<i32>) -> ~[Vec2<GLfloat>] {
   vertex_data
 }
 
-#[deriving(Decodable)]
-struct Size2<T> {
-  x: T,
-  y: T,
-}
-
-fn read_win_size(config_path: &str) -> Vec2<i32> {
+fn read_win_size(config_path: &str) -> Size2<Int> {
   let path = Path::new(config_path);
   let json = json::from_str(read_file(&path)).unwrap();
   let mut decoder = json::Decoder::new(json);
-  let size: Size2<i32> = Decodable::decode(&mut decoder);
-  Vec2{x: size.x, y: size.y}
+  let size: Size2<Int> = Decodable::decode(&mut decoder);
+  size
 }
 
-fn init_win(win_size: Vec2<i32>) -> glfw::Window {
+fn init_win(win_size: Size2<Int>) -> glfw::Window {
   glfw::set_error_callback(~glfw::LogErrorHandler);
   let init_status = glfw::init();
   if !init_status.is_ok() {
@@ -236,7 +235,7 @@ impl<'a> Visualizer<'a> {
     self.win().swap_buffers();
   }
 
-  pub fn is_running(&self) -> bool {
+  pub fn is_running(&self) -> Bool {
     return !self.win().should_close()
   }
 
@@ -304,7 +303,7 @@ impl<'a> Visualizer<'a> {
       },
       glfw::SizeEvent(w, h) => {
         gl::Viewport(0, 0, w, h);
-        self.picker.set_win_size(Vec2{x: w, y: h});
+        self.picker.set_win_size(Size2{x: w, y: h});
       },
       _ => {},
     }
@@ -318,8 +317,8 @@ impl<'a> Visualizer<'a> {
 
   fn pick_tile(&mut self) {
     let mouse_pos = Vec2 {
-      x: self.mouse_pos.x as i32,
-      y: self.mouse_pos.y as i32,
+      x: self.mouse_pos.x as Int,
+      y: self.mouse_pos.y as Int,
     };
     self.selected_tile_pos = self.picker.pick_tile(&self.camera, mouse_pos);
   }

@@ -28,6 +28,7 @@ use misc::{
   deg_to_rad,
 };
 use color::Color3;
+use core_types::Int;
 
 pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
   let shader = gl::CreateShader(shader_type);
@@ -101,7 +102,7 @@ pub fn get_uniform(program: GLuint, name: &str) -> GLint {
 
 pub fn draw_mesh(faces_count: int) {
   let starting_index = 0;
-  let vertices_count = faces_count as i32 * 3;
+  let vertices_count = faces_count as Int * 3;
   gl::DrawArrays(gl::TRIANGLES, starting_index, vertices_count);
 }
 
@@ -170,7 +171,7 @@ pub fn fill_current_texture_coords_vbo(data: &[Vec2<GLfloat>]) {
   fill_buffer(buffer_size, data);
 }
 
-pub fn vertex_attrib_pointer(attr: GLuint, components_count: i32) {
+pub fn vertex_attrib_pointer(attr: GLuint, components_count: Int) {
   let normalized = gl::FALSE;
   let stride = 0;
   unsafe {

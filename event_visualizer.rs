@@ -3,6 +3,10 @@
 use cgmath::vector::Vector;
 use gl::types::GLfloat;
 use geom::Geom;
+use core_types::{
+  Bool,
+  Int,
+};
 use core::{
   MapPos,
   UnitId,
@@ -11,7 +15,7 @@ use scene::Scene;
 use world_pos::WorldPos;
 
 pub trait EventVisualizer {
-  fn is_finished(&self) -> bool;
+  fn is_finished(&self) -> Bool;
   fn draw(&mut self, geom: &Geom, scene: &mut Scene);
   fn end(&mut self, geom: &Geom, scene: &mut Scene);
 }
@@ -21,11 +25,11 @@ static MOVE_SPEED: GLfloat = 40.0; // TODO: config?
 pub struct EventMoveVisualizer {
   unit_id: UnitId,
   path: ~[MapPos],
-  current_move_index: i32,
+  current_move_index: Int,
 }
 
 impl EventVisualizer for EventMoveVisualizer {
-  fn is_finished(&self) -> bool {
+  fn is_finished(&self) -> Bool {
     assert!(self.current_move_index <= self.frames_count());
     self.current_move_index == self.frames_count()
   }
@@ -50,9 +54,9 @@ impl EventMoveVisualizer {
     } as ~EventVisualizer
   }
 
-  fn frames_count(&self) -> i32 {
-    let len = self.path.len() as i32 - 1;
-    len * MOVE_SPEED as i32
+  fn frames_count(&self) -> Int {
+    let len = self.path.len() as Int - 1;
+    len * MOVE_SPEED as Int
   }
 
   fn current_tile(&self) -> MapPos {
@@ -68,12 +72,12 @@ impl EventMoveVisualizer {
     unit_node.pos = self.current_position(geom);
   }
 
-  fn current_tile_index(&self) -> i32 {
-    // self.current_move_index / MOVE_SPEED as i32
+  fn current_tile_index(&self) -> Int {
+    // self.current_move_index / MOVE_SPEED as Int
     0
   }
 
-  fn node_index(&self) -> i32 {
+  fn node_index(&self) -> Int {
     // self.current_move_index - self.current_tile_index() * MOVE_SPEED
     self.current_move_index
   }
@@ -95,7 +99,7 @@ impl EventEndTurnVisualizer {
 }
 
 impl EventVisualizer for EventEndTurnVisualizer {
-  fn is_finished(&self) -> bool {
+  fn is_finished(&self) -> Bool {
     true
   }
 
