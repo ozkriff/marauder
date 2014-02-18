@@ -22,6 +22,23 @@ use tile_picker::TilePicker;
 use obj;
 use mesh::Mesh;
 use misc::read_file;
+use core::{
+  Core,
+  Unit,
+  PlayerId,
+  CommandEndTurn,
+  CommandMove,
+  EventView,
+  EventViewMove,
+  EventViewEndTurn,
+};
+use event_visualizer::{
+  SceneNode,
+  Scene,
+  EventVisualizer,
+  EventMoveVisualizer,
+  EventEndTurnVisualizer,
+};
 
 fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
   let mut vertex_data = ~[];
@@ -48,10 +65,6 @@ fn build_hex_tex_coord() -> ~[Vec2<GLfloat>] {
     }
   }
   vertex_data
-}
-
-pub struct SceneNode {
-  pos: Vec3<f32>,
 }
 
 #[deriving(Decodable)]
@@ -85,7 +98,7 @@ fn init_win(win_size: Vec2<i32>) -> glfw::Window {
   win
 }
 
-pub struct Visualizer {
+pub struct Visualizer<'a> {
   program: GLuint,
   map_mesh: Mesh,
   unit_mesh: Mesh,
@@ -96,10 +109,12 @@ pub struct Visualizer {
   picker: TilePicker,
   selected_tile_pos: Option<Vec2<i32>>,
   geom: Geom,
-  scene_nodes: HashMap<i32, SceneNode>,
+  scenes: HashMap<PlayerId, Scene>,
+  core: Core<'a>,
+  event_visualizer: Option<~EventVisualizer>,
 }
 
-impl Visualizer {
+impl<'a> Visualizer<'a> {
   pub fn new() -> ~Visualizer {
     let win_size = read_win_size("config.json");
     let win = init_win(win_size);
@@ -115,7 +130,14 @@ impl Visualizer {
       picker: TilePicker::new(win_size),
       selected_tile_pos: None,
       geom: geom,
-      scene_nodes: HashMap::new(),
+      scenes: {
+        let mut m = HashMap::new();
+        m.insert(0 as PlayerId, HashMap::new());
+        m.insert(1 as PlayerId, HashMap::new());
+        m
+      },
+      core: Core::new(),
+      event_visualizer: None,
     };
     vis.init_opengl();
     vis.picker.init(&geom);
@@ -153,9 +175,16 @@ impl Visualizer {
     self.unit_mesh.set_texture(glh::load_texture(~"data/tank.png"));
   }
 
+  fn scene<'a>(&'a self) -> &'a Scene {
+    self.scenes.get(&self.core.current_player_id)
+  }
+
   fn add_unit(&mut self, id: i32, pos: Vec2<i32>) {
-    let world_pos = self.geom.map_pos_to_world_pos(pos);
-    self.scene_nodes.insert(id, SceneNode{pos: world_pos});
+    for (_, scene) in self.scenes.mut_iter() {
+      let world_pos = self.geom.map_pos_to_world_pos(pos);
+      scene.insert(id, SceneNode{pos: world_pos});
+      self.core.units.push(Unit{id: id, pos: pos});
+    }
   }
 
   fn init_units(&mut self) {
@@ -176,7 +205,7 @@ impl Visualizer {
 
   fn draw_units(&self) {
     gl::UseProgram(self.program);
-    for (_, unit) in self.scene_nodes.iter() {
+    for (_, unit) in self.scene().iter() {
       let m = glh::tr(self.camera.mat(), unit.pos);
       glh::uniform_mat4f(self.mat_id, &m);
       self.unit_mesh.draw(self.program);
@@ -188,12 +217,16 @@ impl Visualizer {
     self.map_mesh.draw(self.program);
   }
 
-  fn draw(&self) {
+  fn draw(&mut self) {
     gl::ClearColor(0.3, 0.3, 0.3, 1.0);
     gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
     gl::UseProgram(self.program);
     self.draw_units();
     self.draw_map();
+    if !self.event_visualizer.is_none() {
+      let scene = self.scenes.get_mut(&self.core.current_player_id);
+      self.event_visualizer.get_mut_ref().draw(&self.geom, scene);
+    }
     self.win().swap_buffers();
   }
 
@@ -205,6 +238,9 @@ impl Visualizer {
     match key {
       glfw::KeyEscape | glfw::KeyQ => {
         self.win().set_should_close(true);
+      },
+      glfw::KeyT => {
+        self.core.do_command(CommandEndTurn);
       },
       glfw::KeySpace => println!("space"),
       glfw::KeyUp => self.camera.move(270.0),
@@ -228,10 +264,9 @@ impl Visualizer {
 
   fn handle_mouse_button_event(&mut self) {
     if !self.selected_tile_pos.is_none() {
-      let map_pos = self.selected_tile_pos.unwrap();
-      let pos = self.geom.map_pos_to_world_pos(map_pos);
-      let unit_id = 0;
-      self.scene_nodes.get_mut(&unit_id).pos = pos;
+      let unit_id = 0; // TODO: selected_unit_id
+      let destination = self.selected_tile_pos.unwrap();
+      self.core.do_command(CommandMove(unit_id, destination));
     }
   }
 
@@ -278,14 +313,49 @@ impl Visualizer {
     self.selected_tile_pos = self.picker.pick_tile(&self.camera, mouse_pos);
   }
 
+  pub fn get_event_visualizer(
+    &mut self, event_view: EventView) -> ~EventVisualizer
+  {
+    match event_view {
+      EventViewMove(unit_id, path) => {
+        ~EventMoveVisualizer {
+          unit_id: unit_id,
+          path: path,
+          current_move_index: 0,
+        } as ~EventVisualizer
+      },
+      EventViewEndTurn(_, _) => {
+        ~EventEndTurnVisualizer as ~EventVisualizer
+      },
+    }
+  }
+
+  pub fn logic(&mut self) {
+    if self.event_visualizer.is_none() {
+      let player_id = self.core.current_player_id;
+      if self.core.event_view_lists.get(&player_id).len() != 0 {
+        let event_view = {
+          let event_view_list = self.core.event_view_lists.get_mut(&player_id);
+          event_view_list.shift().unwrap()
+        };
+        self.event_visualizer = Some(self.get_event_visualizer(event_view));
+      }
+    } else if self.event_visualizer.get_ref().is_finished() {
+      let scene = self.scenes.get_mut(&self.core.current_player_id);
+      self.event_visualizer.get_mut_ref().end(&self.geom, scene);
+      self.event_visualizer = None;
+    }
+  }
+
   pub fn tick(&mut self) {
     self.handle_events();
+    self.logic();
     self.pick_tile();
     self.draw();
   }
 }
 
-impl Drop for Visualizer {
+impl<'a> Drop for Visualizer<'a> {
   fn drop(&mut self) {
     self.cleanup_opengl();
   }

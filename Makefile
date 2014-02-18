@@ -18,6 +18,8 @@ SRC = \
   misc.rs \
   map.rs \
   mesh.rs \
+  core.rs \
+  event_visualizer.rs \
   obj.rs \
   tile_picker.rs \
   visualizer.rs

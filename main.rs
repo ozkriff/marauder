@@ -23,6 +23,8 @@ mod geom;
 mod tile_picker;
 mod obj;
 mod mesh;
+mod core;
+mod event_visualizer;
 
 fn main() {
   let mut visualizer = visualizer::Visualizer::new();
