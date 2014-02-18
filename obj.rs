@@ -5,12 +5,19 @@ use std::io::{
   BufferedReader,
   File
 };
-use gl::types::GLfloat;
 use cgmath::vector::{
   Vec3,
   Vec2,
 };
-use core_types::Int;
+use core_types::{
+  Bool,
+  Int,
+};
+use gl_types::{
+  VertexCoord,
+  TextureCoord,
+  Normal,
+};
 
 struct Face {
   vertex: [Int, ..3],
@@ -19,9 +26,9 @@ struct Face {
 }
 
 pub struct Model {
-  coords: ~[Vec3<GLfloat>],
-  normals: ~[Vec3<GLfloat>],
-  texture_coords: ~[Vec2<GLfloat>],
+  coords: ~[VertexCoord],
+  normals: ~[Normal],
+  texture_coords: ~[TextureCoord],
   faces: ~[Face],
 }
 
@@ -38,7 +45,7 @@ impl Model {
     obj
   }
 
-  fn read_v_or_vn(words: &mut Words) -> Vec3<GLfloat> {
+  fn read_v_or_vn(words: &mut Words) -> VertexCoord {
     Vec3 {
       x: from_str(words.next().unwrap()).unwrap(),
       y: from_str(words.next().unwrap()).unwrap(),
@@ -46,7 +53,7 @@ impl Model {
     }
   }
 
-  fn read_vt(words: &mut Words) -> Vec2<GLfloat> {
+  fn read_vt(words: &mut Words) -> TextureCoord {
     Vec2 {
       x: from_str(words.next().unwrap()).unwrap(),
       y: 1.0 - from_str(words.next().unwrap()).unwrap(), // flip
@@ -72,7 +79,7 @@ impl Model {
 
   fn read_line(&mut self, line: &str) {
     let mut words = line.words();
-    fn is_correct_tag(tag: &str) -> bool {
+    fn is_correct_tag(tag: &str) -> Bool {
       tag.len() != 0 && tag[0] != ('#' as u8)
     }
     match words.next() {
@@ -98,7 +105,7 @@ impl Model {
     }
   }
 
-  pub fn build(&self) -> ~[Vec3<GLfloat>] {
+  pub fn build(&self) -> ~[VertexCoord] {
     let mut mesh = ~[];
     for face in self.faces.iter() {
       for i in range(0, 3) {
@@ -109,7 +116,7 @@ impl Model {
     mesh
   }
 
-  pub fn build_tex_coord(&self) -> ~[Vec2<GLfloat>] {
+  pub fn build_tex_coord(&self) -> ~[TextureCoord] {
     let mut tex_coords = ~[];
     for face in self.faces.iter() {
       for i in range(0, 3) {

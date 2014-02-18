@@ -11,7 +11,6 @@ all: marauder
 
 SRC = \
   camera.rs \
-  color.rs \
   geom.rs \
   gl_helpers.rs \
   main.rs \
@@ -23,6 +22,7 @@ SRC = \
   obj.rs \
   tile_picker.rs \
   core_types.rs \
+  gl_types.rs \
   visualizer.rs
 
 marauder: Makefile ${SRC}

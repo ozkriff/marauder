@@ -7,6 +7,6 @@ pub struct Size2<T> {
 }
 
 pub type Bool = bool;
-pub type Int = i32;
+pub type Int = i32; // TODO: rename, collision with trait
 
 // vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:

@@ -3,7 +3,6 @@
 use std;
 use gl;
 use gl::types::{
-  GLfloat,
   GLint,
   GLuint,
 };
@@ -13,7 +12,6 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use map::TileIterator;
-use color::Color3;
 use camera::Camera;
 use geom::Geom;
 use mesh::Mesh;
@@ -23,8 +21,13 @@ use core_types::{
   Int,
   Size2,
 };
+use gl_types::{
+  VertexCoord,
+  Color3,
+  Float,
+};
 
-fn build_hex_map_mesh(geom: &Geom, map_size: Size2<Int>) -> (~[Vec3<GLfloat>], ~[Color3]) {
+fn build_hex_map_mesh(geom: &Geom, map_size: Size2<Int>) -> (~[VertexCoord], ~[Color3]) {
   let mut c_data = ~[];
   let mut v_data = ~[];
   for tile_pos in TileIterator::new(map_size) {
@@ -32,8 +35,8 @@ fn build_hex_map_mesh(geom: &Geom, map_size: Size2<Int>) -> (~[Vec3<GLfloat>], ~
     for num in range(0 as Int, 6) {
       let vertex = geom.index_to_hex_vertex(num);
       let next_vertex = geom.index_to_hex_vertex(num + 1);
-      let col_x = tile_pos.x as f32 / 255.0;
-      let col_y = tile_pos.y as f32 / 255.0;
+      let col_x = tile_pos.x as Float / 255.0;
+      let col_y = tile_pos.y as Float / 255.0;
       let color = Color3{r: col_x, g: col_y, b: 1.0};
       v_data.push(pos3d + vertex);
       c_data.push(color);

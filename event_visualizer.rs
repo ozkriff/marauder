@@ -1,7 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vector;
-use gl::types::GLfloat;
 use geom::Geom;
 use core_types::{
   Bool,
@@ -11,8 +10,11 @@ use core::{
   MapPos,
   UnitId,
 };
-use scene::Scene;
-use world_pos::WorldPos;
+use gl_types::{
+  Scene,
+  Float,
+  WorldPos,
+};
 
 pub trait EventVisualizer {
   fn is_finished(&self) -> Bool;
@@ -20,7 +22,7 @@ pub trait EventVisualizer {
   fn end(&mut self, geom: &Geom, scene: &mut Scene);
 }
 
-static MOVE_SPEED: GLfloat = 40.0; // TODO: config?
+static MOVE_SPEED: Float = 40.0; // TODO: config?
 
 pub struct EventMoveVisualizer {
   unit_id: UnitId,
@@ -86,7 +88,7 @@ impl EventMoveVisualizer {
     let from = geom.map_pos_to_world_pos(self.current_tile());
     let to = geom.map_pos_to_world_pos(self.next_tile());
     let diff = to.sub_v(&from).div_s(MOVE_SPEED);
-    from.add_v(&diff.mul_s(self.node_index() as GLfloat))
+    from.add_v(&diff.mul_s(self.node_index() as Float))
   }
 }
 

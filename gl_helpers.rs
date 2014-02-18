@@ -3,7 +3,6 @@
 use std;
 use gl;
 use gl::types::{
-  GLfloat,
   GLint,
   GLuint,
   GLchar,
@@ -19,7 +18,6 @@ use cgmath::matrix::{
 };
 use cgmath::vector::{
   Vec3,
-  Vec2,
 };
 use cgmath::angle;
 use stb_image::image;
@@ -27,7 +25,12 @@ use misc::{
   c_str,
   deg_to_rad,
 };
-use color::Color3;
+use gl_types::{
+  Float,
+  Color3,
+  TextureCoord,
+  VertexCoord,
+};
 use core_types::Int;
 
 pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
@@ -106,27 +109,27 @@ pub fn draw_mesh(faces_count: Int) {
   gl::DrawArrays(gl::TRIANGLES, starting_index, vertices_count);
 }
 
-pub fn uniform_mat4f(mat_id: GLint, mat: &Mat4<GLfloat>) {
+pub fn uniform_mat4f(mat_id: GLint, mat: &Mat4<Float>) {
   unsafe {
     gl::UniformMatrix4fv(mat_id, 1, gl::FALSE, mat.cr(0, 0));
   }
 }
 
-pub fn tr(m: Mat4<f32>, v: Vec3<f32>) -> Mat4<f32> {
-  let mut t = Mat4::<f32>::identity();
+pub fn tr(m: Mat4<Float>, v: Vec3<Float>) -> Mat4<Float> {
+  let mut t = Mat4::<Float>::identity();
   *t.mut_cr(3, 0) = v.x;
   *t.mut_cr(3, 1) = v.y;
   *t.mut_cr(3, 2) = v.z;
   m.mul_m(&t)
 }
 
-pub fn rot_x(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
+pub fn rot_x(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
   let rad = angle::rad(deg_to_rad(angle));
   let r = Mat3::from_angle_x(rad).to_mat4();
   m.mul_m(&r)
 }
 
-pub fn rot_z(m: Mat4<f32>, angle: f32) -> Mat4<f32> {
+pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
   let rad = angle::rad(deg_to_rad(angle));
   let r = Mat3::from_angle_z(rad).to_mat4();
   m.mul_m(&r)
@@ -153,21 +156,21 @@ fn fill_buffer<T>(buffer_size: i64, data: &[T]) {
   }
 }
 
-pub fn fill_current_coord_vbo(data: &[Vec3<GLfloat>]) {
-  let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * 3 * glfloat_size) as GLsizeiptr;
+pub fn fill_current_coord_vbo(data: &[VertexCoord]) {
+  let size = std::mem::size_of::<VertexCoord>();
+  let buffer_size = (data.len() * size) as GLsizeiptr;
   fill_buffer(buffer_size, data);
 }
 
 pub fn fill_current_color_vbo(data: &[Color3]) {
-  let color3_size = std::mem::size_of::<Color3>();
-  let buffer_size = (data.len() * color3_size) as GLsizeiptr;
+  let size = std::mem::size_of::<Color3>();
+  let buffer_size = (data.len() * size) as GLsizeiptr;
   fill_buffer(buffer_size, data);
 }
 
-pub fn fill_current_texture_coords_vbo(data: &[Vec2<GLfloat>]) {
-  let glfloat_size = std::mem::size_of::<GLfloat>();
-  let buffer_size = (data.len() * 2 * glfloat_size) as GLsizeiptr;
+pub fn fill_current_texture_coords_vbo(data: &[TextureCoord]) {
+  let size = std::mem::size_of::<TextureCoord>();
+  let buffer_size = (data.len() * size) as GLsizeiptr;
   fill_buffer(buffer_size, data);
 }
 

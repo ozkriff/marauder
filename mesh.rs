@@ -1,16 +1,13 @@
 // See LICENSE file for copyright and license details.
 
 use gl;
-use gl::types::{
-  GLfloat,
-  GLuint,
-};
-use cgmath::vector::{
-  Vec3,
-  Vec2,
-};
+use gl::types::GLuint;
 use glh = gl_helpers;
-use color::Color3;
+use gl_types::{
+  Color3,
+  VertexCoord,
+  TextureCoord,
+};
 use core_types::Int;
 
 pub struct Mesh {
@@ -32,7 +29,7 @@ impl Mesh {
     }
   }
 
-  pub fn set_vertex_coords(&mut self, data: &[Vec3<GLfloat>]) {
+  pub fn set_vertex_coords(&mut self, data: &[VertexCoord]) {
     self.length = data.len() as Int;
     self.vertex_coords_vbo = glh::gen_buffer();
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_coords_vbo);
@@ -46,7 +43,7 @@ impl Mesh {
     glh::fill_current_color_vbo(data);
   }
 
-  pub fn set_texture_coords(&mut self, data: &[Vec2<GLfloat>]) {
+  pub fn set_texture_coords(&mut self, data: &[TextureCoord]) {
     assert_eq!(self.length, data.len() as Int);
     self.texture_coords_vbo = Some(glh::gen_buffer());
     gl::BindBuffer(gl::ARRAY_BUFFER, self.texture_coords_vbo.unwrap());

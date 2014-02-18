@@ -18,15 +18,13 @@ mod visualizer;
 mod gl_helpers;
 mod camera;
 mod map;
-mod color;
+mod gl_types;
 mod geom;
 mod tile_picker;
 mod obj;
 mod mesh;
 mod core;
 mod event_visualizer;
-mod scene;
-mod world_pos;
 mod core_types;
 
 fn main() {

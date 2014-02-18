@@ -6,7 +6,6 @@ use serialize::Decodable;
 use glfw;
 use gl;
 use gl::types::{
-  GLfloat,
   GLint,
   GLuint,
 };
@@ -34,14 +33,18 @@ use core::{
   EventViewEndTurn,
   MapPos,
 };
-use scene::{
-  SceneNode,
-  Scene,
-};
 use core_types::{
   Size2,
   Int,
   Bool,
+};
+use gl_types::{
+  SceneNode,
+  Scene,
+  VertexCoord,
+  TextureCoord,
+  Float,
+  Point2,
 };
 use event_visualizer::{
   EventVisualizer,
@@ -49,7 +52,7 @@ use event_visualizer::{
   EventEndTurnVisualizer,
 };
 
-fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[Vec3<GLfloat>] {
+fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
   let mut vertex_data = ~[];
   for tile_pos in TileIterator::new(map_size) {
     let pos = geom.map_pos_to_world_pos(tile_pos);
@@ -64,7 +67,7 @@ fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[Vec3<GLfloat>] {
   vertex_data
 }
 
-fn build_hex_tex_coord(map_size: Size2<Int>) -> ~[Vec2<GLfloat>] {
+fn build_hex_tex_coord(map_size: Size2<Int>) -> ~[TextureCoord] {
   let mut vertex_data = ~[];
   for _ in TileIterator::new(map_size) {
     for _ in range(0, 6) {
@@ -107,7 +110,7 @@ pub struct Visualizer<'a> {
   unit_mesh: Mesh,
   mat_id: GLint,
   win: glfw::Window,
-  mouse_pos: Vec2<f32>,
+  mouse_pos: Point2<Float>,
   camera: Camera,
   picker: TilePicker,
   selected_tile_pos: Option<MapPos>,
@@ -258,7 +261,7 @@ impl<'a> Visualizer<'a> {
     }
   }
 
-  fn handle_cursor_pos_event(&mut self, pos: Vec2<f32>) {
+  fn handle_cursor_pos_event(&mut self, pos: Point2<Float>) {
     let button = self.win().get_mouse_button(glfw::MouseButtonRight);
     if button == glfw::Press {
       self.camera.z_angle += (self.mouse_pos.x - pos.x) / 2.0;
@@ -295,7 +298,7 @@ impl<'a> Visualizer<'a> {
         self.handle_key_event(key);
       },
       glfw::CursorPosEvent(x, y) => {
-        let p = Vec2{x: x as f32, y: y as f32};
+        let p = Vec2{x: x as Float, y: y as Float};
         self.handle_cursor_pos_event(p);
       },
       glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
