@@ -54,23 +54,26 @@ impl<'a> Core<'a> {
     }
   }
 
-  pub fn id_to_unit_mut(&'a mut self, id: UnitId) -> Option<&'a mut Unit> {
-    // TODO: Simplify
-    for unit in self.units.mut_iter() {
-      if unit.id == id {
-        return Some(unit);
-      }
-    }
-    None
+  pub fn id_to_unit_mut_opt(&'a mut self, id: UnitId) -> Option<&'a mut Unit> {
+    self.units.mut_iter().find(|u| u.id == id)
   }
 
-  pub fn id_to_unit(&'a self, id: UnitId) -> Option<&'a Unit> {
-    for unit in self.units.iter() {
-      if unit.id == id {
-        return Some(unit);
-      }
+  pub fn id_to_unit_mut(&'a mut self, id: UnitId) -> &'a mut Unit {
+    match self.id_to_unit_mut_opt(id) {
+      Some(unit) => unit,
+      None => fail!("Bad unit id: {}", id),
     }
-    None
+  }
+
+  pub fn id_to_unit_opt(&'a self, id: UnitId) -> Option<&'a Unit> {
+    self.units.iter().find(|u| u.id == id)
+  }
+
+  pub fn id_to_unit(&'a self, id: UnitId) -> &'a Unit {
+    match self.id_to_unit_opt(id) {
+      Some(unit) => unit,
+      None => fail!("Bad unit id: {}", id),
+    }
   }
 
   fn command_to_event(&self, command: Command) -> ~Event {
@@ -115,10 +118,7 @@ struct EventMove {
 
 impl EventMove {
   fn new(core: &Core, unit_id: UnitId, destination: MapPos) -> ~EventMove {
-    let start_pos = match core.id_to_unit(unit_id) {
-      Some(unit) => unit.pos,
-      None => fail!("Bad unit id: {}", unit_id),
-    };
+    let start_pos = core.id_to_unit(unit_id).pos;
     ~EventMove {
       path: ~[start_pos, destination],
       unit_id: unit_id,
@@ -132,10 +132,7 @@ impl Event for EventMove {
   }
 
   fn apply(&self, core: &mut Core) {
-    let unit = match core.id_to_unit_mut(self.unit_id) {
-      Some(unit) => unit,
-      None => fail!("Bad unit id: {}", self.unit_id),
-    };
+    let unit = core.id_to_unit_mut(self.unit_id);
     unit.pos = *self.path.last().unwrap();
   }
 }
