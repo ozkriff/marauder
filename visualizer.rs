@@ -112,6 +112,7 @@ pub struct Visualizer<'a> {
   camera: Camera,
   picker: TilePicker,
   selected_tile_pos: Option<MapPos>,
+  selected_unit_id: Option<UnitId>,
   geom: Geom,
   scenes: HashMap<PlayerId, Scene>,
   core: Core<'a>,
@@ -133,6 +134,7 @@ impl<'a> Visualizer<'a> {
       camera: Camera::new(),
       picker: TilePicker::new(win_size),
       selected_tile_pos: None,
+      selected_unit_id: None,
       geom: geom,
       scenes: {
         let mut m = HashMap::new();
@@ -267,10 +269,15 @@ impl<'a> Visualizer<'a> {
   }
 
   fn handle_mouse_button_event(&mut self) {
-    if !self.selected_tile_pos.is_none() {
-      let unit_id = 0; // TODO: selected_unit_id
-      let destination = self.selected_tile_pos.unwrap();
-      self.core.do_command(CommandMove(unit_id, destination));
+    if self.selected_tile_pos.is_some() {
+      let pos = self.selected_tile_pos.unwrap();
+      if self.core.is_unit_at(pos) {
+        let unit = self.core.unit_at_mut(pos);
+        self.selected_unit_id = Some(unit.id);
+      } else if self.selected_unit_id.is_some() {
+        let unit_id = self.selected_unit_id.unwrap();
+        self.core.do_command(CommandMove(unit_id, pos));
+      }
     }
   }
 

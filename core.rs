@@ -76,6 +76,21 @@ impl<'a> Core<'a> {
     }
   }
 
+  pub fn unit_at_mut_opt(&'a mut self, pos: MapPos) -> Option<&'a mut Unit> {
+    self.units.mut_iter().find(|u| u.pos == pos)
+  }
+
+  pub fn unit_at_mut(&'a mut self, pos: MapPos) -> &'a mut Unit {
+    match self.unit_at_mut_opt(pos) {
+      Some(unit) => unit,
+      None => fail!("No unit at pos: {:?}", pos),
+    }
+  }
+
+  pub fn is_unit_at(&'a self, pos: MapPos) -> bool {
+    self.units.iter().find(|u| u.pos == pos).is_some()
+  }
+
   fn command_to_event(&self, command: Command) -> ~Event {
     match command {
       CommandEndTurn => {
