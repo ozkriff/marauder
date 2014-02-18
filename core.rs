@@ -93,7 +93,7 @@ impl<'a> Core<'a> {
     self.make_event_views();
   }
 
-  pub fn make_event_views(&mut self) {
+  fn make_event_views(&mut self) {
     while self.event_list.len() != 0 {
       let event = self.event_list.pop().unwrap();
       event.apply(self);
