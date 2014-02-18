@@ -42,9 +42,9 @@ use event_visualizer::{
   EventEndTurnVisualizer,
 };
 
-fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
+fn build_hex_mesh(&geom: &Geom, map_size: Vec2<i32>) -> ~[Vec3<GLfloat>] {
   let mut vertex_data = ~[];
-  for tile_pos in TileIterator::new(Vec2{x: 3, y: 4}) {
+  for tile_pos in TileIterator::new(map_size) {
     let pos = geom.map_pos_to_world_pos(tile_pos);
     for num in range(0, 6) {
       let vertex = geom.index_to_hex_vertex(num);
@@ -57,9 +57,9 @@ fn build_hex_mesh(&geom: &Geom) -> ~[Vec3<GLfloat>] {
   vertex_data
 }
 
-fn build_hex_tex_coord() -> ~[Vec2<GLfloat>] {
+fn build_hex_tex_coord(map_size: Vec2<i32>) -> ~[Vec2<GLfloat>] {
   let mut vertex_data = ~[];
-  for _ in TileIterator::new(Vec2{x: 3, y: 4}) {
+  for _ in TileIterator::new(map_size) {
     for _ in range(0, 6) {
       vertex_data.push(Vec2{x: 0.0, y: 0.0});
       vertex_data.push(Vec2{x: 1.0, y: 0.0});
@@ -142,7 +142,7 @@ impl<'a> Visualizer<'a> {
       event_visualizer: None,
     };
     vis.init_opengl();
-    vis.picker.init(&geom);
+    vis.picker.init(&geom, vis.core.map_size);
     vis.init_models();
     vis.init_units();
     vis
@@ -167,9 +167,9 @@ impl<'a> Visualizer<'a> {
       self.program, "in_texture_coordinates");
     gl::EnableVertexAttribArray(texture_coords_attr);
     glh::vertex_attrib_pointer(texture_coords_attr, 3);
-    let map_vertex_data = build_hex_mesh(&self.geom);
+    let map_vertex_data = build_hex_mesh(&self.geom, self.core.map_size);
     self.map_mesh.set_vertex_coords(map_vertex_data);
-    self.map_mesh.set_texture_coords(build_hex_tex_coord());
+    self.map_mesh.set_texture_coords(build_hex_tex_coord(self.core.map_size));
     self.map_mesh.set_texture(glh::load_texture(~"data/floor.png"));
     let unit_obj = obj::Model::new("data/tank.obj");
     self.unit_mesh.set_vertex_coords(unit_obj.build());

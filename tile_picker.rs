@@ -20,10 +20,10 @@ use mesh::Mesh;
 use misc::read_file;
 use core::MapPos;
 
-fn build_hex_map_mesh(geom: &Geom) -> (~[Vec3<GLfloat>], ~[Color3]) {
+fn build_hex_map_mesh(geom: &Geom, map_size: Vec2<i32>) -> (~[Vec3<GLfloat>], ~[Color3]) {
   let mut c_data = ~[];
   let mut v_data = ~[];
-  for tile_pos in TileIterator::new(Vec2{x:3, y: 4}) {
+  for tile_pos in TileIterator::new(map_size) {
     let pos3d = geom.map_pos_to_world_pos(tile_pos);
     for num in range(0, 6) {
       let vertex = geom.index_to_hex_vertex(num);
@@ -68,7 +68,7 @@ impl TilePicker {
     gl::DeleteProgram(self.program);
   }
 
-  pub fn init(&mut self, geom: &Geom) {
+  pub fn init(&mut self, geom: &Geom, map_size: Vec2<i32>) {
     self.program = glh::compile_program(
       read_file(&Path::new("pick.vs.glsl")),
       read_file(&Path::new("pick.fs.glsl")),
@@ -80,7 +80,7 @@ impl TilePicker {
     gl::EnableVertexAttribArray(color_attr);
     glh::vertex_attrib_pointer(position_attr, 3);
     glh::vertex_attrib_pointer(color_attr, 3);
-    let (vertex_data, color_data) =  build_hex_map_mesh(geom);
+    let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
     self.map_mesh.set_vertex_coords(vertex_data);
     self.map_mesh.set_color(color_data);
     self.mat_id = glh::get_uniform(self.program, "mvp_mat");

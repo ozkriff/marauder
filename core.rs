@@ -32,6 +32,7 @@ pub struct Core<'a> {
   current_player_id: PlayerId,
   event_list: ~[~Event],
   event_view_lists: HashMap<PlayerId, ~[EventView]>,
+  map_size: Vec2<i32>,
 }
 
 fn get_event_view_lists() -> HashMap<PlayerId, ~[EventView]> {
@@ -49,6 +50,7 @@ impl<'a> Core<'a> {
       current_player_id: 0,
       event_list: ~[],
       event_view_lists: get_event_view_lists(),
+      map_size: Vec2{x: 4, y: 8},
     }
   }
 
