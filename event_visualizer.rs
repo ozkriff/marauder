@@ -16,7 +16,7 @@ pub trait EventVisualizer {
   fn end(&mut self, geom: &Geom, scene: &mut Scene);
 }
 
-static MOVE_SPEED: GLfloat = 400.0; // TODO: config?
+static MOVE_SPEED: GLfloat = 40.0; // TODO: config?
 
 pub struct EventMoveVisualizer {
   unit_id: UnitId,
@@ -42,7 +42,13 @@ impl EventVisualizer for EventMoveVisualizer {
 }
 
 impl EventMoveVisualizer {
-  // TODO: fn new() -> ...
+  pub fn new(unit_id: UnitId, path: ~[MapPos]) -> ~EventVisualizer {
+    ~EventMoveVisualizer {
+      unit_id: unit_id,
+      path: path,
+      current_move_index: 0,
+    } as ~EventVisualizer
+  }
 
   fn frames_count(&self) -> i32 {
     let len = self.path.len() as i32 - 1;
@@ -81,6 +87,12 @@ impl EventMoveVisualizer {
 }
 
 pub struct EventEndTurnVisualizer;
+
+impl EventEndTurnVisualizer {
+  pub fn new() -> ~EventVisualizer {
+    ~EventEndTurnVisualizer as ~EventVisualizer
+  }
+}
 
 impl EventVisualizer for EventEndTurnVisualizer {
   fn is_finished(&self) -> bool {

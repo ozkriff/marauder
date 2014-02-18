@@ -324,19 +324,16 @@ impl<'a> Visualizer<'a> {
     self.selected_tile_pos = self.picker.pick_tile(&self.camera, mouse_pos);
   }
 
-  pub fn get_event_visualizer(
-    &mut self, event_view: EventView) -> ~EventVisualizer
-  {
+  pub fn make_event_visualizer(
+    &mut self,
+    event_view: EventView
+  ) -> ~EventVisualizer {
     match event_view {
       EventViewMove(unit_id, path) => {
-        ~EventMoveVisualizer {
-          unit_id: unit_id,
-          path: path,
-          current_move_index: 0,
-        } as ~EventVisualizer
+        EventMoveVisualizer::new(unit_id, path)
       },
       EventViewEndTurn(_, _) => {
-        ~EventEndTurnVisualizer as ~EventVisualizer
+        EventEndTurnVisualizer::new()
       },
     }
   }
@@ -349,7 +346,7 @@ impl<'a> Visualizer<'a> {
           let event_view_list = self.core.event_view_lists.get_mut(&player_id);
           event_view_list.shift().unwrap()
         };
-        self.event_visualizer = Some(self.get_event_visualizer(event_view));
+        self.event_visualizer = Some(self.make_event_visualizer(event_view));
       }
     } else if self.event_visualizer.get_ref().is_finished() {
       let scene = self.scenes.get_mut(&self.core.current_player_id);
