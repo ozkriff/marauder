@@ -35,8 +35,7 @@ rustc cgmath-rs/src/cgmath/lib.rs --out-dir .
 
 # rust-stb-image
 echo Downloading rust-stb-image...
-# TODO: git clone --depth=1 https://github.com/mozilla-servo/rust-stb-image
-git clone --depth=1 https://github.com/ozkriff/rust-stb-image
+git clone --depth=1 https://github.com/mozilla-servo/rust-stb-image
 echo Building rust-stb-image...
 cd rust-stb-image
 ./configure
