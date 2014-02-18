@@ -1,9 +1,10 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vec2;
+use core::MapPos;
 
 pub struct TileIterator {
-  cursor: Vec2<i32>,
+  cursor: MapPos,
   map_size: Vec2<i32>,
 }
 
@@ -16,8 +17,8 @@ impl TileIterator {
   }
 }
 
-impl Iterator<Vec2<i32>> for TileIterator {
-  fn next(&mut self) -> Option<Vec2<i32>> {
+impl Iterator<MapPos> for TileIterator {
+  fn next(&mut self) -> Option<MapPos> {
     let current_pos = if self.cursor.y > self.map_size.y {
       None
     } else {

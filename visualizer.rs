@@ -25,12 +25,14 @@ use misc::read_file;
 use core::{
   Core,
   Unit,
+  UnitId,
   PlayerId,
   CommandEndTurn,
   CommandMove,
   EventView,
   EventViewMove,
   EventViewEndTurn,
+  MapPos,
 };
 use event_visualizer::{
   SceneNode,
@@ -107,7 +109,7 @@ pub struct Visualizer<'a> {
   mouse_pos: Vec2<f32>,
   camera: Camera,
   picker: TilePicker,
-  selected_tile_pos: Option<Vec2<i32>>,
+  selected_tile_pos: Option<MapPos>,
   geom: Geom,
   scenes: HashMap<PlayerId, Scene>,
   core: Core<'a>,
@@ -179,7 +181,7 @@ impl<'a> Visualizer<'a> {
     self.scenes.get(&self.core.current_player_id)
   }
 
-  fn add_unit(&mut self, id: i32, pos: Vec2<i32>) {
+  fn add_unit(&mut self, id: UnitId, pos: MapPos) {
     for (_, scene) in self.scenes.mut_iter() {
       let world_pos = self.geom.map_pos_to_world_pos(pos);
       scene.insert(id, SceneNode{pos: world_pos});

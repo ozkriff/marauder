@@ -16,6 +16,8 @@ use cgmath::vector::{
   Vec3,
   Vector,
 };
+use core::MapPos;
+use event_visualizer::WorldPos;
 
 pub struct Geom {
   hex_ex_radius: GLfloat,
@@ -33,7 +35,7 @@ impl Geom {
     }
   }
 
-  pub fn map_pos_to_world_pos(&self, i: Vec2<i32>) -> Vec3<f32> {
+  pub fn map_pos_to_world_pos(&self, i: MapPos) -> WorldPos {
     let v = Vec2 {
       x: (i.x as f32) * self.hex_in_radius * 2.0,
       y: (i.y as f32) * self.hex_ex_radius * 1.5,

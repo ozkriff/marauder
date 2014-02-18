@@ -18,6 +18,7 @@ use camera::Camera;
 use geom::Geom;
 use mesh::Mesh;
 use misc::read_file;
+use core::MapPos;
 
 fn build_hex_map_mesh(geom: &Geom) -> (~[Vec3<GLfloat>], ~[Color3]) {
   let mut c_data = ~[];
@@ -88,7 +89,7 @@ impl TilePicker {
   fn read_coords_from_image_buffer(
     &self,
     mouse_pos: Vec2<i32>
-  ) -> Option<Vec2<i32>> {
+  ) -> Option<MapPos> {
     let height = self.win_size.y;
     let reverted_y = height - mouse_pos.y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
@@ -112,7 +113,7 @@ impl TilePicker {
     &mut self,
     camera: &Camera,
     mouse_pos: Vec2<i32>
-  ) -> Option<Vec2<i32>> {
+  ) -> Option<MapPos> {
     gl::UseProgram(self.program);
     glh::uniform_mat4f(self.mat_id, &camera.mat());
     gl::ClearColor(0.0, 0.0, 0.0, 1.0);
