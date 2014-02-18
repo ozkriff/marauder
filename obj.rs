@@ -10,11 +10,12 @@ use cgmath::vector::{
   Vec3,
   Vec2,
 };
+use core_types::Int;
 
 struct Face {
-  vertex: [int, ..3],
-  texture: [int, ..3],
-  normal: [int, ..3],
+  vertex: [Int, ..3],
+  texture: [Int, ..3],
+  normal: [Int, ..3],
 }
 
 pub struct Model {

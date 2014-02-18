@@ -11,13 +11,14 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use color::Color3;
+use core_types::Int;
 
 pub struct Mesh {
   vertex_coords_vbo: GLuint,
   color_vbo: Option<GLuint>,
   texture_coords_vbo: Option<GLuint>,
   texture_id: Option<GLuint>,
-  length: int,
+  length: Int,
 }
 
 impl Mesh {
@@ -32,21 +33,21 @@ impl Mesh {
   }
 
   pub fn set_vertex_coords(&mut self, data: &[Vec3<GLfloat>]) {
-    self.length = data.len() as int;
+    self.length = data.len() as Int;
     self.vertex_coords_vbo = glh::gen_buffer();
     gl::BindBuffer(gl::ARRAY_BUFFER, self.vertex_coords_vbo);
     glh::fill_current_coord_vbo(data);
   }
 
   pub fn set_color(&mut self, data: &[Color3]) {
-    assert_eq!(self.length, data.len() as int);
+    assert_eq!(self.length, data.len() as Int);
     self.color_vbo = Some(glh::gen_buffer());
     gl::BindBuffer(gl::ARRAY_BUFFER, self.color_vbo.unwrap());
     glh::fill_current_color_vbo(data);
   }
 
   pub fn set_texture_coords(&mut self, data: &[Vec2<GLfloat>]) {
-    assert_eq!(self.length, data.len() as int);
+    assert_eq!(self.length, data.len() as Int);
     self.texture_coords_vbo = Some(glh::gen_buffer());
     gl::BindBuffer(gl::ARRAY_BUFFER, self.texture_coords_vbo.unwrap());
     glh::fill_current_texture_coords_vbo(data);

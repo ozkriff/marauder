@@ -100,9 +100,9 @@ pub fn get_uniform(program: GLuint, name: &str) -> GLint {
   }
 }
 
-pub fn draw_mesh(faces_count: int) {
+pub fn draw_mesh(faces_count: Int) {
   let starting_index = 0;
-  let vertices_count = faces_count as Int * 3;
+  let vertices_count = faces_count * 3;
   gl::DrawArrays(gl::TRIANGLES, starting_index, vertices_count);
 }
 
