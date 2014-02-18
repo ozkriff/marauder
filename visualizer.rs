@@ -191,15 +191,16 @@ impl<'a> Visualizer<'a> {
     for (_, scene) in self.scenes.mut_iter() {
       let world_pos = self.geom.map_pos_to_world_pos(pos);
       scene.insert(id, SceneNode{pos: world_pos});
-      self.core.units.push(Unit{id: id, pos: pos});
     }
+    self.core.units.push(Unit{id: id, pos: pos});
   }
 
   fn init_units(&mut self) {
+    // TODO: generate unique ids
     self.add_unit(0, Vec2{x: 0, y: 0});
     self.add_unit(1, Vec2{x: 0, y: 1});
     self.add_unit(2, Vec2{x: 1, y: 0});
-    self.add_unit(2, Vec2{x: 1, y: 1});
+    self.add_unit(3, Vec2{x: 1, y: 1});
   }
 
   fn init_opengl(&mut self) {
