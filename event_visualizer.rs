@@ -1,26 +1,14 @@
 // See LICENSE file for copyright and license details.
 
-use std::hashmap::HashMap;
-use cgmath::vector::{
-  Vec3,
-  Vector,
-};
+use cgmath::vector::Vector;
 use gl::types::GLfloat;
 use geom::Geom;
 use core::{
   MapPos,
   UnitId,
 };
-
-pub type WorldPos = Vec3<GLfloat>;
-
-pub struct SceneNode {
-  pos: WorldPos,
-  // rot: Angle,
-}
-
-pub type NodeId = i32;
-pub type Scene = HashMap<NodeId, SceneNode>;
+use scene::Scene;
+use world_pos::WorldPos;
 
 pub trait EventVisualizer {
   fn is_finished(&self) -> bool;

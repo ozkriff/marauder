@@ -17,7 +17,7 @@ use cgmath::vector::{
   Vector,
 };
 use core::MapPos;
-use event_visualizer::WorldPos;
+use world_pos::WorldPos;
 
 pub struct Geom {
   hex_ex_radius: GLfloat,

@@ -25,6 +25,8 @@ mod obj;
 mod mesh;
 mod core;
 mod event_visualizer;
+mod scene;
+mod world_pos;
 
 fn main() {
   let mut visualizer = visualizer::Visualizer::new();

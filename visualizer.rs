@@ -34,9 +34,11 @@ use core::{
   EventViewEndTurn,
   MapPos,
 };
-use event_visualizer::{
+use scene::{
   SceneNode,
   Scene,
+};
+use event_visualizer::{
   EventVisualizer,
   EventMoveVisualizer,
   EventEndTurnVisualizer,
