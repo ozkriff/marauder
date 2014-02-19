@@ -22,7 +22,6 @@ use cgmath::vector::{
 use cgmath::angle;
 use stb_image::image;
 use misc::{
-  c_str,
   deg_to_rad,
 };
 use gl_types::{
@@ -37,6 +36,12 @@ use gl_types::{
   MatId,
 };
 use core_types::Int;
+
+fn c_str(s: &str) -> *GLchar {
+  unsafe {
+    s.to_c_str().unwrap()
+  }
+}
 
 pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
   let shader = gl::CreateShader(shader_type);

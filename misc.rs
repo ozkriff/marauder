@@ -3,14 +3,7 @@
 use std::f32::consts::PI;
 use std::io::File;
 use std::str::from_utf8_owned;
-use gl::types::GLchar;
 use gl_types::Float;
-
-pub fn c_str(s: &str) -> *GLchar {
-  unsafe {
-    s.to_c_str().unwrap()
-  }
-}
 
 pub fn deg_to_rad(n: Float) -> Float {
   n * PI / 180.0
