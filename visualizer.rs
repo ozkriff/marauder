@@ -108,7 +108,7 @@ pub struct Visualizer<'a> {
     program: ShaderId,
     map_mesh: Mesh,
     unit_mesh: Mesh,
-    mat_id: MatId,
+    mvp_mat: MatId,
     win: glfw::Window,
     mouse_pos: Point2<Float>,
     camera: Camera,
@@ -131,7 +131,7 @@ impl<'a> Visualizer<'a> {
             program: 0,
             map_mesh: Mesh::new(),
             unit_mesh: Mesh::new(),
-            mat_id: 0,
+            mvp_mat: 0,
             win: win,
             mouse_pos: Vec2::zero(),
             camera: Camera::new(),
@@ -171,7 +171,7 @@ impl<'a> Visualizer<'a> {
             read_file(&Path::new("normal.fs.glsl")),
         );
         gl::UseProgram(self.program);
-        self.mat_id = glh::get_uniform(self.program, "mvp_mat");
+        self.mvp_mat = glh::get_uniform(self.program, "mvp_mat");
         let vertex_coordinates_attr = glh::get_attr(
             self.program, "in_vertex_coordinates");
         gl::EnableVertexAttribArray(vertex_coordinates_attr);
@@ -213,13 +213,13 @@ impl<'a> Visualizer<'a> {
         gl::UseProgram(self.program);
         for (_, unit) in self.scene().iter() {
             let m = glh::tr(self.camera.mat(), unit.pos);
-            glh::uniform_mat4f(self.mat_id, &m);
+            glh::uniform_mat4f(self.mvp_mat, &m);
             self.unit_mesh.draw(self.program);
         }
     }
 
     fn draw_map(&self) {
-        glh::uniform_mat4f(self.mat_id, &self.camera.mat());
+        glh::uniform_mat4f(self.mvp_mat, &self.camera.mat());
         self.map_mesh.draw(self.program);
     }
 
