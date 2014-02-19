@@ -343,12 +343,9 @@ impl<'a> Visualizer<'a> {
 
   pub fn logic(&mut self) {
     if self.event_visualizer.is_none() {
-      let player_id = self.core.current_player_id;
-      if self.core.event_view_lists.get(&player_id).len() != 0 {
-        let event_view = {
-          let event_view_list = self.core.event_view_lists.get_mut(&player_id);
-          event_view_list.shift().unwrap()
-        };
+      let event_view_opt = self.core.get_event_view();
+      if event_view_opt.is_some() {
+        let event_view = event_view_opt.unwrap();
         self.event_visualizer = Some(self.make_event_visualizer(event_view));
       }
     } else if self.event_visualizer.get_ref().is_finished() {

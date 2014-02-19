@@ -57,6 +57,11 @@ impl<'a> Core<'a> {
     }
   }
 
+  pub fn get_event_view(&mut self) -> Option<EventView> {
+    let list = self.event_view_lists.get_mut(&self.current_player_id);
+    list.shift()
+  }
+
   pub fn id_to_unit_mut_opt(&'a mut self, id: UnitId) -> Option<&'a mut Unit> {
     self.units.mut_iter().find(|u| u.id == id)
   }
