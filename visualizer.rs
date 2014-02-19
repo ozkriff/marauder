@@ -156,7 +156,7 @@ impl<'a> Visualizer<'a> {
             event_visualizer: None,
         };
         vis.init_opengl();
-        vis.picker.init(&geom, vis.core.map_size);
+        vis.picker.init(&geom, vis.core.map_size());
         vis.init_models();
         vis
     }
@@ -180,10 +180,10 @@ impl<'a> Visualizer<'a> {
             self.program, "in_texture_coordinates");
         gl::EnableVertexAttribArray(texture_coords_attr);
         glh::vertex_attrib_pointer(texture_coords_attr, 3);
-        let map_vertex_data = build_hex_mesh(&self.geom, self.core.map_size);
+        let map_size = self.core.map_size();
+        let map_vertex_data = build_hex_mesh(&self.geom, map_size);
         self.map_mesh.set_vertex_coords(map_vertex_data);
-        self.map_mesh.set_texture_coords(
-            build_hex_tex_coord(self.core.map_size));
+        self.map_mesh.set_texture_coords(build_hex_tex_coord(map_size));
         self.map_mesh.set_texture(glh::load_texture(~"data/floor.png"));
         let unit_obj = obj::Model::new("data/tank.obj");
         self.unit_mesh.set_vertex_coords(unit_obj.build());
@@ -192,11 +192,11 @@ impl<'a> Visualizer<'a> {
     }
 
     fn scene<'a>(&'a self) -> &'a Scene {
-        self.scenes.get(&self.core.current_player_id)
+        self.scenes.get(&self.core.player_id())
     }
 
     fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
-        let id = self.core.current_player_id;
+        let id = self.core.player_id();
         self.units.get(&id).iter().find(|u| u.pos == pos)
     }
 
@@ -230,7 +230,7 @@ impl<'a> Visualizer<'a> {
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {
-            let scene = self.scenes.get_mut(&self.core.current_player_id);
+            let scene = self.scenes.get_mut(&self.core.player_id());
             self.event_visualizer.get_mut_ref().draw(&self.geom, scene);
         }
         self.win().swap_buffers();
@@ -357,8 +357,8 @@ impl<'a> Visualizer<'a> {
                 self.event_visualizer = Some(vis);
             }
         } else if self.event_visualizer.get_ref().is_finished() {
-            let scene = self.scenes.get_mut(&self.core.current_player_id);
-            let units = self.units.get_mut(&self.core.current_player_id);
+            let scene = self.scenes.get_mut(&self.core.player_id());
+            let units = self.units.get_mut(&self.core.player_id());
             self.event_visualizer.get_mut_ref().end(
                 &self.geom, scene, units);
             self.event_visualizer = None;

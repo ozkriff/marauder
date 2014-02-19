@@ -32,12 +32,12 @@ pub struct Unit {
 }
 
 pub struct Core<'a> {
-    units: ~[Unit],
-    players: ~[Player],
-    current_player_id: PlayerId,
-    core_event_list: ~[~CoreEvent],
-    event_lists: HashMap<PlayerId, ~[Event]>,
-    map_size: Size2<Int>,
+    priv units: ~[Unit],
+    priv players: ~[Player],
+    priv current_player_id: PlayerId,
+    priv core_event_list: ~[~CoreEvent],
+    priv event_lists: HashMap<PlayerId, ~[Event]>,
+    priv map_size: Size2<Int>,
 }
 
 fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
@@ -62,6 +62,14 @@ impl<'a> Core<'a> {
         core.do_command(CommandCreateUnit(Vec2{x: 2, y: 0}));
         core.do_command(CommandCreateUnit(Vec2{x: 2, y: 2}));
         core
+    }
+
+    pub fn map_size(&self) -> Size2<Int> {
+        self.map_size
+    }
+
+    pub fn player_id(&self) -> PlayerId {
+        self.current_player_id
     }
 
     pub fn get_event(&mut self) -> Option<Event> {
