@@ -5,10 +5,6 @@ use std::hashmap::HashMap;
 use serialize::Decodable;
 use glfw;
 use gl;
-use gl::types::{
-  GLint,
-  GLuint,
-};
 use cgmath::vector::{
   Vec3,
   Vec2,
@@ -45,6 +41,8 @@ use gl_types::{
   TextureCoord,
   Float,
   Point2,
+  MatId,
+  ShaderId,
 };
 use event_visualizer::{
   EventVisualizer,
@@ -105,10 +103,10 @@ fn init_win(win_size: Size2<Int>) -> glfw::Window {
 }
 
 pub struct Visualizer<'a> {
-  program: GLuint,
+  program: ShaderId,
   map_mesh: Mesh,
   unit_mesh: Mesh,
-  mat_id: GLint,
+  mat_id: MatId,
   win: glfw::Window,
   mouse_pos: Point2<Float>,
   camera: Camera,

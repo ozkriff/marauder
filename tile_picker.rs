@@ -2,10 +2,6 @@
 
 use std;
 use gl;
-use gl::types::{
-  GLint,
-  GLuint,
-};
 use cgmath::vector::{
   Vec3,
   Vec2,
@@ -25,6 +21,8 @@ use gl_types::{
   VertexCoord,
   Color3,
   Float,
+  ShaderId,
+  MatId,
 };
 
 fn build_hex_map_mesh(geom: &Geom, map_size: Size2<Int>) -> (~[VertexCoord], ~[Color3]) {
@@ -50,9 +48,9 @@ fn build_hex_map_mesh(geom: &Geom, map_size: Size2<Int>) -> (~[VertexCoord], ~[C
 }
 
 pub struct TilePicker {
-  program: GLuint,
+  program: ShaderId,
   map_mesh: Mesh,
-  mat_id: GLint,
+  mat_id: MatId,
   win_size: Size2<Int>,
 }
 

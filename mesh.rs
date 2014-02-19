@@ -1,20 +1,22 @@
 // See LICENSE file for copyright and license details.
 
 use gl;
-use gl::types::GLuint;
 use glh = gl_helpers;
 use gl_types::{
   Color3,
   VertexCoord,
   TextureCoord,
+  TextureId,
+  ShaderId,
+  VboId,
 };
 use core_types::Int;
 
 pub struct Mesh {
-  vertex_coords_vbo: GLuint,
-  color_vbo: Option<GLuint>,
-  texture_coords_vbo: Option<GLuint>,
-  texture_id: Option<GLuint>,
+  vertex_coords_vbo: VboId,
+  color_vbo: Option<VboId>,
+  texture_coords_vbo: Option<VboId>,
+  texture_id: Option<TextureId>,
   length: Int,
 }
 
@@ -50,11 +52,11 @@ impl Mesh {
     glh::fill_current_texture_coords_vbo(data);
   }
 
-  pub fn set_texture(&mut self, texture_id: GLuint) {
+  pub fn set_texture(&mut self, texture_id: TextureId) {
     self.texture_id = Some(texture_id);
   }
 
-  pub fn draw(&self, program: GLuint) {
+  pub fn draw(&self, program: ShaderId) {
     if !self.texture_id.is_none() {
       let basic_texture_loc = glh::get_uniform(program, "basic_texture");
       gl::Uniform1ui(basic_texture_loc, 0);

@@ -30,6 +30,11 @@ use gl_types::{
   Color3,
   TextureCoord,
   VertexCoord,
+  ShaderId,
+  AttrId,
+  VboId,
+  TextureId,
+  MatId,
 };
 use core_types::Int;
 
@@ -79,7 +84,7 @@ pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
 pub fn compile_program(
   vertex_shader_src: &str,
   frag_shader_src: &str,
-) -> GLuint {
+) -> ShaderId {
   let vertex_shader = compile_shader(
     vertex_shader_src, gl::VERTEX_SHADER);
   let fragment_shader = compile_shader(
@@ -91,13 +96,13 @@ pub fn compile_program(
   program
 }
 
-pub fn get_attr(program_id: GLuint, name: &str) -> GLuint {
+pub fn get_attr(program_id: ShaderId, name: &str) -> AttrId {
   unsafe {
-    gl::GetAttribLocation(program_id, c_str(name)) as GLuint
+    gl::GetAttribLocation(program_id, c_str(name)) as AttrId
   }
 }
 
-pub fn get_uniform(program: GLuint, name: &str) -> GLint {
+pub fn get_uniform(program: ShaderId, name: &str) -> GLint {
   unsafe {
     gl::GetUniformLocation(program, c_str(name))
   }
@@ -109,7 +114,7 @@ pub fn draw_mesh(faces_count: Int) {
   gl::DrawArrays(gl::TRIANGLES, starting_index, vertices_count);
 }
 
-pub fn uniform_mat4f(mat_id: GLint, mat: &Mat4<Float>) {
+pub fn uniform_mat4f(mat_id: MatId, mat: &Mat4<Float>) {
   unsafe {
     gl::UniformMatrix4fv(mat_id, 1, gl::FALSE, mat.cr(0, 0));
   }
@@ -135,15 +140,15 @@ pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
   m.mul_m(&r)
 }
 
-pub fn gen_buffer() -> GLuint {
-  let mut n = 0 as GLuint;
+pub fn gen_buffer() -> VboId {
+  let mut n = 0 as VboId;
   unsafe {
     gl::GenBuffers(1, &mut n);
   }
   n
 }
 
-pub fn delete_buffer(buffer: GLuint) {
+pub fn delete_buffer(buffer: VboId) {
   unsafe {
     gl::DeleteBuffers(1, &buffer);
   }
@@ -174,7 +179,7 @@ pub fn fill_current_texture_coords_vbo(data: &[TextureCoord]) {
   fill_buffer(buffer_size, data);
 }
 
-pub fn vertex_attrib_pointer(attr: GLuint, components_count: Int) {
+pub fn vertex_attrib_pointer(attr: AttrId, components_count: Int) {
   let normalized = gl::FALSE;
   let stride = 0;
   unsafe {
@@ -204,7 +209,7 @@ fn load_image(path: ~str) -> image::Image<u8> {
   }
 }
 
-pub fn load_texture(path: ~str) -> GLuint {
+pub fn load_texture(path: ~str) -> TextureId {
   let image = load_image(path);
   let mut id = 0;
   unsafe {
