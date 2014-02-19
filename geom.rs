@@ -15,9 +15,9 @@ use cgmath::vector::{
   Vec3,
   Vector,
 };
-use core::MapPos;
 use core_types::{
   Int,
+  MapPos,
 };
 use gl_types::{
   WorldPos,

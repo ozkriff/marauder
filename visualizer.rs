@@ -24,19 +24,19 @@ use misc::read_file;
 use core::{
   Core,
   Unit,
-  UnitId,
-  PlayerId,
   CommandEndTurn,
   CommandMove,
   EventView,
   EventViewMove,
   EventViewEndTurn,
-  MapPos,
 };
 use core_types::{
   Size2,
   Int,
   Bool,
+  UnitId,
+  PlayerId,
+  MapPos,
 };
 use gl_types::{
   SceneNode,

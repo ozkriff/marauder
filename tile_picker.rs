@@ -16,10 +16,10 @@ use camera::Camera;
 use geom::Geom;
 use mesh::Mesh;
 use misc::read_file;
-use core::MapPos;
 use core_types::{
   Int,
   Size2,
+  MapPos,
 };
 use gl_types::{
   VertexCoord,

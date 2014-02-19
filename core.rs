@@ -1,16 +1,14 @@
 // See LICENSE file for copyright and license details.
 
 use std::hashmap::HashMap;
-use cgmath::vector::Vec2;
 use core_types::{
   Size2,
   Int,
   Bool,
+  UnitId,
+  PlayerId,
+  MapPos,
 };
-
-pub type PlayerId = Int;
-pub type UnitId = Int;
-pub type MapPos = Vec2<Int>;
 
 pub enum Command {
   CommandMove(UnitId, MapPos),

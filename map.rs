@@ -1,10 +1,10 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vec2;
-use core::MapPos;
 use core_types::{
   Size2,
   Int,
+  MapPos,
 };
 
 pub struct TileIterator {

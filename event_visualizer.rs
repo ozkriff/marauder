@@ -5,8 +5,6 @@ use geom::Geom;
 use core_types::{
   Bool,
   Int,
-};
-use core::{
   MapPos,
   UnitId,
 };
