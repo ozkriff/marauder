@@ -32,7 +32,7 @@ pub struct Core<'a> {
   units: ~[Unit],
   players: ~[Player],
   current_player_id: PlayerId,
-  event_list: ~[~Event],
+  core_event_list: ~[~CoreEvent],
   event_view_lists: HashMap<PlayerId, ~[EventView]>,
   map_size: Size2<Int>,
 }
@@ -50,7 +50,7 @@ impl<'a> Core<'a> {
       units: ~[],
       players: ~[Player{id: 0}, Player{id: 1}],
       current_player_id: 0,
-      event_list: ~[],
+      core_event_list: ~[],
       event_view_lists: get_event_view_lists(),
       map_size: Size2{x: 4, y: 8},
     }
@@ -88,26 +88,26 @@ impl<'a> Core<'a> {
     self.units.iter().find(|u| u.pos == pos)
   }
 
-  fn command_to_event(&self, command: Command) -> ~Event {
+  fn command_to_core_event(&self, command: Command) -> ~CoreEvent {
     match command {
       CommandEndTurn => {
-        EventEndTurn::new(self) as ~Event
+        CoreEventEndTurn::new(self) as ~CoreEvent
       },
       CommandMove(unit_id, destination) => {
-        EventMove::new(self, unit_id, destination) as ~Event
+        CoreEventMove::new(self, unit_id, destination) as ~CoreEvent
       },
     }
   }
 
   pub fn do_command(&mut self, command: Command) {
-    let event = self.command_to_event(command);
-    self.event_list.push(event);
+    let core_event = self.command_to_core_event(command);
+    self.core_event_list.push(core_event);
     self.make_event_views();
   }
 
   fn make_event_views(&mut self) {
-    while self.event_list.len() != 0 {
-      let event = self.event_list.pop().unwrap();
+    while self.core_event_list.len() != 0 {
+      let event = self.core_event_list.pop().unwrap();
       event.apply(self);
       for player in self.players.iter() {
         let event_view_list = self.event_view_lists.get_mut(&player.id);
@@ -117,28 +117,28 @@ impl<'a> Core<'a> {
   }
 }
 
-trait Event {
+trait CoreEvent {
   fn apply(&self, core: &mut Core);
   fn get_view(&self) -> EventView;
   // TODO: fn is_visible(&self) -> Bool;
 }
 
-struct EventMove {
+struct CoreEventMove {
   unit_id: UnitId,
   path: ~[MapPos],
 }
 
-impl EventMove {
-  fn new(core: &Core, unit_id: UnitId, destination: MapPos) -> ~EventMove {
+impl CoreEventMove {
+  fn new(core: &Core, unit_id: UnitId, destination: MapPos) -> ~CoreEventMove {
     let start_pos = core.id_to_unit(unit_id).pos;
-    ~EventMove {
+    ~CoreEventMove {
       path: ~[start_pos, destination],
       unit_id: unit_id,
     }
   }
 }
 
-impl Event for EventMove {
+impl CoreEvent for CoreEventMove {
   fn get_view(&self) -> EventView {
     EventViewMove(self.unit_id, self.path.clone())
   }
@@ -149,21 +149,21 @@ impl Event for EventMove {
   }
 }
 
-struct EventEndTurn {
+struct CoreEventEndTurn {
   old_id: PlayerId,
   new_id: PlayerId,
 }
 
-impl EventEndTurn {
-  fn new(core: &Core) -> ~EventEndTurn {
+impl CoreEventEndTurn {
+  fn new(core: &Core) -> ~CoreEventEndTurn {
     let old_id = core.current_player_id;
     let max_id = core.players.len() as Int;
     let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
-    ~EventEndTurn{old_id: old_id, new_id: new_id}
+    ~CoreEventEndTurn{old_id: old_id, new_id: new_id}
   }
 }
 
-impl Event for EventEndTurn {
+impl CoreEvent for CoreEventEndTurn {
   fn get_view(&self) -> EventView {
     EventViewEndTurn(self.old_id, self.new_id)
   }
