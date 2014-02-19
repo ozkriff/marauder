@@ -19,12 +19,13 @@ use mesh::Mesh;
 use misc::read_file;
 use core::{
     Core,
-    Unit,
     CommandEndTurn,
     CommandMove,
+    CommandCreateUnit,
     Event,
     EventMove,
     EventEndTurn,
+    EventCreateUnit,
 };
 use core_types::{
     Size2,
@@ -35,7 +36,6 @@ use core_types::{
     MapPos,
 };
 use gl_types::{
-    SceneNode,
     Scene,
     VertexCoord,
     TextureCoord,
@@ -48,6 +48,7 @@ use event_visualizer::{
     EventVisualizer,
     EventMoveVisualizer,
     EventEndTurnVisualizer,
+    EventCreateUnitVisualizer,
 };
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
@@ -148,7 +149,6 @@ impl<'a> Visualizer<'a> {
         vis.init_opengl();
         vis.picker.init(&geom, vis.core.map_size);
         vis.init_models();
-        vis.init_units();
         vis
     }
 
@@ -184,22 +184,6 @@ impl<'a> Visualizer<'a> {
 
     fn scene<'a>(&'a self) -> &'a Scene {
         self.scenes.get(&self.core.current_player_id)
-    }
-
-    fn add_unit(&mut self, id: UnitId, pos: MapPos) {
-        for (_, scene) in self.scenes.mut_iter() {
-            let world_pos = self.geom.map_pos_to_world_pos(pos);
-            scene.insert(id, SceneNode{pos: world_pos});
-        }
-        self.core.units.push(Unit{id: id, pos: pos});
-    }
-
-    fn init_units(&mut self) {
-        // TODO: generate unique ids
-        self.add_unit(0, Vec2{x: 0, y: 0});
-        self.add_unit(1, Vec2{x: 0, y: 1});
-        self.add_unit(2, Vec2{x: 1, y: 0});
-        self.add_unit(3, Vec2{x: 1, y: 1});
     }
 
     fn init_opengl(&mut self) {
@@ -249,6 +233,16 @@ impl<'a> Visualizer<'a> {
             },
             glfw::KeyT => {
                 self.core.do_command(CommandEndTurn);
+            },
+            glfw::KeyU => {
+                let pos_opt = self.selected_tile_pos;
+                if pos_opt.is_some() {
+                    let pos = pos_opt.unwrap();
+                    if self.core.unit_at_opt(pos).is_none() {
+                        let cmd = CommandCreateUnit(pos);
+                        self.core.do_command(cmd);
+                    }
+                }
             },
             glfw::KeySpace => println!("space"),
             glfw::KeyUp => self.camera.move(270.0),
@@ -333,6 +327,9 @@ impl<'a> Visualizer<'a> {
             },
             EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
+            },
+            EventCreateUnit(id, pos) => {
+                EventCreateUnitVisualizer::new(id, pos)
             },
         }
     }

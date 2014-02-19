@@ -10,6 +10,7 @@ use core_types::{
 };
 use gl_types::{
     Scene,
+    SceneNode,
     Float,
     WorldPos,
 };
@@ -108,4 +109,30 @@ impl EventVisualizer for EventEndTurnVisualizer {
     fn end(&mut self, _: &Geom, _: &mut Scene) {}
 }
 
+pub struct EventCreateUnitVisualizer {
+    id: UnitId,
+    pos: MapPos,
+}
+
+impl EventCreateUnitVisualizer {
+    pub fn new(id: UnitId, pos: MapPos) -> ~EventVisualizer {
+        ~EventCreateUnitVisualizer {
+            id: id,
+            pos: pos,
+        } as ~EventVisualizer
+    }
+}
+
+impl EventVisualizer for EventCreateUnitVisualizer {
+    fn is_finished(&self) -> Bool {
+        true
+    }
+
+    fn draw(&mut self, _: &Geom, _: &mut Scene) {}
+
+    fn end(&mut self, geom: &Geom, scene: &mut Scene) {
+        let world_pos = geom.map_pos_to_world_pos(self.pos);
+        scene.insert(self.id, SceneNode{pos: world_pos});
+    }
+}
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

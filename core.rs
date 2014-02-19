@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::hashmap::HashMap;
+use cgmath::vector::Vec2;
 use core_types::{
     Size2,
     Int,
@@ -12,11 +13,13 @@ use core_types::{
 pub enum Command {
     CommandMove(UnitId, MapPos),
     CommandEndTurn,
+    CommandCreateUnit(MapPos),
 }
 
 pub enum Event {
     EventMove(UnitId, ~[MapPos]),
     EventEndTurn(PlayerId, PlayerId), // old_id, new_id
+    EventCreateUnit(UnitId, MapPos),
 }
 
 pub struct Player {
@@ -46,14 +49,19 @@ fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
 
 impl<'a> Core<'a> {
     pub fn new() -> Core {
-        Core {
+        let mut core = Core {
             units: ~[],
             players: ~[Player{id: 0}, Player{id: 1}],
             current_player_id: 0,
             core_event_list: ~[],
             event_lists: get_event_lists(),
             map_size: Size2{x: 4, y: 8},
-        }
+        };
+        core.do_command(CommandCreateUnit(Vec2{x: 0, y: 0}));
+        core.do_command(CommandCreateUnit(Vec2{x: 0, y: 1}));
+        core.do_command(CommandCreateUnit(Vec2{x: 2, y: 0}));
+        core.do_command(CommandCreateUnit(Vec2{x: 2, y: 2}));
+        core
     }
 
     pub fn get_event(&mut self) -> Option<Event> {
@@ -92,6 +100,9 @@ impl<'a> Core<'a> {
         match command {
             CommandEndTurn => {
                 CoreEventEndTurn::new(self) as ~CoreEvent
+            },
+            CommandCreateUnit(pos) => {
+                CoreEventCreateUnit::new(self, pos) as ~CoreEvent
             },
             CommandMove(unit_id, destination) => {
                 CoreEventMove::new(self, unit_id, destination) as ~CoreEvent
@@ -184,5 +195,34 @@ impl CoreEvent for CoreEventEndTurn {
         }
     }
 }
+
+struct CoreEventCreateUnit {
+    pos: MapPos,
+    id: UnitId,
+}
+
+impl CoreEventCreateUnit {
+    fn new(core: &Core, pos: MapPos) -> ~CoreEventCreateUnit {
+        let last_unit_opt = core.units.last();
+        let new_id = if last_unit_opt.is_some() {
+            last_unit_opt.unwrap().id + 1
+        } else {
+            0
+        };
+        ~CoreEventCreateUnit{id: new_id, pos: pos}
+    }
+}
+
+impl CoreEvent for CoreEventCreateUnit {
+    fn to_event(&self) -> Event {
+        EventCreateUnit(self.id, self.pos)
+    }
+
+    fn apply(&self, core: &mut Core) {
+        assert!(core.units.mut_iter().find(|u| u.id == self.id).is_none());
+        core.units.push(Unit{id: self.id, pos: self.pos});
+    }
+}
+
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
