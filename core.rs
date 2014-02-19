@@ -14,9 +14,9 @@ pub enum Command {
   CommandEndTurn,
 }
 
-pub enum EventView {
-  EventViewMove(UnitId, ~[MapPos]),
-  EventViewEndTurn(PlayerId, PlayerId), // old_id, new_id
+pub enum Event {
+  EventMove(UnitId, ~[MapPos]),
+  EventEndTurn(PlayerId, PlayerId), // old_id, new_id
 }
 
 pub struct Player {
@@ -33,11 +33,11 @@ pub struct Core<'a> {
   players: ~[Player],
   current_player_id: PlayerId,
   core_event_list: ~[~CoreEvent],
-  event_view_lists: HashMap<PlayerId, ~[EventView]>,
+  event_lists: HashMap<PlayerId, ~[Event]>,
   map_size: Size2<Int>,
 }
 
-fn get_event_view_lists() -> HashMap<PlayerId, ~[EventView]> {
+fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
   let mut map = HashMap::new();
   map.insert(0 as PlayerId, ~[]);
   map.insert(1 as PlayerId, ~[]);
@@ -51,13 +51,13 @@ impl<'a> Core<'a> {
       players: ~[Player{id: 0}, Player{id: 1}],
       current_player_id: 0,
       core_event_list: ~[],
-      event_view_lists: get_event_view_lists(),
+      event_lists: get_event_lists(),
       map_size: Size2{x: 4, y: 8},
     }
   }
 
-  pub fn get_event_view(&mut self) -> Option<EventView> {
-    let list = self.event_view_lists.get_mut(&self.current_player_id);
+  pub fn get_event(&mut self) -> Option<Event> {
+    let list = self.event_lists.get_mut(&self.current_player_id);
     list.shift()
   }
 
@@ -102,16 +102,16 @@ impl<'a> Core<'a> {
   pub fn do_command(&mut self, command: Command) {
     let core_event = self.command_to_core_event(command);
     self.core_event_list.push(core_event);
-    self.make_event_views();
+    self.make_events();
   }
 
-  fn make_event_views(&mut self) {
+  fn make_events(&mut self) {
     while self.core_event_list.len() != 0 {
       let event = self.core_event_list.pop().unwrap();
       event.apply(self);
       for player in self.players.iter() {
-        let event_view_list = self.event_view_lists.get_mut(&player.id);
-        event_view_list.push(event.get_view());
+        let event_list = self.event_lists.get_mut(&player.id);
+        event_list.push(event.to_event());
       }
     }
   }
@@ -119,7 +119,7 @@ impl<'a> Core<'a> {
 
 trait CoreEvent {
   fn apply(&self, core: &mut Core);
-  fn get_view(&self) -> EventView;
+  fn to_event(&self) -> Event;
   // TODO: fn is_visible(&self) -> Bool;
 }
 
@@ -139,8 +139,8 @@ impl CoreEventMove {
 }
 
 impl CoreEvent for CoreEventMove {
-  fn get_view(&self) -> EventView {
-    EventViewMove(self.unit_id, self.path.clone())
+  fn to_event(&self) -> Event {
+    EventMove(self.unit_id, self.path.clone())
   }
 
   fn apply(&self, core: &mut Core) {
@@ -164,8 +164,8 @@ impl CoreEventEndTurn {
 }
 
 impl CoreEvent for CoreEventEndTurn {
-  fn get_view(&self) -> EventView {
-    EventViewEndTurn(self.old_id, self.new_id)
+  fn to_event(&self) -> Event {
+    EventEndTurn(self.old_id, self.new_id)
   }
 
   fn apply(&self, core: &mut Core) {

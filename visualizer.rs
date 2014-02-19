@@ -26,9 +26,9 @@ use core::{
   Unit,
   CommandEndTurn,
   CommandMove,
-  EventView,
-  EventViewMove,
-  EventViewEndTurn,
+  Event,
+  EventMove,
+  EventEndTurn,
 };
 use core_types::{
   Size2,
@@ -327,15 +327,12 @@ impl<'a> Visualizer<'a> {
     self.selected_tile_pos = self.picker.pick_tile(&self.camera, mouse_pos);
   }
 
-  pub fn make_event_visualizer(
-    &mut self,
-    event_view: EventView
-  ) -> ~EventVisualizer {
-    match event_view {
-      EventViewMove(unit_id, path) => {
+  pub fn make_event_visualizer(&mut self, event: Event) -> ~EventVisualizer {
+    match event {
+      EventMove(unit_id, path) => {
         EventMoveVisualizer::new(unit_id, path)
       },
-      EventViewEndTurn(_, _) => {
+      EventEndTurn(_, _) => {
         EventEndTurnVisualizer::new()
       },
     }
@@ -343,10 +340,10 @@ impl<'a> Visualizer<'a> {
 
   pub fn logic(&mut self) {
     if self.event_visualizer.is_none() {
-      let event_view_opt = self.core.get_event_view();
-      if event_view_opt.is_some() {
-        let event_view = event_view_opt.unwrap();
-        self.event_visualizer = Some(self.make_event_visualizer(event_view));
+      let event_opt = self.core.get_event();
+      if event_opt.is_some() {
+        let event = event_opt.unwrap();
+        self.event_visualizer = Some(self.make_event_visualizer(event));
       }
     } else if self.event_visualizer.get_ref().is_finished() {
       let scene = self.scenes.get_mut(&self.core.current_player_id);
