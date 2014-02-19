@@ -91,11 +91,6 @@ impl<'a> Core<'a> {
         }
     }
 
-    // TODO: Remove or make private
-    pub fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
-        self.units.iter().find(|u| u.pos == pos)
-    }
-
     fn command_to_core_event(&self, command: Command) -> ~CoreEvent {
         match command {
             CommandEndTurn => {
@@ -219,7 +214,7 @@ impl CoreEvent for CoreEventCreateUnit {
     }
 
     fn apply(&self, core: &mut Core) {
-        assert!(core.units.mut_iter().find(|u| u.id == self.id).is_none());
+        assert!(core.units.iter().find(|u| u.id == self.id).is_none());
         core.units.push(Unit{id: self.id, pos: self.pos});
     }
 }

@@ -8,6 +8,9 @@ use core_types::{
     MapPos,
     UnitId,
 };
+use core::{
+    Unit,
+};
 use gl_types::{
     Scene,
     SceneNode,
@@ -18,7 +21,7 @@ use gl_types::{
 pub trait EventVisualizer {
     fn is_finished(&self) -> Bool;
     fn draw(&mut self, geom: &Geom, scene: &mut Scene);
-    fn end(&mut self, geom: &Geom, scene: &mut Scene);
+    fn end(&mut self, geom: &Geom, scene: &mut Scene, units: &mut ~[Unit]);
 }
 
 static MOVE_SPEED: Float = 40.0; // TODO: config?
@@ -41,8 +44,11 @@ impl EventVisualizer for EventMoveVisualizer {
         self.current_move_index += 1;
     }
 
-    fn end(&mut self, geom: &Geom, scene: &mut Scene) {
-        self.end_movement(geom, scene);
+    fn end(&mut self, geom: &Geom, scene: &mut Scene, units: &mut ~[Unit]) {
+        let unit_node = scene.get_mut(&self.unit_id);
+        unit_node.pos = self.current_position(geom);
+        let unit: &mut Unit = units.mut_iter().find(|u| u.id == self.unit_id).unwrap();
+        unit.pos = *self.path.last().unwrap();
     }
 }
 
@@ -66,11 +72,6 @@ impl EventMoveVisualizer {
 
     fn next_tile(&self) -> MapPos {
         self.path[self.current_tile_index() + 1]
-    }
-
-    fn end_movement(&mut self, geom: &Geom, scene: &mut Scene) {
-        let unit_node = scene.get_mut(&self.unit_id);
-        unit_node.pos = self.current_position(geom);
     }
 
     fn current_tile_index(&self) -> Int {
@@ -106,7 +107,7 @@ impl EventVisualizer for EventEndTurnVisualizer {
 
     fn draw(&mut self, _: &Geom, _: &mut Scene) {}
 
-    fn end(&mut self, _: &Geom, _: &mut Scene) {}
+    fn end(&mut self, _: &Geom, _: &mut Scene, _: &mut ~[Unit]) {}
 }
 
 pub struct EventCreateUnitVisualizer {
@@ -130,9 +131,11 @@ impl EventVisualizer for EventCreateUnitVisualizer {
 
     fn draw(&mut self, _: &Geom, _: &mut Scene) {}
 
-    fn end(&mut self, geom: &Geom, scene: &mut Scene) {
+    fn end(&mut self, geom: &Geom, scene: &mut Scene, units: &mut ~[Unit]) {
         let world_pos = geom.map_pos_to_world_pos(self.pos);
         scene.insert(self.id, SceneNode{pos: world_pos});
+        assert!(units.iter().find(|u| u.id == self.id).is_none());
+        units.push(Unit{id: self.id, pos: self.pos});
     }
 }
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

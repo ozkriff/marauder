@@ -19,6 +19,7 @@ use mesh::Mesh;
 use misc::read_file;
 use core::{
     Core,
+    Unit,
     CommandEndTurn,
     CommandMove,
     CommandCreateUnit,
@@ -118,6 +119,7 @@ pub struct Visualizer<'a> {
     scenes: HashMap<PlayerId, Scene>,
     core: Core<'a>,
     event_visualizer: Option<~EventVisualizer>,
+    units: HashMap<PlayerId, ~[Unit]>,
 }
 
 impl<'a> Visualizer<'a> {
@@ -137,10 +139,17 @@ impl<'a> Visualizer<'a> {
             selected_tile_pos: None,
             selected_unit_id: None,
             geom: geom,
+            // TODO: use for cycle
             scenes: {
                 let mut m = HashMap::new();
                 m.insert(0 as PlayerId, HashMap::new());
                 m.insert(1 as PlayerId, HashMap::new());
+                m
+            },
+            units: {
+                let mut m = HashMap::new();
+                m.insert(0 as PlayerId, ~[]);
+                m.insert(1 as PlayerId, ~[]);
                 m
             },
             core: Core::new(),
@@ -184,6 +193,11 @@ impl<'a> Visualizer<'a> {
 
     fn scene<'a>(&'a self) -> &'a Scene {
         self.scenes.get(&self.core.current_player_id)
+    }
+
+    fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
+        let id = self.core.current_player_id;
+        self.units.get(&id).iter().find(|u| u.pos == pos)
     }
 
     fn init_opengl(&mut self) {
@@ -238,7 +252,7 @@ impl<'a> Visualizer<'a> {
                 let pos_opt = self.selected_tile_pos;
                 if pos_opt.is_some() {
                     let pos = pos_opt.unwrap();
-                    if self.core.unit_at_opt(pos).is_none() {
+                    if self.unit_at_opt(pos).is_none() {
                         let cmd = CommandCreateUnit(pos);
                         self.core.do_command(cmd);
                     }
@@ -267,9 +281,9 @@ impl<'a> Visualizer<'a> {
     fn handle_mouse_button_event(&mut self) {
         if self.selected_tile_pos.is_some() {
             let pos = self.selected_tile_pos.unwrap();
-            if self.core.unit_at_opt(pos).is_some() {
-                let unit = self.core.unit_at_opt(pos).unwrap();
-                self.selected_unit_id = Some(unit.id);
+            if self.unit_at_opt(pos).is_some() {
+                let unit_id = self.unit_at_opt(pos).unwrap().id;
+                self.selected_unit_id = Some(unit_id);
             } else if self.selected_unit_id.is_some() {
                 let unit_id = self.selected_unit_id.unwrap();
                 self.core.do_command(CommandMove(unit_id, pos));
@@ -344,7 +358,11 @@ impl<'a> Visualizer<'a> {
             }
         } else if self.event_visualizer.get_ref().is_finished() {
             let scene = self.scenes.get_mut(&self.core.current_player_id);
-            self.event_visualizer.get_mut_ref().end(&self.geom, scene);
+            self.event_visualizer.get_mut_ref().end(
+                &self.geom,
+                scene,
+                self.units.get_mut(&self.core.current_player_id)
+            );
             self.event_visualizer = None;
         }
     }
