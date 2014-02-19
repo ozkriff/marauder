@@ -7,7 +7,7 @@ in vec2 texture_coordinates;
 out vec4 out_color;
 
 void main() {
-  out_color = texture(basic_texture, texture_coordinates);
+    out_color = texture(basic_texture, texture_coordinates);
 }
 
-// vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
+// vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

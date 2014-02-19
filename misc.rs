@@ -6,17 +6,17 @@ use std::str::from_utf8_owned;
 use gl_types::Float;
 
 pub fn deg_to_rad(n: Float) -> Float {
-  n * PI / 180.0
+    n * PI / 180.0
 }
 
 // TODO: handle errors
 pub fn read_file(path: &Path) -> ~str {
-  if !path.exists() {
-    fail!("no such path");
-  }
-  let shader = File::open(path).map(|mut v| v.read_to_end()).unwrap();
-  let shader = from_utf8_owned(shader.unwrap());
-  shader.unwrap()
+    if !path.exists() {
+        fail!("no such path");
+    }
+    let shader = File::open(path).map(|mut v| v.read_to_end()).unwrap();
+    let shader = from_utf8_owned(shader.unwrap());
+    shader.unwrap()
 }
 
-// vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
+// vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

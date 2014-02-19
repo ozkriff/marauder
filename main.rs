@@ -28,15 +28,15 @@ mod event_visualizer;
 mod core_types;
 
 fn main() {
-  let mut visualizer = visualizer::Visualizer::new();
-  while visualizer.is_running() {
-    visualizer.tick();
-  }
+    let mut visualizer = visualizer::Visualizer::new();
+    while visualizer.is_running() {
+        visualizer.tick();
+    }
 }
 
 #[start]
 fn start(argc: int, argv: **u8) -> int {
-  native::start(argc, argv, main)
+    native::start(argc, argv, main)
 }
 
-// vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
+// vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

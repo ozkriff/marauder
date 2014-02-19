@@ -8,9 +8,9 @@ uniform mat4 mvp_mat;
 out vec2 texture_coordinates;
 
 void main() {
-  texture_coordinates = in_texture_coordinates;
-  vec4 v = vec4(in_vertex_coordinates, 1);
-  gl_Position = mvp_mat * v;
+    texture_coordinates = in_texture_coordinates;
+    vec4 v = vec4(in_vertex_coordinates, 1);
+    gl_Position = mvp_mat * v;
 }
 
-// vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
+// vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

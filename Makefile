@@ -31,4 +31,4 @@ marauder: Makefile ${SRC}
 clean:
 	rm -f marauder
 
-# vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
+# vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
