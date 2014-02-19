@@ -4,7 +4,6 @@ use std::hashmap::HashMap;
 use core_types::{
   Size2,
   Int,
-  Bool,
   UnitId,
   PlayerId,
   MapPos,
@@ -62,41 +61,31 @@ impl<'a> Core<'a> {
     list.shift()
   }
 
-  pub fn id_to_unit_mut_opt(&'a mut self, id: UnitId) -> Option<&'a mut Unit> {
+  fn id_to_unit_mut_opt(&'a mut self, id: UnitId) -> Option<&'a mut Unit> {
     self.units.mut_iter().find(|u| u.id == id)
   }
 
-  pub fn id_to_unit_mut(&'a mut self, id: UnitId) -> &'a mut Unit {
+  fn id_to_unit_mut(&'a mut self, id: UnitId) -> &'a mut Unit {
     match self.id_to_unit_mut_opt(id) {
       Some(unit) => unit,
       None => fail!("Bad unit id: {}", id),
     }
   }
 
-  pub fn id_to_unit_opt(&'a self, id: UnitId) -> Option<&'a Unit> {
+  fn id_to_unit_opt(&'a self, id: UnitId) -> Option<&'a Unit> {
     self.units.iter().find(|u| u.id == id)
   }
 
-  pub fn id_to_unit(&'a self, id: UnitId) -> &'a Unit {
+  fn id_to_unit(&'a self, id: UnitId) -> &'a Unit {
     match self.id_to_unit_opt(id) {
       Some(unit) => unit,
       None => fail!("Bad unit id: {}", id),
     }
   }
 
-  pub fn unit_at_mut_opt(&'a mut self, pos: MapPos) -> Option<&'a mut Unit> {
-    self.units.mut_iter().find(|u| u.pos == pos)
-  }
-
-  pub fn unit_at_mut(&'a mut self, pos: MapPos) -> &'a mut Unit {
-    match self.unit_at_mut_opt(pos) {
-      Some(unit) => unit,
-      None => fail!("No unit at pos: {:?}", pos),
-    }
-  }
-
-  pub fn is_unit_at(&'a self, pos: MapPos) -> Bool {
-    self.units.iter().find(|u| u.pos == pos).is_some()
+  // TODO: Remove or make private
+  pub fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
+    self.units.iter().find(|u| u.pos == pos)
   }
 
   fn command_to_event(&self, command: Command) -> ~Event {

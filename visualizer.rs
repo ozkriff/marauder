@@ -274,8 +274,8 @@ impl<'a> Visualizer<'a> {
   fn handle_mouse_button_event(&mut self) {
     if self.selected_tile_pos.is_some() {
       let pos = self.selected_tile_pos.unwrap();
-      if self.core.is_unit_at(pos) {
-        let unit = self.core.unit_at_mut(pos);
+      if self.core.unit_at_opt(pos).is_some() {
+        let unit = self.core.unit_at_opt(pos).unwrap();
         self.selected_unit_id = Some(unit.id);
       } else if self.selected_unit_id.is_some() {
         let unit_id = self.selected_unit_id.unwrap();
