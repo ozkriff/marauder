@@ -358,11 +358,9 @@ impl<'a> Visualizer<'a> {
             }
         } else if self.event_visualizer.get_ref().is_finished() {
             let scene = self.scenes.get_mut(&self.core.current_player_id);
+            let units = self.units.get_mut(&self.core.current_player_id);
             self.event_visualizer.get_mut_ref().end(
-                &self.geom,
-                scene,
-                self.units.get_mut(&self.core.current_player_id)
-            );
+                &self.geom, scene, units);
             self.event_visualizer = None;
         }
     }
