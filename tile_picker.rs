@@ -11,7 +11,7 @@ use cgmath::vector::{
   Vec2,
 };
 use glh = gl_helpers;
-use map::TileIterator;
+use map::MapPosIter;
 use camera::Camera;
 use geom::Geom;
 use mesh::Mesh;
@@ -30,7 +30,7 @@ use gl_types::{
 fn build_hex_map_mesh(geom: &Geom, map_size: Size2<Int>) -> (~[VertexCoord], ~[Color3]) {
   let mut c_data = ~[];
   let mut v_data = ~[];
-  for tile_pos in TileIterator::new(map_size) {
+  for tile_pos in MapPosIter::new(map_size) {
     let pos3d = geom.map_pos_to_world_pos(tile_pos);
     for num in range(0 as Int, 6) {
       let vertex = geom.index_to_hex_vertex(num);

@@ -7,21 +7,21 @@ use core_types::{
   MapPos,
 };
 
-pub struct TileIterator {
+pub struct MapPosIter {
   cursor: MapPos,
   map_size: Size2<Int>,
 }
 
-impl TileIterator {
-  pub fn new(map_size: Size2<Int>) -> TileIterator {
-    TileIterator {
+impl MapPosIter {
+  pub fn new(map_size: Size2<Int>) -> MapPosIter {
+    MapPosIter {
       cursor: Vec2::zero(),
       map_size: map_size,
     }
   }
 }
 
-impl Iterator<MapPos> for TileIterator {
+impl Iterator<MapPos> for MapPosIter {
   fn next(&mut self) -> Option<MapPos> {
     let current_pos = if self.cursor.y > self.map_size.y {
       None

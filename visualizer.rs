@@ -15,7 +15,7 @@ use cgmath::vector::{
 };
 use glh = gl_helpers;
 use camera::Camera;
-use map::TileIterator;
+use map::MapPosIter;
 use geom::Geom;
 use tile_picker::TilePicker;
 use obj;
@@ -54,7 +54,7 @@ use event_visualizer::{
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
   let mut vertex_data = ~[];
-  for tile_pos in TileIterator::new(map_size) {
+  for tile_pos in MapPosIter::new(map_size) {
     let pos = geom.map_pos_to_world_pos(tile_pos);
     for num in range(0 as Int, 6) {
       let vertex = geom.index_to_hex_vertex(num);
@@ -69,7 +69,7 @@ fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
 
 fn build_hex_tex_coord(map_size: Size2<Int>) -> ~[TextureCoord] {
   let mut vertex_data = ~[];
-  for _ in TileIterator::new(map_size) {
+  for _ in MapPosIter::new(map_size) {
     for _ in range(0, 6) {
       vertex_data.push(Vec2{x: 0.0, y: 0.0});
       vertex_data.push(Vec2{x: 1.0, y: 0.0});
