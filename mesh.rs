@@ -13,11 +13,11 @@ use gl_types::{
 use core_types::Int;
 
 pub struct Mesh {
-    vertex_coords_vbo: VboId,
-    color_vbo: Option<VboId>,
-    texture_coords_vbo: Option<VboId>,
-    texture_id: Option<TextureId>,
-    length: Int,
+    priv vertex_coords_vbo: VboId,
+    priv color_vbo: Option<VboId>,
+    priv texture_coords_vbo: Option<VboId>,
+    priv texture_id: Option<TextureId>,
+    priv length: Int,
 }
 
 impl Mesh {
