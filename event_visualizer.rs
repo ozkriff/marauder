@@ -143,4 +143,36 @@ impl EventVisualizer for EventCreateUnitVisualizer {
     fn end(&mut self, _: &Geom, _: &mut Scene) {
     }
 }
+
+pub struct EventAttackUnitVisualizer {
+    attacker_id: UnitId,
+    defender_id: UnitId,
+    anim_index: Int,
+}
+
+impl EventAttackUnitVisualizer {
+    pub fn new(attacker_id: UnitId, defender_id: UnitId) -> ~EventVisualizer {
+        ~EventAttackUnitVisualizer {
+            attacker_id: attacker_id,
+            defender_id: defender_id,
+            anim_index: 0,
+        } as ~EventVisualizer
+    }
+}
+
+impl EventVisualizer for EventAttackUnitVisualizer {
+    fn is_finished(&self) -> Bool {
+        self.anim_index == MOVE_SPEED as Int
+    }
+
+    fn draw(&mut self, _: &Geom, scene: &mut Scene) {
+        scene.get_mut(&self.defender_id).pos.z -= 0.01;
+        self.anim_index += 1;
+    }
+
+    fn end(&mut self, _: &Geom, scene: &mut Scene) {
+        scene.remove(&self.defender_id);
+    }
+}
+
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

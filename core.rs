@@ -14,12 +14,14 @@ pub enum Command {
     CommandMove(UnitId, MapPos),
     CommandEndTurn,
     CommandCreateUnit(MapPos),
+    CommandAttackUnit(UnitId, UnitId),
 }
 
 pub enum Event {
     EventMove(UnitId, ~[MapPos]),
     EventEndTurn(PlayerId, PlayerId), // old_id, new_id
     EventCreateUnit(UnitId, MapPos),
+    EventAttackUnit(UnitId, UnitId),
 }
 
 pub struct Player {
@@ -32,7 +34,7 @@ pub struct Unit {
 }
 
 pub struct Core<'a> {
-    priv units: ~[Unit],
+    priv units: HashMap<UnitId, Unit>,
     priv players: ~[Player],
     priv current_player_id: PlayerId,
     priv core_event_list: ~[~CoreEvent],
@@ -50,7 +52,7 @@ fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
 impl<'a> Core<'a> {
     pub fn new() -> Core {
         let mut core = Core {
-            units: ~[],
+            units: HashMap::new(),
             players: ~[Player{id: 0}, Player{id: 1}],
             current_player_id: 0,
             core_event_list: ~[],
@@ -77,28 +79,6 @@ impl<'a> Core<'a> {
         list.shift()
     }
 
-    fn id_to_unit_mut_opt(&'a mut self, id: UnitId) -> Option<&'a mut Unit> {
-        self.units.mut_iter().find(|u| u.id == id)
-    }
-
-    fn id_to_unit_mut(&'a mut self, id: UnitId) -> &'a mut Unit {
-        match self.id_to_unit_mut_opt(id) {
-            Some(unit) => unit,
-            None => fail!("Bad unit id: {}", id),
-        }
-    }
-
-    fn id_to_unit_opt(&'a self, id: UnitId) -> Option<&'a Unit> {
-        self.units.iter().find(|u| u.id == id)
-    }
-
-    fn id_to_unit(&'a self, id: UnitId) -> &'a Unit {
-        match self.id_to_unit_opt(id) {
-            Some(unit) => unit,
-            None => fail!("Bad unit id: {}", id),
-        }
-    }
-
     fn command_to_core_event(&self, command: Command) -> ~CoreEvent {
         match command {
             CommandEndTurn => {
@@ -109,6 +89,9 @@ impl<'a> Core<'a> {
             },
             CommandMove(unit_id, destination) => {
                 CoreEventMove::new(self, unit_id, destination) as ~CoreEvent
+            },
+            CommandAttackUnit(attacker_id, defender_id) => {
+                CoreEventAttackUnit::new(self, attacker_id, defender_id) as ~CoreEvent
             },
         }
     }
@@ -148,7 +131,7 @@ impl CoreEventMove {
         unit_id: UnitId,
         destination: MapPos
     ) -> ~CoreEventMove {
-        let start_pos = core.id_to_unit(unit_id).pos;
+        let start_pos = core.units.get(&unit_id).pos;
         ~CoreEventMove {
             path: ~[start_pos, destination],
             unit_id: unit_id,
@@ -162,7 +145,7 @@ impl CoreEvent for CoreEventMove {
     }
 
     fn apply(&self, core: &mut Core) {
-        let unit = core.id_to_unit_mut(self.unit_id);
+        let unit = core.units.get_mut(&self.unit_id);
         unit.pos = *self.path.last().unwrap();
     }
 }
@@ -206,11 +189,9 @@ struct CoreEventCreateUnit {
 
 impl CoreEventCreateUnit {
     fn new(core: &Core, pos: MapPos) -> ~CoreEventCreateUnit {
-        let last_unit_opt = core.units.last();
-        let new_id = if last_unit_opt.is_some() {
-            last_unit_opt.unwrap().id + 1
-        } else {
-            0
+        let new_id = match core.units.keys().max_by(|&n| n) {
+            Some(n) => *n + 1,
+            None => 0,
         };
         ~CoreEventCreateUnit{id: new_id, pos: pos}
     }
@@ -222,10 +203,38 @@ impl CoreEvent for CoreEventCreateUnit {
     }
 
     fn apply(&self, core: &mut Core) {
-        assert!(core.units.iter().find(|u| u.id == self.id).is_none());
-        core.units.push(Unit{id: self.id, pos: self.pos});
+        assert!(core.units.find(&self.id).is_none());
+        core.units.insert(self.id, Unit{id: self.id, pos: self.pos});
     }
 }
 
+struct CoreEventAttackUnit {
+    attacker_id: UnitId,
+    defender_id: UnitId,
+}
+
+impl CoreEventAttackUnit {
+    fn new(
+        _: &Core,
+        attacker_id: UnitId,
+        defender_id: UnitId
+    ) -> ~CoreEventAttackUnit {
+        ~CoreEventAttackUnit {
+            attacker_id: attacker_id,
+            defender_id: defender_id,
+        }
+    }
+}
+
+impl CoreEvent for CoreEventAttackUnit {
+    fn to_event(&self) -> Event {
+        EventAttackUnit(self.attacker_id, self.defender_id)
+    }
+
+    fn apply(&self, core: &mut Core) {
+        assert!(core.units.find(&self.defender_id).is_some());
+        core.units.remove(&self.defender_id);
+    }
+}
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

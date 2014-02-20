@@ -1,34 +1,43 @@
 // See LICENSE file for copyright and license details.
 
+use std::hashmap::HashMap;
 use core::{
     Unit,
     Event,
     EventMove,
     EventEndTurn,
     EventCreateUnit,
+    EventAttackUnit,
+};
+use core_types::{
+    UnitId,
 };
 
 pub struct GameState {
-    units: ~[Unit],
+    units: HashMap<UnitId, Unit>,
 }
 
 impl GameState {
     pub fn new() -> GameState {
         GameState {
-            units: ~[],
+            units: HashMap::new(),
         }
     }
 
     pub fn apply_event(&mut self, event: &Event) {
         match *event {
             EventMove(id, ref path) => {
-                let unit = self.units.mut_iter().find(|u| u.id == id).unwrap();
+                let unit = self.units.get_mut(&id);
                 unit.pos = *path.last().unwrap();
             },
             EventEndTurn(_, _) => {},
             EventCreateUnit(id, pos) => {
-                assert!(self.units.iter().find(|u| u.id == id).is_none());
-                self.units.push(Unit{id: id, pos: pos});
+                assert!(self.units.find(&id).is_none());
+                self.units.insert(id, Unit{id: id, pos: pos});
+            },
+            EventAttackUnit(_, defender_id) => {
+                assert!(self.units.find(&defender_id).is_some());
+                self.units.remove(&defender_id);
             },
         }
     }

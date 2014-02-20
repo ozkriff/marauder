@@ -23,10 +23,12 @@ use core::{
     CommandEndTurn,
     CommandMove,
     CommandCreateUnit,
+    CommandAttackUnit,
     Event,
     EventMove,
     EventEndTurn,
     EventCreateUnit,
+    EventAttackUnit,
 };
 use core_types::{
     Size2,
@@ -50,6 +52,7 @@ use event_visualizer::{
     EventMoveVisualizer,
     EventEndTurnVisualizer,
     EventCreateUnitVisualizer,
+    EventAttackUnitVisualizer,
 };
 use game_state::GameState;
 
@@ -199,8 +202,15 @@ impl<'a> Visualizer<'a> {
     }
 
     fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
+        let mut res = None;
         let id = self.core.player_id();
-        self.game_state.get(&id).units.iter().find(|u| u.pos == pos)
+        for (_, unit) in self.game_state.get(&id).units.iter() {
+            if unit.pos == pos {
+                res = Some(unit);
+                break;
+            }
+        }
+        res
     }
 
     fn init_opengl(&mut self) {
@@ -257,6 +267,17 @@ impl<'a> Visualizer<'a> {
                     let pos = pos_opt.unwrap();
                     if self.unit_at_opt(pos).is_none() {
                         let cmd = CommandCreateUnit(pos);
+                        self.core.do_command(cmd);
+                    }
+                }
+            },
+            glfw::KeyA => {
+                let pos_opt = self.selected_tile_pos;
+                if pos_opt.is_some() {
+                    let pos = pos_opt.unwrap();
+                    if self.unit_at_opt(pos).is_some() {
+                        let defender_id = self.unit_at_opt(pos).unwrap().id;
+                        let cmd = CommandAttackUnit(0, defender_id);
                         self.core.do_command(cmd);
                     }
                 }
@@ -347,6 +368,9 @@ impl<'a> Visualizer<'a> {
             },
             EventCreateUnit(id, ref pos) => {
                 EventCreateUnitVisualizer::new(id, *pos)
+            },
+            EventAttackUnit(attacker_id, defender_id) => {
+                EventAttackUnitVisualizer::new(attacker_id, defender_id)
             },
         }
     }
