@@ -114,6 +114,8 @@ impl EventVisualizer for EventEndTurnVisualizer {
 pub struct EventCreateUnitVisualizer {
     id: UnitId,
     pos: MapPos,
+    anim_index: Int,
+    is_initialized: Bool,
 }
 
 impl EventCreateUnitVisualizer {
@@ -121,20 +123,30 @@ impl EventCreateUnitVisualizer {
         ~EventCreateUnitVisualizer {
             id: id,
             pos: pos,
+            anim_index: 0,
+            is_initialized: false,
         } as ~EventVisualizer
     }
 }
 
 impl EventVisualizer for EventCreateUnitVisualizer {
     fn is_finished(&self) -> Bool {
-        true
+        self.anim_index == MOVE_SPEED as Int
     }
 
-    fn draw(&mut self, _: &Geom, _: &mut Scene) {}
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene) {
+        if !self.is_initialized {
+            let world_pos = geom.map_pos_to_world_pos(self.pos);
+            scene.insert(self.id, SceneNode{pos: world_pos});
+            self.is_initialized = true;
+        }
+        let mut pos = geom.map_pos_to_world_pos(self.pos);
+        pos.z -= 0.02 * (MOVE_SPEED / self.anim_index as Float);
+        scene.get_mut(&self.id).pos = pos;
+        self.anim_index += 1;
+    }
 
-    fn end(&mut self, geom: &Geom, scene: &mut Scene, game_state: &mut GameState) {
-        let world_pos = geom.map_pos_to_world_pos(self.pos);
-        scene.insert(self.id, SceneNode{pos: world_pos});
+    fn end(&mut self, _: &Geom, _: &mut Scene, game_state: &mut GameState) {
         assert!(game_state.units.iter().find(|u| u.id == self.id).is_none());
         game_state.units.push(Unit{id: self.id, pos: self.pos});
     }
