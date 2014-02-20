@@ -8,21 +8,17 @@ use core_types::{
     MapPos,
     UnitId,
 };
-use core::{
-    Unit,
-};
 use gl_types::{
     Scene,
     SceneNode,
     Float,
     WorldPos,
 };
-use game_state::GameState;
 
 pub trait EventVisualizer {
     fn is_finished(&self) -> Bool;
     fn draw(&mut self, geom: &Geom, scene: &mut Scene);
-    fn end(&mut self, geom: &Geom, scene: &mut Scene, game_state: &mut GameState);
+    fn end(&mut self, geom: &Geom, scene: &mut Scene);
 }
 
 static MOVE_SPEED: Float = 40.0; // TODO: config?
@@ -45,11 +41,9 @@ impl EventVisualizer for EventMoveVisualizer {
         self.current_move_index += 1;
     }
 
-    fn end(&mut self, geom: &Geom, scene: &mut Scene, game_state: &mut GameState) {
+    fn end(&mut self, geom: &Geom, scene: &mut Scene) {
         let unit_node = scene.get_mut(&self.unit_id);
         unit_node.pos = self.current_position(geom);
-        let unit = game_state.units.mut_iter().find(|u| u.id == self.unit_id).unwrap();
-        unit.pos = *self.path.last().unwrap();
     }
 }
 
@@ -108,7 +102,7 @@ impl EventVisualizer for EventEndTurnVisualizer {
 
     fn draw(&mut self, _: &Geom, _: &mut Scene) {}
 
-    fn end(&mut self, _: &Geom, _: &mut Scene, _: &mut GameState) {}
+    fn end(&mut self, _: &Geom, _: &mut Scene) {}
 }
 
 pub struct EventCreateUnitVisualizer {
@@ -146,9 +140,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
         self.anim_index += 1;
     }
 
-    fn end(&mut self, _: &Geom, _: &mut Scene, game_state: &mut GameState) {
-        assert!(game_state.units.iter().find(|u| u.id == self.id).is_none());
-        game_state.units.push(Unit{id: self.id, pos: self.pos});
+    fn end(&mut self, _: &Geom, _: &mut Scene) {
     }
 }
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

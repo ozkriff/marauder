@@ -119,6 +119,7 @@ pub struct Visualizer<'a> {
     geom: Geom,
     scenes: HashMap<PlayerId, Scene>,
     core: Core<'a>,
+    event: Option<Event>,
     event_visualizer: Option<~EventVisualizer>,
     game_state: HashMap<PlayerId, GameState>,
 }
@@ -155,6 +156,7 @@ impl<'a> Visualizer<'a> {
             },
             core: Core::new(),
             event_visualizer: None,
+            event: None,
         };
         vis.init_opengl();
         vis.picker.init(&geom, vis.core.map_size());
@@ -335,16 +337,16 @@ impl<'a> Visualizer<'a> {
         self.selected_tile_pos = self.picker.pick_tile(&self.camera, mouse_pos);
     }
 
-    pub fn make_event_visualizer(&mut self, event: Event) -> ~EventVisualizer {
-        match event {
-            EventMove(unit_id, path) => {
-                EventMoveVisualizer::new(unit_id, path)
+    pub fn make_event_visualizer(&mut self, event: &Event) -> ~EventVisualizer {
+        match *event {
+            EventMove(ref unit_id, ref path) => {
+                EventMoveVisualizer::new(*unit_id, path.clone())
             },
             EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
             },
-            EventCreateUnit(id, pos) => {
-                EventCreateUnitVisualizer::new(id, pos)
+            EventCreateUnit(id, ref pos) => {
+                EventCreateUnitVisualizer::new(id, *pos)
             },
         }
     }
@@ -354,15 +356,17 @@ impl<'a> Visualizer<'a> {
             let event_opt = self.core.get_event();
             if event_opt.is_some() {
                 let event = event_opt.unwrap();
-                let vis = self.make_event_visualizer(event);
+                let vis = self.make_event_visualizer(&event);
+                self.event = Some(event);
                 self.event_visualizer = Some(vis);
             }
         } else if self.event_visualizer.get_ref().is_finished() {
             let scene = self.scenes.get_mut(&self.core.player_id());
+            self.event_visualizer.get_mut_ref().end(&self.geom, scene);
             let state = self.game_state.get_mut(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().end(
-                &self.geom, scene, state);
+            state.apply_event(self.event.get_ref());
             self.event_visualizer = None;
+            self.event = None;
         }
     }
 
