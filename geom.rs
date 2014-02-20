@@ -32,7 +32,7 @@ pub struct Geom {
 
 impl Geom {
     pub fn new() -> Geom {
-        let hex_ex_radius: Float = 1.0 / 2.0;
+        let hex_ex_radius: Float = 1.0;
         let hex_in_radius = sqrt(
                 pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
         Geom {
