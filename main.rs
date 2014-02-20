@@ -19,6 +19,7 @@ mod gl_helpers;
 mod camera;
 mod map;
 mod gl_types;
+mod game_state;
 mod geom;
 mod tile_picker;
 mod obj;

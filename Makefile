@@ -23,6 +23,7 @@ SRC = \
   tile_picker.rs \
   core_types.rs \
   gl_types.rs \
+  game_state.rs \
   visualizer.rs
 
 marauder: Makefile ${SRC}

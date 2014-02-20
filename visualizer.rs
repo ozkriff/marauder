@@ -51,6 +51,7 @@ use event_visualizer::{
     EventEndTurnVisualizer,
     EventCreateUnitVisualizer,
 };
+use game_state::GameState;
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
     let mut vertex_data = ~[];
@@ -119,7 +120,7 @@ pub struct Visualizer<'a> {
     scenes: HashMap<PlayerId, Scene>,
     core: Core<'a>,
     event_visualizer: Option<~EventVisualizer>,
-    units: HashMap<PlayerId, ~[Unit]>,
+    game_state: HashMap<PlayerId, GameState>,
 }
 
 impl<'a> Visualizer<'a> {
@@ -146,10 +147,10 @@ impl<'a> Visualizer<'a> {
                 m.insert(1 as PlayerId, HashMap::new());
                 m
             },
-            units: {
+            game_state: {
                 let mut m = HashMap::new();
-                m.insert(0 as PlayerId, ~[]);
-                m.insert(1 as PlayerId, ~[]);
+                m.insert(0 as PlayerId, GameState::new());
+                m.insert(1 as PlayerId, GameState::new());
                 m
             },
             core: Core::new(),
@@ -197,7 +198,7 @@ impl<'a> Visualizer<'a> {
 
     fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
         let id = self.core.player_id();
-        self.units.get(&id).iter().find(|u| u.pos == pos)
+        self.game_state.get(&id).units.iter().find(|u| u.pos == pos)
     }
 
     fn init_opengl(&mut self) {
@@ -358,9 +359,9 @@ impl<'a> Visualizer<'a> {
             }
         } else if self.event_visualizer.get_ref().is_finished() {
             let scene = self.scenes.get_mut(&self.core.player_id());
-            let units = self.units.get_mut(&self.core.player_id());
+            let state = self.game_state.get_mut(&self.core.player_id());
             self.event_visualizer.get_mut_ref().end(
-                &self.geom, scene, units);
+                &self.geom, scene, state);
             self.event_visualizer = None;
         }
     }
