@@ -129,6 +129,7 @@ pub struct Visualizer<'a> {
 
 impl<'a> Visualizer<'a> {
     pub fn new() -> ~Visualizer {
+        let players_count = 2;
         let win_size = read_win_size("config.json");
         let win = init_win(win_size);
         let geom = Geom::new();
@@ -144,17 +145,18 @@ impl<'a> Visualizer<'a> {
             selected_tile_pos: None,
             selected_unit_id: None,
             geom: geom,
-            // TODO: use for cycle
             scenes: {
                 let mut m = HashMap::new();
-                m.insert(0 as PlayerId, HashMap::new());
-                m.insert(1 as PlayerId, HashMap::new());
+                for i in range(0 as PlayerId, players_count) {
+                    m.insert(i, HashMap::new());
+                }
                 m
             },
             game_state: {
                 let mut m = HashMap::new();
-                m.insert(0 as PlayerId, GameState::new());
-                m.insert(1 as PlayerId, GameState::new());
+                for i in range(0 as PlayerId, players_count) {
+                    m.insert(i, GameState::new());
+                }
                 m
             },
             core: Core::new(),
