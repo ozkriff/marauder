@@ -15,4 +15,13 @@ pub type PlayerId = Int;
 pub type UnitId = Int;
 pub type MapPos = Vec2<Int>;
 
+pub enum Dir {
+  NorthEast,
+  East,
+  SouthEast,
+  SouthWest,
+  West,
+  NorthWest,
+}
+
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
