@@ -11,7 +11,7 @@ use core_types::{
 };
 
 pub enum Command {
-    CommandMove(UnitId, MapPos),
+    CommandMove(UnitId, ~[MapPos]),
     CommandEndTurn,
     CommandCreateUnit(MapPos),
     CommandAttackUnit(UnitId, UnitId),
@@ -50,8 +50,8 @@ fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
 }
 
 impl<'a> Core<'a> {
-    pub fn new() -> Core {
-        let mut core = Core {
+    pub fn new() -> ~Core {
+        let mut core = ~Core {
             units: HashMap::new(),
             players: ~[Player{id: 0}, Player{id: 1}],
             current_player_id: 0,
@@ -87,8 +87,8 @@ impl<'a> Core<'a> {
             CommandCreateUnit(pos) => {
                 CoreEventCreateUnit::new(self, pos) as ~CoreEvent
             },
-            CommandMove(unit_id, destination) => {
-                CoreEventMove::new(self, unit_id, destination) as ~CoreEvent
+            CommandMove(unit_id, path) => {
+                CoreEventMove::new(self, unit_id, path) as ~CoreEvent
             },
             CommandAttackUnit(attacker_id, defender_id) => {
                 CoreEventAttackUnit::new(self, attacker_id, defender_id) as ~CoreEvent
@@ -126,14 +126,9 @@ struct CoreEventMove {
 }
 
 impl CoreEventMove {
-    fn new(
-        core: &Core,
-        unit_id: UnitId,
-        destination: MapPos
-    ) -> ~CoreEventMove {
-        let start_pos = core.units.get(&unit_id).pos;
+    fn new(_: &Core, unit_id: UnitId, path: ~[MapPos]) -> ~CoreEventMove {
         ~CoreEventMove {
-            path: ~[start_pos, destination],
+            path: path,
             unit_id: unit_id,
         }
     }

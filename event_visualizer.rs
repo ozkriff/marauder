@@ -58,7 +58,7 @@ impl EventMoveVisualizer {
 
     fn frames_count(&self) -> Int {
         let len = self.path.len() as Int - 1;
-        len * MOVE_SPEED as Int
+        (len * MOVE_SPEED as Int) - 1
     }
 
     fn current_tile(&self) -> MapPos {
@@ -70,13 +70,11 @@ impl EventMoveVisualizer {
     }
 
     fn current_tile_index(&self) -> Int {
-        // self.current_move_index / MOVE_SPEED as Int
-        0
+        self.current_move_index / MOVE_SPEED as Int
     }
 
     fn node_index(&self) -> Int {
-        // self.current_move_index - self.current_tile_index() * MOVE_SPEED
-        self.current_move_index
+        self.current_move_index - self.current_tile_index() * MOVE_SPEED as Int
     }
 
     fn current_position(&self, geom: &Geom) -> WorldPos {

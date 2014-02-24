@@ -28,6 +28,8 @@ mod mesh;
 mod core;
 mod event_visualizer;
 mod core_types;
+mod pathfinder;
+mod dir;
 
 fn main() {
     let mut visualizer = visualizer::Visualizer::new();

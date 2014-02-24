@@ -55,6 +55,7 @@ use event_visualizer::{
     EventAttackUnitVisualizer,
 };
 use game_state::GameState;
+use pathfinder::Pathfinder;
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
     let mut vertex_data = ~[];
@@ -121,10 +122,11 @@ pub struct Visualizer<'a> {
     selected_unit_id: Option<UnitId>,
     geom: Geom,
     scenes: HashMap<PlayerId, Scene>,
-    core: Core<'a>,
+    core: ~Core<'a>,
     event: Option<Event>,
     event_visualizer: Option<~EventVisualizer>,
     game_state: HashMap<PlayerId, GameState>,
+    pathfinders: HashMap<PlayerId, Pathfinder>,
 }
 
 impl<'a> Visualizer<'a> {
@@ -133,6 +135,8 @@ impl<'a> Visualizer<'a> {
         let win_size = read_win_size("config.json");
         let win = init_win(win_size);
         let geom = Geom::new();
+        let core = Core::new();
+        let map_size = core.map_size();
         let mut vis = ~Visualizer {
             program: 0,
             map_mesh: Mesh::new(),
@@ -159,9 +163,16 @@ impl<'a> Visualizer<'a> {
                 }
                 m
             },
-            core: Core::new(),
+            core: core,
             event_visualizer: None,
             event: None,
+            pathfinders: {
+                let mut m = HashMap::new();
+                for i in range(0 as PlayerId, players_count) {
+                    m.insert(i, Pathfinder::new(map_size));
+                }
+                m
+            },
         };
         vis.init_opengl();
         vis.picker.init(&geom, vis.core.map_size());
@@ -309,10 +320,15 @@ impl<'a> Visualizer<'a> {
             let pos = self.selected_tile_pos.unwrap();
             if self.unit_at_opt(pos).is_some() {
                 let unit_id = self.unit_at_opt(pos).unwrap().id;
+                let state = self.game_state.get_mut(&self.core.player_id());
                 self.selected_unit_id = Some(unit_id);
+                let pf = self.pathfinders.get_mut(&self.core.player_id());
+                pf.fill_map(state, state.units.get(&unit_id));
             } else if self.selected_unit_id.is_some() {
                 let unit_id = self.selected_unit_id.unwrap();
-                self.core.do_command(CommandMove(unit_id, pos));
+                let pf = self.pathfinders.get_mut(&self.core.player_id());
+                let path = pf.get_path(pos);
+                self.core.do_command(CommandMove(unit_id, path));
             }
         }
     }
@@ -393,6 +409,11 @@ impl<'a> Visualizer<'a> {
             state.apply_event(self.event.get_ref());
             self.event_visualizer = None;
             self.event = None;
+            if self.selected_unit_id.is_some() {
+                let unit_id = self.selected_unit_id.unwrap();
+                let pf = self.pathfinders.get_mut(&self.core.player_id());
+                pf.fill_map(state, state.units.get(&unit_id));
+            }
         }
     }
 

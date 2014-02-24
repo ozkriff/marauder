@@ -11,17 +11,29 @@ use core::{
 };
 use core_types::{
     UnitId,
+    MapPos,
 };
 
 pub struct GameState {
     units: HashMap<UnitId, Unit>,
 }
 
-impl GameState {
+impl<'a> GameState {
     pub fn new() -> GameState {
         GameState {
             units: HashMap::new(),
         }
+    }
+
+    pub fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
+        let mut res = None;
+        for (_, unit) in self.units.iter() {
+            if unit.pos == pos {
+                res = Some(unit);
+                break;
+            }
+        }
+        res
     }
 
     pub fn apply_event(&mut self, event: &Event) {

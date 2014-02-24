@@ -16,6 +16,7 @@ SRC = \
   main.rs \
   misc.rs \
   map.rs \
+  dir.rs \
   mesh.rs \
   core.rs \
   event_visualizer.rs \
@@ -24,6 +25,7 @@ SRC = \
   core_types.rs \
   gl_types.rs \
   game_state.rs \
+  pathfinder.rs \
   visualizer.rs
 
 marauder: Makefile ${SRC}
