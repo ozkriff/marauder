@@ -98,8 +98,8 @@ fn init_win(win_size: Size2<Int>) -> glfw::Window {
         fail!("Failed to initialize GLFW");
     }
     let win = glfw::Window::create(
-        win_size.x as u32,
-        win_size.y as u32,
+        win_size.w as u32,
+        win_size.h as u32,
         "Marauder",
         glfw::Windowed,
     ).unwrap();
@@ -362,8 +362,8 @@ impl<'a> Visualizer<'a> {
                 self.handle_mouse_button_event();
             },
             glfw::SizeEvent(w, h) => {
-                glh::viewport(Size2{x: w, y: h});
-                self.picker.set_win_size(Size2{x: w, y: h});
+                glh::viewport(Size2{w: w, h: h});
+                self.picker.set_win_size(Size2{w: w, h: h});
             },
             _ => {},
         }

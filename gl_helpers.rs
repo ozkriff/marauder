@@ -242,7 +242,7 @@ pub fn clear() {
 }
 
 pub fn viewport(size: Size2<Int>) {
-    gl::Viewport(0, 0, size.x, size.y);
+    gl::Viewport(0, 0, size.w, size.h);
 }
 
 pub fn bind_buffer(buffer: &VboId) {

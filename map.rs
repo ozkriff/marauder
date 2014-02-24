@@ -23,13 +23,13 @@ impl MapPosIter {
 
 impl Iterator<MapPos> for MapPosIter {
     fn next(&mut self) -> Option<MapPos> {
-        let current_pos = if self.cursor.y >= self.map_size.y {
+        let current_pos = if self.cursor.y >= self.map_size.h {
             None
         } else {
             Some(self.cursor)
         };
         self.cursor.x += 1;
-        if self.cursor.x >= self.map_size.x {
+        if self.cursor.x >= self.map_size.w {
             self.cursor.x = 0;
             self.cursor.y += 1;
         }

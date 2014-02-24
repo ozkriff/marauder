@@ -57,7 +57,7 @@ impl<'a> Core<'a> {
             current_player_id: PlayerId(0),
             core_event_list: ~[],
             event_lists: get_event_lists(),
-            map_size: Size2{x: 4, y: 8},
+            map_size: Size2{w: 4, h: 8}, // TODO: Read from json config
         };
         core.do_command(CommandCreateUnit(Vec2{x: 0, y: 0}));
         core.do_command(CommandCreateUnit(Vec2{x: 0, y: 1}));

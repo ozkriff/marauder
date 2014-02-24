@@ -24,17 +24,17 @@ struct Map {
 
 impl<'a> Map {
     fn tile_mut(&'a mut self, pos: MapPos) -> &'a mut Tile {
-        &mut self.tiles[pos.x + (pos.y * self.size.x)]
+        &mut self.tiles[pos.x + (pos.y * self.size.w)]
     }
 
     fn tile(&'a self, pos: MapPos) -> &'a Tile {
-        &self.tiles[pos.x + (pos.y * self.size.x)]
+        &self.tiles[pos.x + (pos.y * self.size.w)]
     }
 
     fn is_inboard(&self, pos: MapPos) -> Bool {
         let x = pos.x;
         let y = pos.y;
-        x >= 0 && y >= 0 && x < self.size.x && y < self.size.y
+        x >= 0 && y >= 0 && x < self.size.w && y < self.size.h
     }
 }
 
@@ -56,7 +56,7 @@ fn create_tiles(tiles_count: Int) -> ~[Tile] {
 
 impl Pathfinder {
     pub fn new(map_size: Size2<Int>) -> Pathfinder {
-        let tiles_count = map_size.x * map_size.y;
+        let tiles_count = map_size.w * map_size.h;
         Pathfinder {
             queue: ~[],
             map: Map {

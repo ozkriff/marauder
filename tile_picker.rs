@@ -99,7 +99,7 @@ impl TilePicker {
         mouse_pos: Vec2<Int>
     ) -> Option<MapPos> {
         use gl; // TODO: remove
-        let height = self.win_size.y;
+        let height = self.win_size.h;
         let reverted_y = height - mouse_pos.y;
         let data: [u8, ..4] = [0, 0, 0, 0]; // mut
         unsafe {

@@ -3,10 +3,7 @@
 use cgmath::vector::Vec2;
 
 #[deriving(Decodable)]
-pub struct Size2<T> {
-    x: T,
-    y: T,
-}
+pub struct Size2<T>{w: T, h: T}
 
 pub type Bool = bool;
 pub type Int = i32; // TODO: rename, collision with trait
