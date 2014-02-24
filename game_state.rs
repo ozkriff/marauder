@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use std::hashmap::HashMap;
+use collections::hashmap::HashMap;
 use core::{
     Unit,
     Event,

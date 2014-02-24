@@ -8,6 +8,7 @@
 extern crate native;
 extern crate extra;
 extern crate serialize;
+extern crate collections;
 extern crate cgmath;
 extern crate glfw = "glfw-rs";
 extern crate gl;

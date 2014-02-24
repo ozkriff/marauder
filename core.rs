@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use std::hashmap::HashMap;
+use collections::hashmap::HashMap;
 use cgmath::vector::Vec2;
 use core_types::{
     Size2,

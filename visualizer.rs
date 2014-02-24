@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use extra::json;
-use std::hashmap::HashMap;
+use collections::hashmap::HashMap;
 use serialize::Decodable;
 use glfw;
 use gl;
