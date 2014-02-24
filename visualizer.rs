@@ -280,6 +280,7 @@ impl<'a> Visualizer<'a> {
             },
             glfw::KeyT => {
                 self.core.do_command(CommandEndTurn);
+                self.selected_unit_id = None;
             },
             glfw::KeyU => {
                 let pos_opt = self.selected_tile_pos;
