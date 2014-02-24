@@ -4,7 +4,6 @@ use extra::json;
 use collections::hashmap::HashMap;
 use serialize::Decodable;
 use glfw;
-use gl;
 use cgmath::vector::{
     Vec3,
     Vec2,
@@ -111,16 +110,16 @@ fn init_win(win_size: Size2<Int>) -> glfw::Window {
 
 fn get_scenes(players_count: Int) -> HashMap<PlayerId, Scene> {
     let mut m = HashMap::new();
-    for i in range(0 as PlayerId, players_count) {
-        m.insert(i, HashMap::new());
+    for i in range(0, players_count) {
+        m.insert(PlayerId(i), HashMap::new());
     }
     m
 }
 
 fn get_game_states(players_count: Int) -> HashMap<PlayerId, GameState> {
     let mut m = HashMap::new();
-    for i in range(0 as PlayerId, players_count) {
-        m.insert(i, GameState::new());
+    for i in range(0, players_count) {
+        m.insert(PlayerId(i), GameState::new());
     }
     m
 }
@@ -130,8 +129,8 @@ fn get_pathfinders(
     map_size: Size2<Int>,
 ) -> HashMap<PlayerId, Pathfinder> {
     let mut m = HashMap::new();
-    for i in range(0 as PlayerId, players_count) {
-        m.insert(i, Pathfinder::new(map_size));
+    for i in range(0, players_count) {
+        m.insert(PlayerId(i), Pathfinder::new(map_size));
     }
     m
 }
@@ -165,10 +164,10 @@ impl<'a> Visualizer<'a> {
         let core = Core::new();
         let map_size = core.map_size();
         let mut vis = ~Visualizer {
-            program: 0,
+            program: ShaderId(0),
             map_mesh: Mesh::new(),
             unit_mesh: Mesh::new(),
-            mvp_mat: 0,
+            mvp_mat: MatId(0),
             win: win,
             mouse_pos: Vec2::zero(),
             camera: Camera::new(),
@@ -198,15 +197,15 @@ impl<'a> Visualizer<'a> {
             read_file(&Path::new("normal.vs.glsl")),
             read_file(&Path::new("normal.fs.glsl")),
         );
-        gl::UseProgram(self.program);
-        self.mvp_mat = glh::get_uniform(self.program, "mvp_mat");
+        glh::use_program(&self.program);
+        self.mvp_mat = MatId(glh::get_uniform(&self.program, "mvp_mat"));
         let vertex_coordinates_attr = glh::get_attr(
-            self.program, "in_vertex_coordinates");
-        gl::EnableVertexAttribArray(vertex_coordinates_attr);
+            &self.program, "in_vertex_coordinates");
+        glh::enable_vertex_attrib_array(&vertex_coordinates_attr);
         glh::vertex_attrib_pointer(vertex_coordinates_attr, 3);
         let texture_coords_attr = glh::get_attr(
-            self.program, "in_texture_coordinates");
-        gl::EnableVertexAttribArray(texture_coords_attr);
+            &self.program, "in_texture_coordinates");
+        glh::enable_vertex_attrib_array(&texture_coords_attr);
         glh::vertex_attrib_pointer(texture_coords_attr, 3);
         let map_size = self.core.map_size();
         let map_vertex_data = build_hex_mesh(&self.geom, map_size);
@@ -236,32 +235,31 @@ impl<'a> Visualizer<'a> {
     }
 
     fn init_opengl(&mut self) {
-        gl::load_with(glfw::get_proc_address);
-        gl::Enable(gl::DEPTH_TEST);
+        glh::init_opengl();
     }
 
     fn cleanup_opengl(&self) {
-        gl::DeleteProgram(self.program);
+        glh::delete_program(&self.program);
     }
 
     fn draw_units(&self) {
-        gl::UseProgram(self.program);
+        glh::use_program(&self.program);
         for (_, unit) in self.scene().iter() {
             let m = glh::tr(self.camera.mat(), unit.pos);
             glh::uniform_mat4f(self.mvp_mat, &m);
-            self.unit_mesh.draw(self.program);
+            self.unit_mesh.draw(&self.program);
         }
     }
 
     fn draw_map(&self) {
         glh::uniform_mat4f(self.mvp_mat, &self.camera.mat());
-        self.map_mesh.draw(self.program);
+        self.map_mesh.draw(&self.program);
     }
 
     fn draw(&mut self) {
-        gl::ClearColor(0.3, 0.3, 0.3, 1.0);
-        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-        gl::UseProgram(self.program);
+        glh::set_clear_color(0.3, 0.3, 0.3);
+        glh::clear();
+        glh::use_program(&self.program);
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {
@@ -299,7 +297,7 @@ impl<'a> Visualizer<'a> {
                     let pos = pos_opt.unwrap();
                     if self.unit_at_opt(pos).is_some() {
                         let defender_id = self.unit_at_opt(pos).unwrap().id;
-                        let cmd = CommandAttackUnit(0, defender_id);
+                        let cmd = CommandAttackUnit(UnitId(0), defender_id);
                         self.core.do_command(cmd);
                     }
                 }
@@ -364,7 +362,7 @@ impl<'a> Visualizer<'a> {
                 self.handle_mouse_button_event();
             },
             glfw::SizeEvent(w, h) => {
-                gl::Viewport(0, 0, w, h);
+                glh::viewport(Size2{x: w, y: h});
                 self.picker.set_win_size(Size2{x: w, y: h});
             },
             _ => {},

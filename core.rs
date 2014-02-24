@@ -44,8 +44,8 @@ pub struct Core<'a> {
 
 fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
     let mut map = HashMap::new();
-    map.insert(0 as PlayerId, ~[]);
-    map.insert(1 as PlayerId, ~[]);
+    map.insert(PlayerId(0), ~[]);
+    map.insert(PlayerId(1), ~[]);
     map
 }
 
@@ -53,8 +53,8 @@ impl<'a> Core<'a> {
     pub fn new() -> ~Core {
         let mut core = ~Core {
             units: HashMap::new(),
-            players: ~[Player{id: 0}, Player{id: 1}],
-            current_player_id: 0,
+            players: ~[Player{id: PlayerId(0)}, Player{id: PlayerId(1)}],
+            current_player_id: PlayerId(0),
             core_event_list: ~[],
             event_lists: get_event_lists(),
             map_size: Size2{x: 4, y: 8},
@@ -152,10 +152,10 @@ struct CoreEventEndTurn {
 
 impl CoreEventEndTurn {
     fn new(core: &Core) -> ~CoreEventEndTurn {
-        let old_id = core.current_player_id;
+        let PlayerId(old_id) = core.current_player_id;
         let max_id = core.players.len() as Int;
         let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
-        ~CoreEventEndTurn{old_id: old_id, new_id: new_id}
+        ~CoreEventEndTurn{old_id: PlayerId(old_id), new_id: PlayerId(new_id)}
     }
 }
 
@@ -185,10 +185,13 @@ struct CoreEventCreateUnit {
 impl CoreEventCreateUnit {
     fn new(core: &Core, pos: MapPos) -> ~CoreEventCreateUnit {
         let new_id = match core.units.keys().max_by(|&n| n) {
-            Some(n) => *n + 1,
+            Some(n) => {
+                let UnitId(id) = *n;
+                id + 1
+            },
             None => 0,
         };
-        ~CoreEventCreateUnit{id: new_id, pos: pos}
+        ~CoreEventCreateUnit{id: UnitId(new_id), pos: pos}
     }
 }
 

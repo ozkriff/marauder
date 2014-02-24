@@ -11,8 +11,12 @@ pub struct Size2<T> {
 pub type Bool = bool;
 pub type Int = i32; // TODO: rename, collision with trait
 
-pub type PlayerId = Int;
-pub type UnitId = Int;
+#[deriving(Ord, Eq, Hash)]
+pub struct PlayerId(Int);
+
+#[deriving(Ord, Eq, Hash)]
+pub struct UnitId(Int);
+
 pub type MapPos = Vec2<Int>;
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

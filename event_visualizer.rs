@@ -13,7 +13,13 @@ use gl_types::{
     SceneNode,
     Float,
     WorldPos,
+    NodeId,
 };
+
+fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
+    let UnitId(id) = unit_id;
+    NodeId(id)
+}
 
 pub trait EventVisualizer {
     fn is_finished(&self) -> Bool;
@@ -36,13 +42,15 @@ impl EventVisualizer for EventMoveVisualizer {
     }
 
     fn draw(&mut self, geom: &Geom, scene: &mut Scene) {
-        let node = scene.get_mut(&self.unit_id);
+        let node_id = unit_id_to_node_id(self.unit_id);
+        let node = scene.get_mut(&node_id);
         node.pos = self.current_position(geom);
         self.current_move_index += 1;
     }
 
     fn end(&mut self, geom: &Geom, scene: &mut Scene) {
-        let unit_node = scene.get_mut(&self.unit_id);
+        let node_id = unit_id_to_node_id(self.unit_id);
+        let unit_node = scene.get_mut(&node_id);
         unit_node.pos = self.current_position(geom);
     }
 }
@@ -127,14 +135,15 @@ impl EventVisualizer for EventCreateUnitVisualizer {
     }
 
     fn draw(&mut self, geom: &Geom, scene: &mut Scene) {
+        let node_id = unit_id_to_node_id(self.id);
         if !self.is_initialized {
             let world_pos = geom.map_pos_to_world_pos(self.pos);
-            scene.insert(self.id, SceneNode{pos: world_pos});
+            scene.insert(node_id, SceneNode{pos: world_pos});
             self.is_initialized = true;
         }
         let mut pos = geom.map_pos_to_world_pos(self.pos);
         pos.z -= 0.02 * (MOVE_SPEED / self.anim_index as Float);
-        scene.get_mut(&self.id).pos = pos;
+        scene.get_mut(&node_id).pos = pos;
         self.anim_index += 1;
     }
 
@@ -164,12 +173,14 @@ impl EventVisualizer for EventAttackUnitVisualizer {
     }
 
     fn draw(&mut self, _: &Geom, scene: &mut Scene) {
-        scene.get_mut(&self.defender_id).pos.z -= 0.01;
+        let node_id = unit_id_to_node_id(self.defender_id);
+        scene.get_mut(&node_id).pos.z -= 0.01;
         self.anim_index += 1;
     }
 
     fn end(&mut self, _: &Geom, scene: &mut Scene) {
-        scene.remove(&self.defender_id);
+        let node_id = unit_id_to_node_id(self.defender_id);
+        scene.remove(&node_id);
     }
 }
 

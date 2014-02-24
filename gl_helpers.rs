@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std;
+use glfw;
 use gl;
 use gl::types::{
     GLint,
@@ -35,7 +36,10 @@ use gl_types::{
     TextureId,
     MatId,
 };
-use core_types::Int;
+use core_types::{
+    Size2,
+    Int,
+};
 
 fn c_str(s: &str) -> *GLchar {
     unsafe {
@@ -98,18 +102,21 @@ pub fn compile_program(
     // mark shaders for deletion after program deletion
     gl::DeleteShader(fragment_shader);
     gl::DeleteShader(vertex_shader);
-    program
+    ShaderId(program)
 }
 
-pub fn get_attr(program_id: ShaderId, name: &str) -> AttrId {
+pub fn get_attr(shader: &ShaderId, name: &str) -> AttrId {
     unsafe {
-        gl::GetAttribLocation(program_id, c_str(name)) as AttrId
+        let ShaderId(id) = *shader;
+        let attr_id = gl::GetAttribLocation(id, c_str(name));
+        AttrId(attr_id as GLuint)
     }
 }
 
-pub fn get_uniform(program: ShaderId, name: &str) -> GLint {
+pub fn get_uniform(shader: &ShaderId, name: &str) -> GLuint {
+    let ShaderId(id) = *shader;
     unsafe {
-        gl::GetUniformLocation(program, c_str(name))
+        gl::GetUniformLocation(id, c_str(name)) as GLuint
     }
 }
 
@@ -121,7 +128,8 @@ pub fn draw_mesh(faces_count: Int) {
 
 pub fn uniform_mat4f(mat_id: MatId, mat: &Mat4<Float>) {
     unsafe {
-        gl::UniformMatrix4fv(mat_id, 1, gl::FALSE, mat.cr(0, 0));
+        let MatId(id) = mat_id;
+        gl::UniformMatrix4fv(id as Int, 1, gl::FALSE, mat.cr(0, 0));
     }
 }
 
@@ -146,16 +154,17 @@ pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
 }
 
 pub fn gen_buffer() -> VboId {
-    let mut n = 0 as VboId;
+    let mut n = 0;
     unsafe {
         gl::GenBuffers(1, &mut n);
     }
-    n
+    VboId(n)
 }
 
-pub fn delete_buffer(buffer: VboId) {
+pub fn delete_buffer(buffer: &VboId) {
     unsafe {
-        gl::DeleteBuffers(1, &buffer);
+        let VboId(id) = *buffer;
+        gl::DeleteBuffers(1, &id);
     }
 }
 
@@ -188,9 +197,10 @@ pub fn fill_current_texture_coords_vbo(data: &[TextureCoord]) {
 pub fn vertex_attrib_pointer(attr: AttrId, components_count: Int) {
     let normalized = gl::FALSE;
     let stride = 0;
+    let AttrId(id) = attr;
     unsafe {
         gl::VertexAttribPointer(
-            attr,
+            id,
             components_count,
             gl::FLOAT,
             normalized,
@@ -198,6 +208,54 @@ pub fn vertex_attrib_pointer(attr: AttrId, components_count: Int) {
             std::ptr::null(),
         );
     }
+}
+
+// TODO: shader method
+pub fn use_program(shader: &ShaderId) {
+    let ShaderId(shader_id) = *shader;
+    gl::UseProgram(shader_id);
+}
+
+pub fn enable_vertex_attrib_array(attr: &AttrId) {
+    let AttrId(id) = *attr;
+    gl::EnableVertexAttribArray(id);
+}
+
+pub fn init_opengl() {
+    // TODO: Remove 'use glfw, glfw::...'?
+    gl::load_with(glfw::get_proc_address);
+    gl::Enable(gl::DEPTH_TEST);
+}
+
+// TODO: Drop
+pub fn delete_program(shader: &ShaderId) {
+    let ShaderId(id) = *shader;
+    gl::DeleteProgram(id);
+}
+
+pub fn set_clear_color(r: Float, g: Float, b: Float) {
+    gl::ClearColor(r, g, b, 1.0);
+}
+
+pub fn clear() {
+    gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+}
+
+pub fn viewport(size: Size2<Int>) {
+    gl::Viewport(0, 0, size.x, size.y);
+}
+
+pub fn bind_buffer(buffer: &VboId) {
+    let VboId(id) = *buffer;
+    gl::BindBuffer(gl::ARRAY_BUFFER, id);
+}
+
+pub fn enable_texture(shader: &ShaderId, texture: &TextureId) {
+    let TextureId(id) = *texture;
+    let basic_texture_loc = get_uniform(shader, "basic_texture") as GLint;
+    gl::Uniform1ui(basic_texture_loc, 0);
+    gl::ActiveTexture(gl::TEXTURE0);
+    gl::BindTexture(gl::TEXTURE_2D, id);
 }
 
 fn load_image(path: ~str) -> image::Image<u8> {
@@ -251,7 +309,7 @@ pub fn load_texture(path: ~str) -> TextureId {
         gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
     gl::TexParameteri(gl::TEXTURE_2D,
         gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
-    id
+    TextureId(id)
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

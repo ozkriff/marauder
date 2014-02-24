@@ -4,7 +4,6 @@ use collections::hashmap::HashMap;
 use gl::types::{
     GLfloat,
     GLuint,
-    GLint,
 };
 use cgmath::vector::{
     Vec3,
@@ -25,18 +24,20 @@ pub type Normal = Vec3<Float>;
 pub type TextureCoord = Vec2<Float>;
 pub type Point2<T> = Vec2<T>;
 
-pub type ShaderId = GLuint;
-pub type TextureId = GLuint;
-pub type VboId = GLuint;
-pub type AttrId = GLuint;
-pub type MatId = GLint;
+pub struct ShaderId(GLuint);
+pub struct TextureId(GLuint);
+pub struct VboId(GLuint);
+pub struct AttrId(GLuint);
+pub struct MatId(GLuint);
 
 pub struct SceneNode {
     pos: WorldPos,
     // rot: Angle,
 }
 
-pub type NodeId = Int;
+#[deriving(Ord, Eq, Hash)]
+pub struct NodeId(Int);
+
 pub type Scene = HashMap<NodeId, SceneNode>;
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

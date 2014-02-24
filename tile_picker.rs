@@ -1,7 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use std;
-use gl;
 use cgmath::vector::{
     Vec3,
     Vec2,
@@ -60,9 +59,9 @@ pub struct TilePicker {
 impl TilePicker {
     pub fn new(win_size: Size2<Int>) -> TilePicker {
         let picker = TilePicker {
-            program: 0,
+            program: ShaderId(0),
             map_mesh: Mesh::new(),
-            mat_id: 0,
+            mat_id: MatId(0),
             win_size: win_size,
         };
         picker
@@ -73,7 +72,7 @@ impl TilePicker {
     }
 
     pub fn cleanup_opengl(&self) {
-        gl::DeleteProgram(self.program);
+        glh::delete_program(&self.program);
     }
 
     pub fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
@@ -81,24 +80,25 @@ impl TilePicker {
             read_file(&Path::new("pick.vs.glsl")),
             read_file(&Path::new("pick.fs.glsl")),
         );
-        gl::UseProgram(self.program);
+        glh::use_program(&self.program);
         let position_attr = glh::get_attr(
-            self.program, "in_vertex_coordinates");
-        let color_attr = glh::get_attr(self.program, "color");
-        gl::EnableVertexAttribArray(position_attr);
-        gl::EnableVertexAttribArray(color_attr);
+            &self.program, "in_vertex_coordinates");
+        let color_attr = glh::get_attr(&self.program, "color");
+        glh::enable_vertex_attrib_array(&position_attr);
+        glh::enable_vertex_attrib_array(&color_attr);
         glh::vertex_attrib_pointer(position_attr, 3);
         glh::vertex_attrib_pointer(color_attr, 3);
         let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
         self.map_mesh.set_vertex_coords(vertex_data);
         self.map_mesh.set_color(color_data);
-        self.mat_id = glh::get_uniform(self.program, "mvp_mat");
+        self.mat_id = MatId(glh::get_uniform(&self.program, "mvp_mat"));
     }
 
     fn read_coords_from_image_buffer(
         &self,
         mouse_pos: Vec2<Int>
     ) -> Option<MapPos> {
+        use gl; // TODO: remove
         let height = self.win_size.y;
         let reverted_y = height - mouse_pos.y;
         let data: [u8, ..4] = [0, 0, 0, 0]; // mut
@@ -123,11 +123,11 @@ impl TilePicker {
         camera: &Camera,
         mouse_pos: Vec2<Int>
     ) -> Option<MapPos> {
-        gl::UseProgram(self.program);
+        glh::use_program(&self.program);
         glh::uniform_mat4f(self.mat_id, &camera.mat());
-        gl::ClearColor(0.0, 0.0, 0.0, 1.0);
-        gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-        self.map_mesh.draw(self.program);
+        glh::set_clear_color(0.0, 0.0, 0.0);
+        glh::clear();
+        self.map_mesh.draw(&self.program);
         self.read_coords_from_image_buffer(mouse_pos)
     }
 }
