@@ -109,6 +109,33 @@ fn init_win(win_size: Size2<Int>) -> glfw::Window {
     win
 }
 
+fn get_scenes(players_count: Int) -> HashMap<PlayerId, Scene> {
+    let mut m = HashMap::new();
+    for i in range(0 as PlayerId, players_count) {
+        m.insert(i, HashMap::new());
+    }
+    m
+}
+
+fn get_game_states(players_count: Int) -> HashMap<PlayerId, GameState> {
+    let mut m = HashMap::new();
+    for i in range(0 as PlayerId, players_count) {
+        m.insert(i, GameState::new());
+    }
+    m
+}
+
+fn get_pathfinders(
+    players_count: Int,
+    map_size: Size2<Int>,
+) -> HashMap<PlayerId, Pathfinder> {
+    let mut m = HashMap::new();
+    for i in range(0 as PlayerId, players_count) {
+        m.insert(i, Pathfinder::new(map_size));
+    }
+    m
+}
+
 pub struct Visualizer<'a> {
     program: ShaderId,
     map_mesh: Mesh,
@@ -149,30 +176,12 @@ impl<'a> Visualizer<'a> {
             selected_tile_pos: None,
             selected_unit_id: None,
             geom: geom,
-            scenes: {
-                let mut m = HashMap::new();
-                for i in range(0 as PlayerId, players_count) {
-                    m.insert(i, HashMap::new());
-                }
-                m
-            },
-            game_state: {
-                let mut m = HashMap::new();
-                for i in range(0 as PlayerId, players_count) {
-                    m.insert(i, GameState::new());
-                }
-                m
-            },
             core: core,
             event_visualizer: None,
             event: None,
-            pathfinders: {
-                let mut m = HashMap::new();
-                for i in range(0 as PlayerId, players_count) {
-                    m.insert(i, Pathfinder::new(map_size));
-                }
-                m
-            },
+            scenes: get_scenes(players_count),
+            game_state: get_game_states(players_count),
+            pathfinders: get_pathfinders(players_count, map_size),
         };
         vis.init_opengl();
         vis.picker.init(&geom, vis.core.map_size());
