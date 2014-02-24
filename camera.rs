@@ -8,7 +8,11 @@ use cgmath::projection;
 use cgmath::angle;
 use cgmath::matrix::Mat4;
 use cgmath::vector::Vec3;
-use glh = gl_helpers;
+use gl_helpers::{
+    tr,
+    rot_x,
+    rot_z
+};
 use misc::deg_to_rad;
 use gl_types::{
     Float,
@@ -45,10 +49,10 @@ impl Camera {
 
     pub fn mat(&self) -> Mat4<Float> {
         let mut mvp_mat = self.projection_mat;
-        mvp_mat = glh::tr(mvp_mat, Vec3{x: 0.0, y: 0.0, z: -self.zoom});
-        mvp_mat = glh::rot_x(mvp_mat, -self.x_angle);
-        mvp_mat = glh::rot_z(mvp_mat, -self.z_angle);
-        mvp_mat = glh::tr(mvp_mat, self.pos);
+        mvp_mat = tr(mvp_mat, Vec3{x: 0.0, y: 0.0, z: -self.zoom});
+        mvp_mat = rot_x(mvp_mat, -self.x_angle);
+        mvp_mat = rot_z(mvp_mat, -self.z_angle);
+        mvp_mat = tr(mvp_mat, self.pos);
         mvp_mat
     }
 

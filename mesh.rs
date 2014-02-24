@@ -1,6 +1,17 @@
 // See LICENSE file for copyright and license details.
 
-use glh = gl_helpers;
+use gl_helpers::{
+    gen_buffer,
+    bind_buffer,
+    fill_current_coord_vbo,
+    fill_current_color_vbo,
+    fill_current_texture_coords_vbo,
+    enable_texture,
+    get_attr,
+    vertex_attrib_pointer,
+    delete_buffer,
+    draw_mesh,
+};
 use gl_types::{
     Color3,
     VertexCoord,
@@ -32,23 +43,23 @@ impl Mesh {
 
     pub fn set_vertex_coords(&mut self, data: &[VertexCoord]) {
         self.length = data.len() as Int;
-        self.vertex_coords_vbo = glh::gen_buffer();
-        glh::bind_buffer(&self.vertex_coords_vbo);
-        glh::fill_current_coord_vbo(data);
+        self.vertex_coords_vbo = gen_buffer();
+        bind_buffer(&self.vertex_coords_vbo);
+        fill_current_coord_vbo(data);
     }
 
     pub fn set_color(&mut self, data: &[Color3]) {
         assert_eq!(self.length, data.len() as Int);
-        self.color_vbo = Some(glh::gen_buffer());
-        glh::bind_buffer(&self.color_vbo.unwrap());
-        glh::fill_current_color_vbo(data);
+        self.color_vbo = Some(gen_buffer());
+        bind_buffer(&self.color_vbo.unwrap());
+        fill_current_color_vbo(data);
     }
 
     pub fn set_texture_coords(&mut self, data: &[TextureCoord]) {
         assert_eq!(self.length, data.len() as Int);
-        self.texture_coords_vbo = Some(glh::gen_buffer());
-        glh::bind_buffer(&self.texture_coords_vbo.unwrap());
-        glh::fill_current_texture_coords_vbo(data);
+        self.texture_coords_vbo = Some(gen_buffer());
+        bind_buffer(&self.texture_coords_vbo.unwrap());
+        fill_current_texture_coords_vbo(data);
     }
 
     pub fn set_texture(&mut self, texture_id: TextureId) {
@@ -57,28 +68,28 @@ impl Mesh {
 
     pub fn draw(&self, program: &ShaderId) {
         if !self.texture_id.is_none() {
-            glh::enable_texture(program, &self.texture_id.unwrap());
+            enable_texture(program, &self.texture_id.unwrap());
         }
         if !self.texture_coords_vbo.is_none() {
-            glh::bind_buffer(&self.texture_coords_vbo.unwrap());
-            let p = glh::get_attr(program, "in_texture_coordinates");
-            glh::vertex_attrib_pointer(p, 2);
+            bind_buffer(&self.texture_coords_vbo.unwrap());
+            let p = get_attr(program, "in_texture_coordinates");
+            vertex_attrib_pointer(p, 2);
         }
         if !self.color_vbo.is_none() {
-            glh::bind_buffer(&self.color_vbo.unwrap());
-            let p = glh::get_attr(program, "color");
-            glh::vertex_attrib_pointer(p, 3);
+            bind_buffer(&self.color_vbo.unwrap());
+            let p = get_attr(program, "color");
+            vertex_attrib_pointer(p, 3);
         }
-        glh::bind_buffer(&self.vertex_coords_vbo);
-        let p = glh::get_attr(program, "in_vertex_coordinates");
-        glh::vertex_attrib_pointer(p, 3);
-        glh::draw_mesh(self.length);
+        bind_buffer(&self.vertex_coords_vbo);
+        let p = get_attr(program, "in_vertex_coordinates");
+        vertex_attrib_pointer(p, 3);
+        draw_mesh(self.length);
     }
 }
 
 impl Drop for Mesh {
     fn drop(&mut self) {
-        glh::delete_buffer(&self.vertex_coords_vbo);
+        delete_buffer(&self.vertex_coords_vbo);
     }
 }
 
