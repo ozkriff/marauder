@@ -6,7 +6,6 @@
 #[deny(unnecessary_typecast)];
 
 extern crate native;
-extern crate extra;
 extern crate serialize;
 extern crate collections;
 extern crate cgmath;

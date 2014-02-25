@@ -1,8 +1,10 @@
 // See LICENSE file for copyright and license details.
 
-use extra::json;
 use collections::hashmap::HashMap;
-use serialize::Decodable;
+use serialize::{
+    Decodable,
+    json,
+};
 use glfw;
 use cgmath::vector::{
     Vec3,
