@@ -1,9 +1,9 @@
 // See LICENSE file for copyright and license details.
 
 use gl_helpers::{
-    TextureId,
-    ShaderId,
-    VboId,
+    Texture,
+    Shader,
+    Vbo,
     gen_buffer,
     bind_buffer,
     fill_current_coord_vbo,
@@ -23,20 +23,20 @@ use gl_types::{
 use core_types::Int;
 
 pub struct Mesh {
-    priv vertex_coords_vbo: VboId,
-    priv color_vbo: Option<VboId>,
-    priv texture_coords_vbo: Option<VboId>,
-    priv texture_id: Option<TextureId>,
+    priv vertex_coords_vbo: Vbo,
+    priv color_vbo: Option<Vbo>,
+    priv texture_coords_vbo: Option<Vbo>,
+    priv texture: Option<Texture>,
     priv length: Int,
 }
 
 impl Mesh {
     pub fn new() -> Mesh {
         Mesh {
-            vertex_coords_vbo: VboId(0),
+            vertex_coords_vbo: Vbo(0),
             color_vbo: None,
             texture_coords_vbo: None,
-            texture_id: None,
+            texture: None,
             length: 0,
         }
     }
@@ -62,26 +62,26 @@ impl Mesh {
         fill_current_texture_coords_vbo(data);
     }
 
-    pub fn set_texture(&mut self, texture_id: TextureId) {
-        self.texture_id = Some(texture_id);
+    pub fn set_texture(&mut self, texture: Texture) {
+        self.texture = Some(texture);
     }
 
-    pub fn draw(&self, program: &ShaderId) {
-        if !self.texture_id.is_none() {
-            enable_texture(program, &self.texture_id.unwrap());
+    pub fn draw(&self, shader: &Shader) {
+        if !self.texture.is_none() {
+            enable_texture(shader, &self.texture.unwrap());
         }
         if !self.texture_coords_vbo.is_none() {
             bind_buffer(&self.texture_coords_vbo.unwrap());
-            let p = get_attr(program, "in_texture_coordinates");
+            let p = get_attr(shader, "in_texture_coordinates");
             vertex_attrib_pointer(p, 2);
         }
         if !self.color_vbo.is_none() {
             bind_buffer(&self.color_vbo.unwrap());
-            let p = get_attr(program, "color");
+            let p = get_attr(shader, "color");
             vertex_attrib_pointer(p, 3);
         }
         bind_buffer(&self.vertex_coords_vbo);
-        let p = get_attr(program, "in_vertex_coordinates");
+        let p = get_attr(shader, "in_vertex_coordinates");
         vertex_attrib_pointer(p, 3);
         draw_mesh(self.length);
     }

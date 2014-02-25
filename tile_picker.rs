@@ -6,7 +6,7 @@ use cgmath::vector::{
     Vec2,
 };
 use gl_helpers::{
-    ShaderId,
+    Shader,
     get_attr,
     vertex_attrib_pointer,
     delete_program,
@@ -61,7 +61,7 @@ fn build_hex_map_mesh(
 }
 
 pub struct TilePicker {
-    program: ShaderId,
+    shader: Shader,
     map_mesh: Mesh,
     mat_id: MatId,
     win_size: Size2<Int>,
@@ -70,7 +70,7 @@ pub struct TilePicker {
 impl TilePicker {
     pub fn new(win_size: Size2<Int>) -> TilePicker {
         let picker = TilePicker {
-            program: ShaderId(0),
+            shader: Shader(0),
             map_mesh: Mesh::new(),
             mat_id: MatId(0),
             win_size: win_size,
@@ -83,18 +83,18 @@ impl TilePicker {
     }
 
     pub fn cleanup_opengl(&self) {
-        delete_program(&self.program);
+        delete_program(&self.shader);
     }
 
     pub fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
-        self.program = compile_program(
+        self.shader = compile_program(
             read_file(&Path::new("pick.vs.glsl")),
             read_file(&Path::new("pick.fs.glsl")),
         );
-        use_program(&self.program);
+        use_program(&self.shader);
         let position_attr = get_attr(
-            &self.program, "in_vertex_coordinates");
-        let color_attr = get_attr(&self.program, "color");
+            &self.shader, "in_vertex_coordinates");
+        let color_attr = get_attr(&self.shader, "color");
         enable_vertex_attrib_array(&position_attr);
         enable_vertex_attrib_array(&color_attr);
         vertex_attrib_pointer(position_attr, 3);
@@ -102,7 +102,7 @@ impl TilePicker {
         let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
         self.map_mesh.set_vertex_coords(vertex_data);
         self.map_mesh.set_color(color_data);
-        self.mat_id = MatId(get_uniform(&self.program, "mvp_mat"));
+        self.mat_id = MatId(get_uniform(&self.shader, "mvp_mat"));
     }
 
     fn read_coords_from_image_buffer(
@@ -134,11 +134,11 @@ impl TilePicker {
         camera: &Camera,
         mouse_pos: Vec2<Int>
     ) -> Option<MapPos> {
-        use_program(&self.program);
+        use_program(&self.shader);
         uniform_mat4f(self.mat_id, &camera.mat());
         set_clear_color(0.0, 0.0, 0.0);
         clear();
-        self.map_mesh.draw(&self.program);
+        self.map_mesh.draw(&self.shader);
         self.read_coords_from_image_buffer(mouse_pos)
     }
 }

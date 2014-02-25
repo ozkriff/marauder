@@ -89,7 +89,7 @@ pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
 pub fn compile_program(
     vertex_shader_src: &str,
     frag_shader_src: &str,
-) -> ShaderId {
+) -> Shader {
     let vertex_shader = compile_shader(
         vertex_shader_src, gl::VERTEX_SHADER);
     let fragment_shader = compile_shader(
@@ -98,19 +98,19 @@ pub fn compile_program(
     // mark shaders for deletion after program deletion
     gl::DeleteShader(fragment_shader);
     gl::DeleteShader(vertex_shader);
-    ShaderId(program)
+    Shader(program)
 }
 
-pub fn get_attr(shader: &ShaderId, name: &str) -> AttrId {
+pub fn get_attr(shader: &Shader, name: &str) -> Attr {
     unsafe {
-        let ShaderId(id) = *shader;
+        let Shader(id) = *shader;
         let attr_id = gl::GetAttribLocation(id, c_str(name));
-        AttrId(attr_id as GLuint)
+        Attr(attr_id as GLuint)
     }
 }
 
-pub fn get_uniform(shader: &ShaderId, name: &str) -> GLuint {
-    let ShaderId(id) = *shader;
+pub fn get_uniform(shader: &Shader, name: &str) -> GLuint {
+    let Shader(id) = *shader;
     unsafe {
         gl::GetUniformLocation(id, c_str(name)) as GLuint
     }
@@ -149,17 +149,17 @@ pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
     m.mul_m(&r)
 }
 
-pub fn gen_buffer() -> VboId {
+pub fn gen_buffer() -> Vbo {
     let mut n = 0;
     unsafe {
         gl::GenBuffers(1, &mut n);
     }
-    VboId(n)
+    Vbo(n)
 }
 
-pub fn delete_buffer(buffer: &VboId) {
+pub fn delete_buffer(buffer: &Vbo) {
     unsafe {
-        let VboId(id) = *buffer;
+        let Vbo(id) = *buffer;
         gl::DeleteBuffers(1, &id);
     }
 }
@@ -190,10 +190,10 @@ pub fn fill_current_texture_coords_vbo(data: &[TextureCoord]) {
     fill_buffer(buffer_size, data);
 }
 
-pub fn vertex_attrib_pointer(attr: AttrId, components_count: Int) {
+pub fn vertex_attrib_pointer(attr: Attr, components_count: Int) {
     let normalized = gl::FALSE;
     let stride = 0;
-    let AttrId(id) = attr;
+    let Attr(id) = attr;
     unsafe {
         gl::VertexAttribPointer(
             id,
@@ -207,13 +207,13 @@ pub fn vertex_attrib_pointer(attr: AttrId, components_count: Int) {
 }
 
 // TODO: shader method
-pub fn use_program(shader: &ShaderId) {
-    let ShaderId(shader_id) = *shader;
+pub fn use_program(shader: &Shader) {
+    let Shader(shader_id) = *shader;
     gl::UseProgram(shader_id);
 }
 
-pub fn enable_vertex_attrib_array(attr: &AttrId) {
-    let AttrId(id) = *attr;
+pub fn enable_vertex_attrib_array(attr: &Attr) {
+    let Attr(id) = *attr;
     gl::EnableVertexAttribArray(id);
 }
 
@@ -224,8 +224,8 @@ pub fn init_opengl() {
 }
 
 // TODO: Drop
-pub fn delete_program(shader: &ShaderId) {
-    let ShaderId(id) = *shader;
+pub fn delete_program(shader: &Shader) {
+    let Shader(id) = *shader;
     gl::DeleteProgram(id);
 }
 
@@ -241,26 +241,26 @@ pub fn viewport(size: Size2<Int>) {
     gl::Viewport(0, 0, size.w, size.h);
 }
 
-pub fn bind_buffer(buffer: &VboId) {
-    let VboId(id) = *buffer;
+pub fn bind_buffer(buffer: &Vbo) {
+    let Vbo(id) = *buffer;
     gl::BindBuffer(gl::ARRAY_BUFFER, id);
 }
 
-pub fn enable_texture(shader: &ShaderId, texture: &TextureId) {
-    let TextureId(id) = *texture;
+pub fn enable_texture(shader: &Shader, texture: &Texture) {
+    let Texture(id) = *texture;
     let basic_texture_loc = get_uniform(shader, "basic_texture") as GLint;
     gl::Uniform1ui(basic_texture_loc, 0);
     gl::ActiveTexture(gl::TEXTURE0);
     gl::BindTexture(gl::TEXTURE_2D, id);
 }
 
-pub struct ShaderId(GLuint);
+pub struct Shader(GLuint);
 
-pub struct TextureId(GLuint);
+pub struct Texture(GLuint);
 
-pub struct VboId(GLuint);
+pub struct Vbo(GLuint);
 
-pub struct AttrId(GLuint);
+pub struct Attr(GLuint);
 
 fn load_image(path: ~str) -> image::Image<u8> {
     let load_result = image::load(path);
@@ -277,7 +277,7 @@ fn load_image(path: ~str) -> image::Image<u8> {
     }
 }
 
-pub fn load_texture(path: ~str) -> TextureId {
+pub fn load_texture(path: ~str) -> Texture {
     let image = load_image(path);
     let mut id = 0;
     unsafe {
@@ -313,7 +313,7 @@ pub fn load_texture(path: ~str) -> TextureId {
         gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
     gl::TexParameteri(gl::TEXTURE_2D,
         gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
-    TextureId(id)
+    Texture(id)
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

@@ -11,7 +11,7 @@ use cgmath::vector::{
     Vec2,
 };
 use gl_helpers::{
-    ShaderId,
+    Shader,
     get_attr,
     vertex_attrib_pointer,
     delete_program,
@@ -153,7 +153,7 @@ fn get_pathfinders(
 }
 
 pub struct Visualizer<'a> {
-    program: ShaderId,
+    shader: Shader,
     map_mesh: Mesh,
     unit_mesh: Mesh,
     mvp_mat: MatId,
@@ -181,7 +181,7 @@ impl<'a> Visualizer<'a> {
         let core = Core::new();
         let map_size = core.map_size();
         let mut vis = ~Visualizer {
-            program: ShaderId(0),
+            shader: Shader(0),
             map_mesh: Mesh::new(),
             unit_mesh: Mesh::new(),
             mvp_mat: MatId(0),
@@ -210,18 +210,18 @@ impl<'a> Visualizer<'a> {
     }
 
     fn init_models(&mut self) {
-        self.program = compile_program(
+        self.shader = compile_program(
             read_file(&Path::new("normal.vs.glsl")),
             read_file(&Path::new("normal.fs.glsl")),
         );
-        use_program(&self.program);
-        self.mvp_mat = MatId(get_uniform(&self.program, "mvp_mat"));
+        use_program(&self.shader);
+        self.mvp_mat = MatId(get_uniform(&self.shader, "mvp_mat"));
         let vertex_coordinates_attr = get_attr(
-            &self.program, "in_vertex_coordinates");
+            &self.shader, "in_vertex_coordinates");
         enable_vertex_attrib_array(&vertex_coordinates_attr);
         vertex_attrib_pointer(vertex_coordinates_attr, 3);
         let texture_coords_attr = get_attr(
-            &self.program, "in_texture_coordinates");
+            &self.shader, "in_texture_coordinates");
         enable_vertex_attrib_array(&texture_coords_attr);
         vertex_attrib_pointer(texture_coords_attr, 3);
         let map_size = self.core.map_size();
@@ -256,27 +256,27 @@ impl<'a> Visualizer<'a> {
     }
 
     fn cleanup_opengl(&self) {
-        delete_program(&self.program);
+        delete_program(&self.shader);
     }
 
     fn draw_units(&self) {
-        use_program(&self.program);
+        use_program(&self.shader);
         for (_, unit) in self.scene().iter() {
             let m = tr(self.camera.mat(), unit.pos);
             uniform_mat4f(self.mvp_mat, &m);
-            self.unit_mesh.draw(&self.program);
+            self.unit_mesh.draw(&self.shader);
         }
     }
 
     fn draw_map(&self) {
         uniform_mat4f(self.mvp_mat, &self.camera.mat());
-        self.map_mesh.draw(&self.program);
+        self.map_mesh.draw(&self.shader);
     }
 
     fn draw(&mut self) {
         set_clear_color(0.3, 0.3, 0.3);
         clear();
-        use_program(&self.program);
+        use_program(&self.shader);
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {
