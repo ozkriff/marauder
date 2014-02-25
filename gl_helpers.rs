@@ -1,7 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use std;
-use glfw;
 use gl;
 use gl::types::{
     GLint,
@@ -34,6 +33,8 @@ use core_types::{
     Size2,
     Int,
 };
+
+pub use load_gl_funcs_with = gl::load_with;
 
 fn c_str(s: &str) -> *GLchar {
     unsafe {
@@ -145,8 +146,6 @@ pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
 }
 
 pub fn init_opengl() {
-    // TODO: Remove 'use glfw, glfw::...'?
-    gl::load_with(glfw::get_proc_address);
     gl::Enable(gl::DEPTH_TEST);
 }
 

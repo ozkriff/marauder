@@ -19,6 +19,7 @@ use gl_helpers::{
     set_clear_color,
     clear,
     init_opengl,
+    load_gl_funcs_with,
     viewport,
     tr,
 };
@@ -194,6 +195,7 @@ impl<'a> Visualizer<'a> {
             game_state: get_game_states(players_count),
             pathfinders: get_pathfinders(players_count, map_size),
         };
+        load_gl_funcs_with(glfw::get_proc_address);
         vis.init_opengl();
         vis.picker.init(&geom, vis.core.map_size());
         vis.init_models();
