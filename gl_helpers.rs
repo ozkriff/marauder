@@ -267,15 +267,9 @@ impl Attr {
 fn load_image(path: ~str) -> image::Image<u8> {
     let load_result = image::load(path);
     match load_result {
-        image::ImageU8(image) => {
-            image
-        },
-        image::Error(message) => {
-            fail!("{}", message);
-        },
-        _ => {
-            fail!("Unknown image format");
-        }
+        image::ImageU8(image) => image,
+        image::Error(message) => fail!("{}", message),
+        _ => fail!("Unknown image format"),
     }
 }
 
