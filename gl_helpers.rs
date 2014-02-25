@@ -24,6 +24,7 @@ use cgmath::angle;
 use stb_image::image;
 use misc::{
     deg_to_rad,
+    read_file,
 };
 use gl_types::{
     Float,
@@ -43,7 +44,7 @@ fn c_str(s: &str) -> *GLchar {
     }
 }
 
-pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
+fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
     let shader = gl::CreateShader(shader_type);
     unsafe {
         gl::ShaderSource(shader, 1, &c_str(src), std::ptr::null());
@@ -64,7 +65,7 @@ pub fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
     shader
 }
 
-pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
+fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
     let program = gl::CreateProgram();
     gl::AttachShader(program, vertex_shader);
     gl::AttachShader(program, fragment_shader);
@@ -86,10 +87,7 @@ pub fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
     program
 }
 
-pub fn compile_program(
-    vertex_shader_src: &str,
-    frag_shader_src: &str,
-) -> Shader {
+fn compile_program(vertex_shader_src: &str, frag_shader_src: &str) -> Shader {
     let vertex_shader = compile_shader(
         vertex_shader_src, gl::VERTEX_SHADER);
     let fragment_shader = compile_shader(
@@ -149,21 +147,7 @@ pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
     m.mul_m(&r)
 }
 
-pub fn gen_buffer() -> Vbo {
-    let mut n = 0;
-    unsafe {
-        gl::GenBuffers(1, &mut n);
-    }
-    Vbo(n)
-}
-
-pub fn delete_buffer(buffer: &Vbo) {
-    unsafe {
-        let Vbo(id) = *buffer;
-        gl::DeleteBuffers(1, &id);
-    }
-}
-
+// TODO: Vbo method?
 fn fill_buffer<T>(buffer_size: i64, data: &[T]) {
     unsafe {
         let data_ptr = std::cast::transmute(&data[0]);
@@ -190,43 +174,10 @@ pub fn fill_current_texture_coords_vbo(data: &[TextureCoord]) {
     fill_buffer(buffer_size, data);
 }
 
-pub fn vertex_attrib_pointer(attr: Attr, components_count: Int) {
-    let normalized = gl::FALSE;
-    let stride = 0;
-    let Attr(id) = attr;
-    unsafe {
-        gl::VertexAttribPointer(
-            id,
-            components_count,
-            gl::FLOAT,
-            normalized,
-            stride,
-            std::ptr::null(),
-        );
-    }
-}
-
-// TODO: shader method
-pub fn use_program(shader: &Shader) {
-    let Shader(shader_id) = *shader;
-    gl::UseProgram(shader_id);
-}
-
-pub fn enable_vertex_attrib_array(attr: &Attr) {
-    let Attr(id) = *attr;
-    gl::EnableVertexAttribArray(id);
-}
-
 pub fn init_opengl() {
     // TODO: Remove 'use glfw, glfw::...'?
     gl::load_with(glfw::get_proc_address);
     gl::Enable(gl::DEPTH_TEST);
-}
-
-// TODO: Drop
-pub fn delete_program(shader: &Shader) {
-    let Shader(id) = *shader;
-    gl::DeleteProgram(id);
 }
 
 pub fn set_clear_color(r: Float, g: Float, b: Float) {
@@ -241,26 +192,97 @@ pub fn viewport(size: Size2<Int>) {
     gl::Viewport(0, 0, size.w, size.h);
 }
 
-pub fn bind_buffer(buffer: &Vbo) {
-    let Vbo(id) = *buffer;
-    gl::BindBuffer(gl::ARRAY_BUFFER, id);
-}
+pub struct Texture(GLuint);
 
-pub fn enable_texture(shader: &Shader, texture: &Texture) {
-    let Texture(id) = *texture;
-    let basic_texture_loc = get_uniform(shader, "basic_texture") as GLint;
-    gl::Uniform1ui(basic_texture_loc, 0);
-    gl::ActiveTexture(gl::TEXTURE0);
-    gl::BindTexture(gl::TEXTURE_2D, id);
+impl Texture {
+    pub fn new(path: ~str) -> Texture {
+        load_texture(path)
+    }
+
+    pub fn enable(&self, shader: &Shader) {
+        let Texture(id) = *self;
+        let basic_texture_loc = get_uniform(shader, "basic_texture") as GLint;
+        gl::Uniform1ui(basic_texture_loc, 0);
+        gl::ActiveTexture(gl::TEXTURE0);
+        gl::BindTexture(gl::TEXTURE_2D, id);
+    }
 }
 
 pub struct Shader(GLuint);
 
-pub struct Texture(GLuint);
+impl Shader {
+    pub fn new(vs: &str, fs: &str) -> Shader {
+        compile_program(
+            read_file(&Path::new(vs)),
+            read_file(&Path::new(fs)),
+        )
+    }
+
+    // TODO: Rename. Just 'use' is keyword :(
+    pub fn use_this(&self) {
+        let Shader(id) = *self;
+        gl::UseProgram(id);
+    }
+}
+
+impl Drop for Shader {
+    fn drop(&mut self) {
+        let Shader(id) = *self;
+        gl::DeleteProgram(id);
+    }
+}
 
 pub struct Vbo(GLuint);
 
+impl Vbo {
+    pub fn new() -> Vbo {
+        let mut n = 0;
+        unsafe {
+            gl::GenBuffers(1, &mut n);
+        }
+        Vbo(n)
+    }
+
+    pub fn bind(&self) {
+        let Vbo(id) = *self;
+        gl::BindBuffer(gl::ARRAY_BUFFER, id);
+    }
+}
+
+impl Drop for Vbo {
+    fn drop(&mut self) {
+        unsafe {
+            let Vbo(id) = *self;
+            gl::DeleteBuffers(1, &id);
+        }
+    }
+}
+
 pub struct Attr(GLuint);
+
+impl Attr {
+    pub fn enable(&self) {
+        let Attr(id) = *self;
+        gl::EnableVertexAttribArray(id);
+    }
+
+    // TODO: Rename
+    pub fn vertex_pointer(&self, components_count: Int) {
+        let normalized = gl::FALSE;
+        let stride = 0;
+        let Attr(id) = *self;
+        unsafe {
+            gl::VertexAttribPointer(
+                id,
+                components_count,
+                gl::FLOAT,
+                normalized,
+                stride,
+                std::ptr::null(),
+            );
+        }
+    }
+}
 
 fn load_image(path: ~str) -> image::Image<u8> {
     let load_result = image::load(path);
@@ -277,7 +299,7 @@ fn load_image(path: ~str) -> image::Image<u8> {
     }
 }
 
-pub fn load_texture(path: ~str) -> Texture {
+fn load_texture(path: ~str) -> Texture {
     let image = load_image(path);
     let mut id = 0;
     unsafe {

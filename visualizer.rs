@@ -12,18 +12,13 @@ use cgmath::vector::{
 };
 use gl_helpers::{
     Shader,
+    Texture,
     get_attr,
-    vertex_attrib_pointer,
-    delete_program,
-    compile_program,
-    use_program,
-    enable_vertex_attrib_array,
     get_uniform,
     uniform_mat4f,
     set_clear_color,
     clear,
     init_opengl,
-    load_texture,
     viewport,
     tr,
 };
@@ -33,7 +28,6 @@ use geom::Geom;
 use tile_picker::TilePicker;
 use obj;
 use mesh::Mesh;
-use misc::read_file;
 use core::{
     Core,
     Unit,
@@ -72,6 +66,7 @@ use event_visualizer::{
 };
 use game_state::GameState;
 use pathfinder::Pathfinder;
+use misc::read_file;
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
     let mut vertex_data = ~[];
@@ -210,29 +205,26 @@ impl<'a> Visualizer<'a> {
     }
 
     fn init_models(&mut self) {
-        self.shader = compile_program(
-            read_file(&Path::new("normal.vs.glsl")),
-            read_file(&Path::new("normal.fs.glsl")),
-        );
-        use_program(&self.shader);
+        self.shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
+        self.shader.use_this();
         self.mvp_mat = MatId(get_uniform(&self.shader, "mvp_mat"));
         let vertex_coordinates_attr = get_attr(
             &self.shader, "in_vertex_coordinates");
-        enable_vertex_attrib_array(&vertex_coordinates_attr);
-        vertex_attrib_pointer(vertex_coordinates_attr, 3);
+        vertex_coordinates_attr.enable();
+        vertex_coordinates_attr.vertex_pointer(3);
         let texture_coords_attr = get_attr(
             &self.shader, "in_texture_coordinates");
-        enable_vertex_attrib_array(&texture_coords_attr);
-        vertex_attrib_pointer(texture_coords_attr, 3);
+        texture_coords_attr.enable();
+        texture_coords_attr.vertex_pointer(3);
         let map_size = self.core.map_size();
         let map_vertex_data = build_hex_mesh(&self.geom, map_size);
         self.map_mesh.set_vertex_coords(map_vertex_data);
         self.map_mesh.set_texture_coords(build_hex_tex_coord(map_size));
-        self.map_mesh.set_texture(load_texture(~"data/floor.png"));
+        self.map_mesh.set_texture(Texture::new(~"data/floor.png"));
         let unit_obj = obj::Model::new("data/tank.obj");
         self.unit_mesh.set_vertex_coords(unit_obj.build());
         self.unit_mesh.set_texture_coords(unit_obj.build_tex_coord());
-        self.unit_mesh.set_texture(load_texture(~"data/tank.png"));
+        self.unit_mesh.set_texture(Texture::new(~"data/tank.png"));
     }
 
     fn scene<'a>(&'a self) -> &'a Scene {
@@ -255,12 +247,8 @@ impl<'a> Visualizer<'a> {
         init_opengl();
     }
 
-    fn cleanup_opengl(&self) {
-        delete_program(&self.shader);
-    }
-
     fn draw_units(&self) {
-        use_program(&self.shader);
+        self.shader.use_this();
         for (_, unit) in self.scene().iter() {
             let m = tr(self.camera.mat(), unit.pos);
             uniform_mat4f(self.mvp_mat, &m);
@@ -276,7 +264,7 @@ impl<'a> Visualizer<'a> {
     fn draw(&mut self) {
         set_clear_color(0.3, 0.3, 0.3);
         clear();
-        use_program(&self.shader);
+        self.shader.use_this();
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {
@@ -447,12 +435,6 @@ impl<'a> Visualizer<'a> {
         self.logic();
         self.pick_tile();
         self.draw();
-    }
-}
-
-impl<'a> Drop for Visualizer<'a> {
-    fn drop(&mut self) {
-        self.cleanup_opengl();
     }
 }
 

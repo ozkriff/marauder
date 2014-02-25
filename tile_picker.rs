@@ -8,11 +8,6 @@ use cgmath::vector::{
 use gl_helpers::{
     Shader,
     get_attr,
-    vertex_attrib_pointer,
-    delete_program,
-    compile_program,
-    use_program,
-    enable_vertex_attrib_array,
     get_uniform,
     uniform_mat4f,
     set_clear_color,
@@ -22,7 +17,6 @@ use map::MapPosIter;
 use camera::Camera;
 use geom::Geom;
 use mesh::Mesh;
-use misc::read_file;
 use core_types::{
     Int,
     Size2,
@@ -82,23 +76,16 @@ impl TilePicker {
         self.win_size = win_size;
     }
 
-    pub fn cleanup_opengl(&self) {
-        delete_program(&self.shader);
-    }
-
     pub fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
-        self.shader = compile_program(
-            read_file(&Path::new("pick.vs.glsl")),
-            read_file(&Path::new("pick.fs.glsl")),
-        );
-        use_program(&self.shader);
+        self.shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
+        self.shader.use_this();
         let position_attr = get_attr(
             &self.shader, "in_vertex_coordinates");
         let color_attr = get_attr(&self.shader, "color");
-        enable_vertex_attrib_array(&position_attr);
-        enable_vertex_attrib_array(&color_attr);
-        vertex_attrib_pointer(position_attr, 3);
-        vertex_attrib_pointer(color_attr, 3);
+        position_attr.enable();
+        color_attr.enable();
+        position_attr.vertex_pointer(3);
+        color_attr.vertex_pointer(3);
         let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
         self.map_mesh.set_vertex_coords(vertex_data);
         self.map_mesh.set_color(color_data);
@@ -134,18 +121,12 @@ impl TilePicker {
         camera: &Camera,
         mouse_pos: Vec2<Int>
     ) -> Option<MapPos> {
-        use_program(&self.shader);
+        self.shader.use_this();
         uniform_mat4f(self.mat_id, &camera.mat());
         set_clear_color(0.0, 0.0, 0.0);
         clear();
         self.map_mesh.draw(&self.shader);
         self.read_coords_from_image_buffer(mouse_pos)
-    }
-}
-
-impl Drop for TilePicker {
-    fn drop(&mut self) {
-        self.cleanup_opengl();
     }
 }
 
