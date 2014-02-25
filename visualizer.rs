@@ -206,7 +206,7 @@ impl<'a> Visualizer<'a> {
 
     fn init_models(&mut self) {
         self.shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
-        self.shader.use_this();
+        self.shader.activate();
         self.mvp_mat = MatId(get_uniform(&self.shader, "mvp_mat"));
         let vertex_coordinates_attr = get_attr(
             &self.shader, "in_vertex_coordinates");
@@ -248,7 +248,7 @@ impl<'a> Visualizer<'a> {
     }
 
     fn draw_units(&self) {
-        self.shader.use_this();
+        self.shader.activate();
         for (_, unit) in self.scene().iter() {
             let m = tr(self.camera.mat(), unit.pos);
             uniform_mat4f(self.mvp_mat, &m);
@@ -264,7 +264,7 @@ impl<'a> Visualizer<'a> {
     fn draw(&mut self) {
         set_clear_color(0.3, 0.3, 0.3);
         clear();
-        self.shader.use_this();
+        self.shader.activate();
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {

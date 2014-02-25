@@ -78,7 +78,7 @@ impl TilePicker {
 
     pub fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
         self.shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
-        self.shader.use_this();
+        self.shader.activate();
         let position_attr = get_attr(
             &self.shader, "in_vertex_coordinates");
         let color_attr = get_attr(&self.shader, "color");
@@ -121,7 +121,7 @@ impl TilePicker {
         camera: &Camera,
         mouse_pos: Vec2<Int>
     ) -> Option<MapPos> {
-        self.shader.use_this();
+        self.shader.activate();
         uniform_mat4f(self.mat_id, &camera.mat());
         set_clear_color(0.0, 0.0, 0.0);
         clear();

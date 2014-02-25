@@ -218,8 +218,7 @@ impl Shader {
         )
     }
 
-    // TODO: Rename. Just 'use' is keyword :(
-    pub fn use_this(&self) {
+    pub fn activate(&self) {
         let Shader(id) = *self;
         gl::UseProgram(id);
     }
