@@ -156,7 +156,7 @@ pub struct Visualizer<'a> {
     win: glfw::Window,
     mouse_pos: Point2<Float>,
     camera: Camera,
-    picker: TilePicker,
+    picker: ~TilePicker,
     selected_tile_pos: Option<MapPos>,
     selected_unit_id: Option<UnitId>,
     geom: Geom,
@@ -173,9 +173,13 @@ impl<'a> Visualizer<'a> {
         let players_count = 2;
         let win_size = read_win_size("config.json");
         let win = init_win(win_size);
+        load_gl_funcs_with(glfw::get_proc_address);
+        init_opengl();
         let geom = Geom::new();
         let core = Core::new();
         let map_size = core.map_size();
+        let tile_picker = TilePicker::new(
+            win_size, &geom, core.map_size());
         let mut vis = ~Visualizer {
             shader: Shader(0),
             map_mesh: Mesh::new(),
@@ -184,7 +188,7 @@ impl<'a> Visualizer<'a> {
             win: win,
             mouse_pos: Vec2::zero(),
             camera: Camera::new(),
-            picker: TilePicker::new(win_size),
+            picker: tile_picker,
             selected_tile_pos: None,
             selected_unit_id: None,
             geom: geom,
@@ -195,9 +199,6 @@ impl<'a> Visualizer<'a> {
             game_state: get_game_states(players_count),
             pathfinders: get_pathfinders(players_count, map_size),
         };
-        load_gl_funcs_with(glfw::get_proc_address);
-        vis.init_opengl();
-        vis.picker.init(&geom, vis.core.map_size());
         vis.init_models();
         vis
     }
@@ -243,10 +244,6 @@ impl<'a> Visualizer<'a> {
             }
         }
         res
-    }
-
-    fn init_opengl(&mut self) {
-        init_opengl();
     }
 
     fn draw_units(&self) {

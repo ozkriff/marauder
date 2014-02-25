@@ -62,13 +62,18 @@ pub struct TilePicker {
 }
 
 impl TilePicker {
-    pub fn new(win_size: Size2<Int>) -> TilePicker {
-        let picker = TilePicker {
+    pub fn new(
+        win_size: Size2<Int>,
+        geom: &Geom,
+        map_size: Size2<Int>
+    ) -> ~TilePicker {
+        let mut picker = ~TilePicker {
             shader: Shader(0),
             map_mesh: Mesh::new(),
             mat_id: MatId(0),
             win_size: win_size,
         };
+        picker.init(geom, map_size);
         picker
     }
 
@@ -76,7 +81,7 @@ impl TilePicker {
         self.win_size = win_size;
     }
 
-    pub fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
+    fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
         self.shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
         self.shader.activate();
         let position_attr = get_attr(
