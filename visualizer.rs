@@ -283,7 +283,6 @@ impl<'a> Visualizer<'a> {
             glfw::KeyEscape | glfw::KeyQ => {
                 self.win().set_should_close(true);
             },
-            glfw::KeySpace => println!("space"),
             glfw::KeyUp => self.camera.move(270.0),
             glfw::KeyDown => self.camera.move(90.0),
             glfw::KeyRight => self.camera.move(0.0),
