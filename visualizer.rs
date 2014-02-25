@@ -283,6 +283,19 @@ impl<'a> Visualizer<'a> {
             glfw::KeyEscape | glfw::KeyQ => {
                 self.win().set_should_close(true);
             },
+            glfw::KeySpace => println!("space"),
+            glfw::KeyUp => self.camera.move(270.0),
+            glfw::KeyDown => self.camera.move(90.0),
+            glfw::KeyRight => self.camera.move(0.0),
+            glfw::KeyLeft => self.camera.move(180.0),
+            glfw::KeyMinus => self.camera.zoom += 1.0,
+            glfw::KeyEqual => self.camera.zoom -= 1.0,
+            _ => {},
+        }
+        if self.event_visualizer.is_some() {
+            return;
+        }
+        match key {
             glfw::KeyT => {
                 self.core.do_command(CommandEndTurn);
                 self.selected_unit_id = None;
@@ -308,13 +321,6 @@ impl<'a> Visualizer<'a> {
                     }
                 }
             },
-            glfw::KeySpace => println!("space"),
-            glfw::KeyUp => self.camera.move(270.0),
-            glfw::KeyDown => self.camera.move(90.0),
-            glfw::KeyRight => self.camera.move(0.0),
-            glfw::KeyLeft => self.camera.move(180.0),
-            glfw::KeyMinus => self.camera.zoom += 1.0,
-            glfw::KeyEqual => self.camera.zoom -= 1.0,
             _ => {},
         }
     }
@@ -329,6 +335,9 @@ impl<'a> Visualizer<'a> {
     }
 
     fn handle_mouse_button_event(&mut self) {
+        if self.event_visualizer.is_some() {
+            return;
+        }
         if self.selected_tile_pos.is_some() {
             let pos = self.selected_tile_pos.unwrap();
             if self.unit_at_opt(pos).is_some() {
