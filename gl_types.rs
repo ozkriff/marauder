@@ -24,10 +24,6 @@ pub type Normal = Vec3<Float>;
 pub type TextureCoord = Vec2<Float>;
 pub type Point2<T> = Vec2<T>;
 
-pub struct ShaderId(GLuint);
-pub struct TextureId(GLuint);
-pub struct VboId(GLuint);
-pub struct AttrId(GLuint);
 pub struct MatId(GLuint);
 
 pub struct SceneNode {

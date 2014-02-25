@@ -30,10 +30,6 @@ use gl_types::{
     Color3,
     TextureCoord,
     VertexCoord,
-    ShaderId,
-    AttrId,
-    VboId,
-    TextureId,
     MatId,
 };
 use core_types::{
@@ -257,6 +253,14 @@ pub fn enable_texture(shader: &ShaderId, texture: &TextureId) {
     gl::ActiveTexture(gl::TEXTURE0);
     gl::BindTexture(gl::TEXTURE_2D, id);
 }
+
+pub struct ShaderId(GLuint);
+
+pub struct TextureId(GLuint);
+
+pub struct VboId(GLuint);
+
+pub struct AttrId(GLuint);
 
 fn load_image(path: ~str) -> image::Image<u8> {
     let load_result = image::load(path);

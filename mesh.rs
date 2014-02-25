@@ -1,6 +1,9 @@
 // See LICENSE file for copyright and license details.
 
 use gl_helpers::{
+    TextureId,
+    ShaderId,
+    VboId,
     gen_buffer,
     bind_buffer,
     fill_current_coord_vbo,
@@ -16,9 +19,6 @@ use gl_types::{
     Color3,
     VertexCoord,
     TextureCoord,
-    TextureId,
-    ShaderId,
-    VboId,
 };
 use core_types::Int;
 

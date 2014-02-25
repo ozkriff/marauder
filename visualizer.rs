@@ -11,6 +11,7 @@ use cgmath::vector::{
     Vec2,
 };
 use gl_helpers::{
+    ShaderId,
     get_attr,
     vertex_attrib_pointer,
     delete_program,
@@ -61,7 +62,6 @@ use gl_types::{
     Float,
     Point2,
     MatId,
-    ShaderId,
 };
 use event_visualizer::{
     EventVisualizer,
