@@ -1,6 +1,5 @@
 // See LICENSE file for copyright and license details.
 
-use std;
 use cgmath::vector::{
     Vec3,
     Vec2,
@@ -10,6 +9,7 @@ use gl_helpers::{
     uniform_mat4f,
     set_clear_color,
     clear,
+    get_vec2_from_pixel,
 };
 use map::MapPosIter;
 use camera::Camera;
@@ -94,30 +94,6 @@ impl TilePicker {
         self.mat_id = MatId(self.shader.get_uniform("mvp_mat"));
     }
 
-    fn read_coords_from_image_buffer(
-        &self,
-        mouse_pos: Vec2<Int>
-    ) -> Option<MapPos> {
-        use gl; // TODO: remove
-        let height = self.win_size.h;
-        let reverted_y = height - mouse_pos.y;
-        let data: [u8, ..4] = [0, 0, 0, 0]; // mut
-        unsafe {
-            let data_ptr = std::cast::transmute(&data[0]);
-            gl::ReadPixels(
-                mouse_pos.x, reverted_y, 1, 1,
-                gl::RGBA,
-                gl::UNSIGNED_BYTE,
-                data_ptr
-            );
-        }
-        if data[2] != 0 {
-            Some(Vec2{x: data[0] as Int, y: data[1] as Int})
-        } else {
-            None
-        }
-    }
-
     pub fn pick_tile(
         &mut self,
         camera: &Camera,
@@ -128,7 +104,7 @@ impl TilePicker {
         set_clear_color(0.0, 0.0, 0.0);
         clear();
         self.map_mesh.draw(&self.shader);
-        self.read_coords_from_image_buffer(mouse_pos)
+        get_vec2_from_pixel(self.win_size, mouse_pos)
     }
 }
 

@@ -17,6 +17,7 @@ use cgmath::matrix::{
     ToMat4,
 };
 use cgmath::vector::{
+    Vec2,
     Vec3,
 };
 use cgmath::angle;
@@ -310,6 +311,29 @@ fn load_texture(path: ~str) -> Texture {
     gl::TexParameteri(gl::TEXTURE_2D,
         gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
     Texture(id)
+}
+
+pub fn get_vec2_from_pixel(
+    win_size: Size2<Int>,
+    mouse_pos: Vec2<Int>,
+) -> Option<Vec2<Int>> {
+    let height = win_size.h;
+    let reverted_h = height - mouse_pos.y;
+    let data: [u8, ..4] = [0, 0, 0, 0]; // mut
+    unsafe {
+        let data_ptr = std::cast::transmute(&data[0]);
+        gl::ReadPixels(
+            mouse_pos.x, reverted_h, 1, 1,
+            gl::RGBA,
+            gl::UNSIGNED_BYTE,
+            data_ptr
+        );
+    }
+    if data[2] != 0 {
+        Some(Vec2{x: data[0] as Int, y: data[1] as Int})
+    } else {
+        None
+    }
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
