@@ -22,6 +22,10 @@ struct Map {
     tiles: ~[Tile],
 }
 
+fn max_cost() -> Int {
+    30000
+}
+
 impl<'a> Map {
     fn tile_mut(&'a mut self, pos: MapPos) -> &'a mut Tile {
         &mut self.tiles[pos.x + (pos.y * self.size.w)]
@@ -90,7 +94,7 @@ impl Pathfinder {
 
     fn clean_map(&mut self) {
         for tile in self.map.tiles.mut_iter() {
-            tile.cost = 30000; // TODO: magic number
+            tile.cost = max_cost();
             tile.parent = None;
         }
     }
