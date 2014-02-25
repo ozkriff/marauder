@@ -4,9 +4,6 @@ use gl_helpers::{
     Texture,
     Shader,
     Vbo,
-    fill_current_coord_vbo,
-    fill_current_color_vbo,
-    fill_current_texture_coords_vbo,
     get_attr,
     draw_mesh,
 };
@@ -38,23 +35,17 @@ impl Mesh {
 
     pub fn set_vertex_coords(&mut self, data: &[VertexCoord]) {
         self.length = data.len() as Int;
-        self.vertex_coords_vbo = Vbo::new();
-        self.vertex_coords_vbo.bind();
-        fill_current_coord_vbo(data);
+        self.vertex_coords_vbo = Vbo::from_data(data);
     }
 
     pub fn set_color(&mut self, data: &[Color3]) {
         assert_eq!(self.length, data.len() as Int);
-        self.color_vbo = Some(Vbo::new());
-        self.color_vbo.get_ref().bind();
-        fill_current_color_vbo(data);
+        self.color_vbo = Some(Vbo::from_data(data));
     }
 
     pub fn set_texture_coords(&mut self, data: &[TextureCoord]) {
         assert_eq!(self.length, data.len() as Int);
-        self.texture_coords_vbo = Some(Vbo::new());
-        self.texture_coords_vbo.get_ref().bind();
-        fill_current_texture_coords_vbo(data);
+        self.texture_coords_vbo = Some(Vbo::from_data(data));
     }
 
     pub fn set_texture(&mut self, texture: Texture) {

@@ -28,9 +28,6 @@ use misc::{
 };
 use gl_types::{
     Float,
-    Color3,
-    TextureCoord,
-    VertexCoord,
     MatId,
 };
 use core_types::{
@@ -147,33 +144,6 @@ pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
     m.mul_m(&r)
 }
 
-// TODO: Vbo method?
-fn fill_buffer<T>(buffer_size: i64, data: &[T]) {
-    unsafe {
-        let data_ptr = std::cast::transmute(&data[0]);
-        gl::BufferData(
-            gl::ARRAY_BUFFER, buffer_size, data_ptr, gl::STATIC_DRAW);
-    }
-}
-
-pub fn fill_current_coord_vbo(data: &[VertexCoord]) {
-    let size = std::mem::size_of::<VertexCoord>();
-    let buffer_size = (data.len() * size) as GLsizeiptr;
-    fill_buffer(buffer_size, data);
-}
-
-pub fn fill_current_color_vbo(data: &[Color3]) {
-    let size = std::mem::size_of::<Color3>();
-    let buffer_size = (data.len() * size) as GLsizeiptr;
-    fill_buffer(buffer_size, data);
-}
-
-pub fn fill_current_texture_coords_vbo(data: &[TextureCoord]) {
-    let size = std::mem::size_of::<TextureCoord>();
-    let buffer_size = (data.len() * size) as GLsizeiptr;
-    fill_buffer(buffer_size, data);
-}
-
 pub fn init_opengl() {
     // TODO: Remove 'use glfw, glfw::...'?
     gl::load_with(glfw::get_proc_address);
@@ -233,13 +203,25 @@ impl Drop for Shader {
 
 pub struct Vbo(GLuint);
 
+fn get_new_vbo_id() -> GLuint {
+    let mut id = 0;
+    unsafe {
+        gl::GenBuffers(1, &mut id);
+    }
+    id
+}
+
 impl Vbo {
-    pub fn new() -> Vbo {
-        let mut n = 0;
+    pub fn from_data<T>(data: &[T]) -> Vbo {
+        let vbo = Vbo(get_new_vbo_id());
+        vbo.bind();
+        let size = std::mem::size_of::<T>();
+        let buf_size = (data.len() * size) as GLsizeiptr;
         unsafe {
-            gl::GenBuffers(1, &mut n);
+            let data_ptr = std::cast::transmute(&data[0]);
+            gl::BufferData(gl::ARRAY_BUFFER, buf_size, data_ptr, gl::STATIC_DRAW);
         }
-        Vbo(n)
+        vbo
     }
 
     pub fn bind(&self) {
