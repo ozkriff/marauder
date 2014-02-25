@@ -7,8 +7,6 @@ use cgmath::vector::{
 };
 use gl_helpers::{
     Shader,
-    get_attr,
-    get_uniform,
     uniform_mat4f,
     set_clear_color,
     clear,
@@ -84,9 +82,8 @@ impl TilePicker {
     fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
         self.shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
         self.shader.activate();
-        let position_attr = get_attr(
-            &self.shader, "in_vertex_coordinates");
-        let color_attr = get_attr(&self.shader, "color");
+        let position_attr = self.shader.get_attr("in_vertex_coordinates");
+        let color_attr = self.shader.get_attr("color");
         position_attr.enable();
         color_attr.enable();
         position_attr.vertex_pointer(3);
@@ -94,7 +91,7 @@ impl TilePicker {
         let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
         self.map_mesh.set_vertex_coords(vertex_data);
         self.map_mesh.set_color(color_data);
-        self.mat_id = MatId(get_uniform(&self.shader, "mvp_mat"));
+        self.mat_id = MatId(self.shader.get_uniform("mvp_mat"));
     }
 
     fn read_coords_from_image_buffer(

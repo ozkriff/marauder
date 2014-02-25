@@ -97,21 +97,6 @@ fn compile_program(vertex_shader_src: &str, frag_shader_src: &str) -> Shader {
     Shader(program)
 }
 
-pub fn get_attr(shader: &Shader, name: &str) -> Attr {
-    unsafe {
-        let Shader(id) = *shader;
-        let attr_id = gl::GetAttribLocation(id, c_str(name));
-        Attr(attr_id as GLuint)
-    }
-}
-
-pub fn get_uniform(shader: &Shader, name: &str) -> GLuint {
-    let Shader(id) = *shader;
-    unsafe {
-        gl::GetUniformLocation(id, c_str(name)) as GLuint
-    }
-}
-
 pub fn draw_mesh(faces_count: Int) {
     let starting_index = 0;
     let vertices_count = faces_count * 3;
@@ -170,7 +155,7 @@ impl Texture {
 
     pub fn enable(&self, shader: &Shader) {
         let Texture(id) = *self;
-        let basic_texture_loc = get_uniform(shader, "basic_texture") as GLint;
+        let basic_texture_loc = shader.get_uniform("basic_texture") as GLint;
         gl::Uniform1ui(basic_texture_loc, 0);
         gl::ActiveTexture(gl::TEXTURE0);
         gl::BindTexture(gl::TEXTURE_2D, id);
@@ -190,6 +175,21 @@ impl Shader {
     pub fn activate(&self) {
         let Shader(id) = *self;
         gl::UseProgram(id);
+    }
+
+    pub fn get_attr(&self, name: &str) -> Attr {
+        unsafe {
+            let Shader(id) = *self;
+            let attr_id = gl::GetAttribLocation(id, c_str(name));
+            Attr(attr_id as GLuint)
+        }
+    }
+
+    pub fn get_uniform(&self, name: &str) -> GLuint {
+        let Shader(id) = *self;
+        unsafe {
+            gl::GetUniformLocation(id, c_str(name)) as GLuint
+        }
     }
 }
 

@@ -4,7 +4,6 @@ use gl_helpers::{
     Texture,
     Shader,
     Vbo,
-    get_attr,
     draw_mesh,
 };
 use gl_types::{
@@ -58,16 +57,16 @@ impl Mesh {
         }
         if !self.texture_coords_vbo.is_none() {
             self.texture_coords_vbo.get_ref().bind();
-            let p = get_attr(shader, "in_texture_coordinates");
+            let p = shader.get_attr("in_texture_coordinates");
             p.vertex_pointer(2);
         }
         if !self.color_vbo.is_none() {
             self.color_vbo.get_ref().bind();
-            let p = get_attr(shader, "color");
+            let p = shader.get_attr("color");
             p.vertex_pointer(3);
         }
         self.vertex_coords_vbo.bind();
-        let p = get_attr(shader, "in_vertex_coordinates");
+        let p = shader.get_attr("in_vertex_coordinates");
         p.vertex_pointer(3);
         draw_mesh(self.length);
     }

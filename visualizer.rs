@@ -13,8 +13,6 @@ use cgmath::vector::{
 use gl_helpers::{
     Shader,
     Texture,
-    get_attr,
-    get_uniform,
     uniform_mat4f,
     set_clear_color,
     clear,
@@ -210,13 +208,13 @@ impl<'a> Visualizer<'a> {
     fn init_models(&mut self) {
         self.shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
         self.shader.activate();
-        self.mvp_mat = MatId(get_uniform(&self.shader, "mvp_mat"));
-        let vertex_coordinates_attr = get_attr(
-            &self.shader, "in_vertex_coordinates");
+        self.mvp_mat = MatId(self.shader.get_uniform("mvp_mat"));
+        let vertex_coordinates_attr =
+            self.shader.get_attr("in_vertex_coordinates");
         vertex_coordinates_attr.enable();
         vertex_coordinates_attr.vertex_pointer(3);
-        let texture_coords_attr = get_attr(
-            &self.shader, "in_texture_coordinates");
+        let texture_coords_attr =
+            self.shader.get_attr("in_texture_coordinates");
         texture_coords_attr.enable();
         texture_coords_attr.vertex_pointer(3);
         let map_size = self.core.map_size();
