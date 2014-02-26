@@ -66,7 +66,7 @@ impl TilePicker {
         map_size: Size2<Int>
     ) -> ~TilePicker {
         let mut picker = ~TilePicker {
-            shader: Shader(0),
+            shader: Shader::new("pick.vs.glsl", "pick.fs.glsl"),
             map_mesh: Mesh::new(),
             mat_id: MatId(0),
             win_size: win_size,
@@ -80,7 +80,6 @@ impl TilePicker {
     }
 
     fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
-        self.shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
         let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
         self.map_mesh.set_vertex_coords(vertex_data);
         self.map_mesh.set_color(color_data);

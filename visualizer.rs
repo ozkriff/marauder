@@ -179,7 +179,7 @@ impl<'a> Visualizer<'a> {
         let tile_picker = TilePicker::new(
             win_size, &geom, core.map_size());
         let mut vis = ~Visualizer {
-            shader: Shader(0),
+            shader: Shader::new("normal.vs.glsl", "normal.fs.glsl"),
             map_mesh: Mesh::new(),
             unit_mesh: Mesh::new(),
             mvp_mat: MatId(0),
@@ -206,7 +206,6 @@ impl<'a> Visualizer<'a> {
     }
 
     fn init_models(&mut self) {
-        self.shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
         self.mvp_mat = MatId(self.shader.get_uniform("mvp_mat"));
         let map_size = self.core.map_size();
         let map_vertex_data = build_hex_mesh(&self.geom, map_size);
