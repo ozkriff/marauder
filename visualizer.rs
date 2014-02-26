@@ -390,7 +390,7 @@ impl<'a> Visualizer<'a> {
             self.tile_picker.pick_tile(&self.camera, mouse_pos);
     }
 
-    pub fn make_event_visualizer(&mut self, event: &Event) -> ~EventVisualizer {
+    fn make_event_visualizer(&mut self, event: &Event) -> ~EventVisualizer {
         match *event {
             EventMove(ref unit_id, ref path) => {
                 EventMoveVisualizer::new(*unit_id, path.clone())
@@ -407,7 +407,7 @@ impl<'a> Visualizer<'a> {
         }
     }
 
-    pub fn logic(&mut self) {
+    fn logic(&mut self) {
         if self.event_visualizer.is_none() {
             let event_opt = self.core.get_event();
             if event_opt.is_some() {
