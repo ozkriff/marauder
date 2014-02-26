@@ -52,6 +52,15 @@ fn build_hex_map_mesh(
     (v_data, c_data)
 }
 
+fn get_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
+    let mut mesh = Mesh::new();
+    let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
+    mesh.set_vertex_coords(vertex_data);
+    mesh.set_color(color_data);
+    mesh.prepare(shader);
+    mesh
+}
+
 pub struct TilePicker {
     shader: Shader,
     map_mesh: Mesh,
@@ -65,26 +74,20 @@ impl TilePicker {
         geom: &Geom,
         map_size: Size2<Int>
     ) -> ~TilePicker {
-        let mut picker = ~TilePicker {
-            shader: Shader::new("pick.vs.glsl", "pick.fs.glsl"),
-            map_mesh: Mesh::new(),
-            mat_id: MatId(0),
+        let shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
+        let mat_id = MatId(shader.get_uniform("mvp_mat"));
+        let map_mesh = get_mesh(geom, map_size, &shader);
+        let picker = ~TilePicker {
+            map_mesh: map_mesh,
+            shader: shader,
+            mat_id: mat_id,
             win_size: win_size,
         };
-        picker.init(geom, map_size);
         picker
     }
 
     pub fn set_win_size(&mut self, win_size: Size2<Int>) {
         self.win_size = win_size;
-    }
-
-    fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
-        let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
-        self.map_mesh.set_vertex_coords(vertex_data);
-        self.map_mesh.set_color(color_data);
-        self.map_mesh.prepare(&self.shader);
-        self.mat_id = MatId(self.shader.get_uniform("mvp_mat"));
     }
 
     pub fn pick_tile(
