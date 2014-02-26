@@ -29,6 +29,8 @@ mod event_visualizer;
 mod core_types;
 mod pathfinder;
 mod dir;
+mod shader;
+mod texture;
 
 fn main() {
     let mut visualizer = visualizer::Visualizer::new();

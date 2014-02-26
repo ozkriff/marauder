@@ -5,7 +5,6 @@ use cgmath::vector::{
     Vec2,
 };
 use gl_helpers::{
-    Shader,
     uniform_mat4f,
     set_clear_color,
     clear_screen,
@@ -26,6 +25,7 @@ use gl_types::{
     Float,
     MatId,
 };
+use shader::Shader;
 
 fn build_hex_map_mesh(
     geom: &Geom,

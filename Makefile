@@ -19,6 +19,8 @@ SRC = \
   dir.rs \
   mesh.rs \
   core.rs \
+  shader.rs \
+  texture.rs \
   event_visualizer.rs \
   obj.rs \
   tile_picker.rs \

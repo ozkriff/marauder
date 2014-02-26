@@ -11,8 +11,6 @@ use cgmath::vector::{
     Vec2,
 };
 use gl_helpers::{
-    Shader,
-    Texture,
     uniform_mat4f,
     set_clear_color,
     clear_screen,
@@ -66,6 +64,8 @@ use event_visualizer::{
 use game_state::GameState;
 use pathfinder::Pathfinder;
 use misc::read_file;
+use shader::Shader;
+use texture::Texture;
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
     let mut vertex_data = ~[];

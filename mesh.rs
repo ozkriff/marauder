@@ -1,8 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use gl_helpers::{
-    Texture,
-    Shader,
     Vbo,
     Vao,
     Triangles,
@@ -13,6 +11,8 @@ use gl_types::{
     TextureCoord,
 };
 use core_types::Int;
+use shader::Shader;
+use texture::Texture;
 
 pub struct Mesh {
     priv vertex_coords_vbo: Vbo,
