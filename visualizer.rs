@@ -167,7 +167,7 @@ pub struct Visualizer<'a> {
     shader: Shader,
     map_mesh: Mesh,
     unit_mesh: Mesh,
-    mvp_mat: MatId,
+    mvp_mat_id: MatId,
     win: glfw::Window,
     mouse_pos: Point2<Float>,
     camera: Camera,
@@ -196,11 +196,11 @@ impl<'a> Visualizer<'a> {
         let tile_picker = TilePicker::new(
             win_size, &geom, core.map_size());
         let shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
-        let mvp_mat = MatId(shader.get_uniform("mvp_mat"));
+        let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
         let vis = ~Visualizer {
             map_mesh: get_map_mesh(&geom, map_size, &shader),
             unit_mesh: load_unit_mesh(&shader),
-            mvp_mat: mvp_mat,
+            mvp_mat_id: mvp_mat_id,
             shader: shader,
             win: win,
             mouse_pos: Vec2::zero(),
@@ -243,13 +243,13 @@ impl<'a> Visualizer<'a> {
         self.shader.activate();
         for (_, unit) in self.scene().iter() {
             let m = tr(self.camera.mat(), unit.pos);
-            uniform_mat4f(self.mvp_mat, &m);
+            uniform_mat4f(self.mvp_mat_id, &m);
             self.unit_mesh.draw(&self.shader);
         }
     }
 
     fn draw_map(&self) {
-        uniform_mat4f(self.mvp_mat, &self.camera.mat());
+        uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
         self.map_mesh.draw(&self.shader);
     }
 

@@ -63,7 +63,7 @@ fn get_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
 pub struct TilePicker {
     shader: Shader,
     map_mesh: Mesh,
-    mat_id: MatId,
+    mvp_mat_id: MatId,
     win_size: Size2<Int>,
 }
 
@@ -74,12 +74,12 @@ impl TilePicker {
         map_size: Size2<Int>
     ) -> ~TilePicker {
         let shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
-        let mat_id = MatId(shader.get_uniform("mvp_mat"));
+        let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
         let map_mesh = get_mesh(geom, map_size, &shader);
         let picker = ~TilePicker {
             map_mesh: map_mesh,
             shader: shader,
-            mat_id: mat_id,
+            mvp_mat_id: mvp_mat_id,
             win_size: win_size,
         };
         picker
@@ -95,7 +95,7 @@ impl TilePicker {
         mouse_pos: Vec2<Int>
     ) -> Option<MapPos> {
         self.shader.activate();
-        uniform_mat4f(self.mat_id, &camera.mat());
+        uniform_mat4f(self.mvp_mat_id, &camera.mat());
         set_clear_color(0.0, 0.0, 0.0);
         clear_screen();
         self.map_mesh.draw(&self.shader);

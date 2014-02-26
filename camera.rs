@@ -48,12 +48,12 @@ impl Camera {
     }
 
     pub fn mat(&self) -> Mat4<Float> {
-        let mut mvp_mat = self.projection_mat;
-        mvp_mat = tr(mvp_mat, Vec3{x: 0.0, y: 0.0, z: -self.zoom});
-        mvp_mat = rot_x(mvp_mat, -self.x_angle);
-        mvp_mat = rot_z(mvp_mat, -self.z_angle);
-        mvp_mat = tr(mvp_mat, self.pos);
-        mvp_mat
+        let mut m = self.projection_mat;
+        m = tr(m, Vec3{x: 0.0, y: 0.0, z: -self.zoom});
+        m = rot_x(m, -self.x_angle);
+        m = rot_z(m, -self.z_angle);
+        m = tr(m, self.pos);
+        m
     }
 
     pub fn move(&mut self, angle: Float) {
