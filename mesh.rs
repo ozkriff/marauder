@@ -5,7 +5,6 @@ use gl_helpers::{
     Shader,
     Vbo,
     Vao,
-    draw_mesh,
     Triangles,
 };
 use gl_types::{
@@ -70,7 +69,7 @@ impl Mesh {
         if !self.texture.is_none() {
             self.texture.unwrap().enable(shader);
         }
-        draw_mesh(Triangles, self.length);
+        self.vao.draw_array(Triangles, self.length);
         self.vao.unbind();
     }
 }

@@ -112,13 +112,6 @@ impl MeshRenderMode {
     }
 }
 
-pub fn draw_mesh(mesh_mode: MeshRenderMode, faces_count: Int) {
-    let starting_index = 0;
-    let vertices_count = faces_count * 3;
-    let mode = mesh_mode.to_gl_type();
-    gl::DrawArrays(mode, starting_index, vertices_count);
-}
-
 pub fn uniform_mat4f(mat_id: MatId, mat: &Mat4<Float>) {
     unsafe {
         let MatId(id) = mat_id;
@@ -250,6 +243,13 @@ impl Vao {
 
     pub fn unbind(&self) {
         gl::BindVertexArray(0);
+    }
+
+    pub fn draw_array(&self, mesh_mode: MeshRenderMode, faces_count: Int) {
+        let starting_index = 0;
+        let vertices_count = faces_count * 3;
+        let mode = mesh_mode.to_gl_type();
+        gl::DrawArrays(mode, starting_index, vertices_count);
     }
 }
 
