@@ -146,6 +146,25 @@ fn get_pathfinders(
     m
 }
 
+fn get_map_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
+    let tex = Texture::new(~"data/floor.png");
+    let mut mesh = Mesh::new();
+    mesh.set_vertex_coords(build_hex_mesh(geom, map_size));
+    mesh.set_texture(tex, build_hex_tex_coord(map_size));
+    mesh.prepare(shader);
+    mesh
+}
+
+fn load_unit_mesh(shader: &Shader) -> Mesh {
+    let tex = Texture::new(~"data/tank.png");
+    let obj = obj::Model::new("data/tank.obj");
+    let mut mesh = Mesh::new();
+    mesh.set_vertex_coords(obj.build());
+    mesh.set_texture(tex, obj.build_tex_coord());
+    mesh.prepare(shader);
+    mesh
+}
+
 pub struct Visualizer<'a> {
     shader: Shader,
     map_mesh: Mesh,
@@ -178,11 +197,13 @@ impl<'a> Visualizer<'a> {
         let map_size = core.map_size();
         let tile_picker = TilePicker::new(
             win_size, &geom, core.map_size());
-        let mut vis = ~Visualizer {
-            shader: Shader::new("normal.vs.glsl", "normal.fs.glsl"),
-            map_mesh: Mesh::new(),
-            unit_mesh: Mesh::new(),
-            mvp_mat: MatId(0),
+        let shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
+        let mvp_mat = MatId(shader.get_uniform("mvp_mat"));
+        let vis = ~Visualizer {
+            map_mesh: get_map_mesh(&geom, map_size, &shader),
+            unit_mesh: load_unit_mesh(&shader),
+            mvp_mat: mvp_mat,
+            shader: shader,
             win: win,
             mouse_pos: Vec2::zero(),
             camera: Camera::new(),
@@ -197,27 +218,11 @@ impl<'a> Visualizer<'a> {
             game_state: get_game_states(players_count),
             pathfinders: get_pathfinders(players_count, map_size),
         };
-        vis.init_models();
         vis
     }
 
     fn win<'a>(&'a self) -> &'a glfw::Window {
         &self.win
-    }
-
-    fn init_models(&mut self) {
-        self.mvp_mat = MatId(self.shader.get_uniform("mvp_mat"));
-        let map_size = self.core.map_size();
-        let map_vertex_data = build_hex_mesh(&self.geom, map_size);
-        self.map_mesh.set_vertex_coords(map_vertex_data);
-        self.map_mesh.set_texture(
-            Texture::new(~"data/floor.png"), build_hex_tex_coord(map_size));
-        self.map_mesh.prepare(&self.shader);
-        let unit_obj = obj::Model::new("data/tank.obj");
-        self.unit_mesh.set_vertex_coords(unit_obj.build());
-        self.unit_mesh.set_texture(
-            Texture::new(~"data/tank.png"), unit_obj.build_tex_coord());
-        self.unit_mesh.prepare(&self.shader);
     }
 
     fn scene<'a>(&'a self) -> &'a Scene {
