@@ -53,9 +53,8 @@ fn build_hex_map_mesh(
 }
 
 fn get_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
-    let mut mesh = Mesh::new();
     let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
-    mesh.set_vertex_coords(vertex_data);
+    let mut mesh = Mesh::new(vertex_data);
     mesh.set_color(color_data);
     mesh.prepare(shader);
     mesh

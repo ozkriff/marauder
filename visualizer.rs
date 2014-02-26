@@ -148,8 +148,7 @@ fn get_pathfinders(
 
 fn get_map_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
     let tex = Texture::new(~"data/floor.png");
-    let mut mesh = Mesh::new();
-    mesh.set_vertex_coords(build_hex_mesh(geom, map_size));
+    let mut mesh = Mesh::new(build_hex_mesh(geom, map_size));
     mesh.set_texture(tex, build_hex_tex_coord(map_size));
     mesh.prepare(shader);
     mesh
@@ -158,8 +157,7 @@ fn get_map_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
 fn load_unit_mesh(shader: &Shader) -> Mesh {
     let tex = Texture::new(~"data/tank.png");
     let obj = obj::Model::new("data/tank.obj");
-    let mut mesh = Mesh::new();
-    mesh.set_vertex_coords(obj.build());
+    let mut mesh = Mesh::new(obj.build());
     mesh.set_texture(tex, obj.build_tex_coord());
     mesh.prepare(shader);
     mesh

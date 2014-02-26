@@ -25,20 +25,16 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new() -> Mesh {
+    pub fn new(data: &[VertexCoord]) -> Mesh {
+        let length = data.len() as Int;
         Mesh {
-            vertex_coords_vbo: Vbo(0),
+            vertex_coords_vbo: Vbo::from_data(data),
             color_vbo: None,
             texture_coords_vbo: None,
             texture: None,
-            length: 0,
+            length: length,
             vao: Vao::new(),
         }
-    }
-
-    pub fn set_vertex_coords(&mut self, data: &[VertexCoord]) {
-        self.length = data.len() as Int;
-        self.vertex_coords_vbo = Vbo::from_data(data);
     }
 
     pub fn set_color(&mut self, data: &[Color3]) {

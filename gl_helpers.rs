@@ -262,7 +262,9 @@ impl Drop for Vao {
     }
 }
 
-pub struct Vbo(GLuint);
+pub struct Vbo {
+    priv id: GLuint,
+}
 
 fn get_new_vbo_id() -> GLuint {
     let mut id = 0;
@@ -274,7 +276,7 @@ fn get_new_vbo_id() -> GLuint {
 
 impl Vbo {
     pub fn from_data<T>(data: &[T]) -> Vbo {
-        let vbo = Vbo(get_new_vbo_id());
+        let vbo = Vbo{id: get_new_vbo_id()};
         vbo.bind();
         let size = std::mem::size_of::<T>();
         let buf_size = (data.len() * size) as GLsizeiptr;
@@ -286,16 +288,14 @@ impl Vbo {
     }
 
     pub fn bind(&self) {
-        let Vbo(id) = *self;
-        gl::BindBuffer(gl::ARRAY_BUFFER, id);
+        gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
     }
 }
 
 impl Drop for Vbo {
     fn drop(&mut self) {
         unsafe {
-            let Vbo(id) = *self;
-            gl::DeleteBuffers(1, &id);
+            gl::DeleteBuffers(1, &self.id);
         }
     }
 }
