@@ -139,11 +139,11 @@ pub fn set_clear_color(r: Float, g: Float, b: Float) {
     gl::ClearColor(r, g, b, 1.0);
 }
 
-pub fn clear() {
+pub fn clear_screen() {
     gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 }
 
-pub fn viewport(size: Size2<Int>) {
+pub fn set_viewport(size: Size2<Int>) {
     gl::Viewport(0, 0, size.w, size.h);
 }
 

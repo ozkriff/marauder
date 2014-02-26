@@ -15,10 +15,10 @@ use gl_helpers::{
     Texture,
     uniform_mat4f,
     set_clear_color,
-    clear,
+    clear_screen,
     init_opengl,
     load_gl_funcs_with,
-    viewport,
+    set_viewport,
     tr,
 };
 use camera::Camera;
@@ -260,7 +260,7 @@ impl<'a> Visualizer<'a> {
 
     fn draw(&mut self) {
         set_clear_color(0.3, 0.3, 0.3);
-        clear();
+        clear_screen();
         self.shader.activate();
         self.draw_units();
         self.draw_map();
@@ -373,7 +373,7 @@ impl<'a> Visualizer<'a> {
                 self.handle_mouse_button_event();
             },
             glfw::SizeEvent(w, h) => {
-                viewport(Size2{w: w, h: h});
+                set_viewport(Size2{w: w, h: h});
                 self.picker.set_win_size(Size2{w: w, h: h});
             },
             _ => {},

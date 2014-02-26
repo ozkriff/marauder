@@ -8,7 +8,7 @@ use gl_helpers::{
     Shader,
     uniform_mat4f,
     set_clear_color,
-    clear,
+    clear_screen,
     get_vec2_from_pixel,
 };
 use map::MapPosIter;
@@ -102,7 +102,7 @@ impl TilePicker {
         self.shader.activate();
         uniform_mat4f(self.mat_id, &camera.mat());
         set_clear_color(0.0, 0.0, 0.0);
-        clear();
+        clear_screen();
         self.map_mesh.draw(&self.shader);
         get_vec2_from_pixel(self.win_size, mouse_pos)
     }
