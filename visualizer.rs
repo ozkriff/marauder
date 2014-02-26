@@ -171,7 +171,7 @@ pub struct Visualizer<'a> {
     win: glfw::Window,
     mouse_pos: Point2<Float>,
     camera: Camera,
-    picker: ~TilePicker,
+    tile_picker: ~TilePicker,
     selected_tile_pos: Option<MapPos>,
     selected_unit_id: Option<UnitId>,
     geom: Geom,
@@ -205,7 +205,7 @@ impl<'a> Visualizer<'a> {
             win: win,
             mouse_pos: Vec2::zero(),
             camera: Camera::new(),
-            picker: tile_picker,
+            tile_picker: tile_picker,
             selected_tile_pos: None,
             selected_unit_id: None,
             geom: geom,
@@ -369,7 +369,7 @@ impl<'a> Visualizer<'a> {
             },
             glfw::SizeEvent(w, h) => {
                 set_viewport(Size2{w: w, h: h});
-                self.picker.set_win_size(Size2{w: w, h: h});
+                self.tile_picker.set_win_size(Size2{w: w, h: h});
             },
             _ => {},
         }
@@ -386,7 +386,8 @@ impl<'a> Visualizer<'a> {
             x: self.mouse_pos.x as Int,
             y: self.mouse_pos.y as Int,
         };
-        self.selected_tile_pos = self.picker.pick_tile(&self.camera, mouse_pos);
+        self.selected_tile_pos =
+            self.tile_picker.pick_tile(&self.camera, mouse_pos);
     }
 
     pub fn make_event_visualizer(&mut self, event: &Event) -> ~EventVisualizer {
