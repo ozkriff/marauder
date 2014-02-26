@@ -46,12 +46,9 @@ impl Mesh {
         self.color_vbo = Some(Vbo::from_data(data));
     }
 
-    pub fn set_texture_coords(&mut self, data: &[TextureCoord]) {
+    pub fn set_texture(&mut self, texture: Texture, data: &[TextureCoord]) {
         assert_eq!(self.length, data.len() as Int);
         self.texture_coords_vbo = Some(Vbo::from_data(data));
-    }
-
-    pub fn set_texture(&mut self, texture: Texture) {
         self.texture = Some(texture);
     }
 
