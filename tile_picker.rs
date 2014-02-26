@@ -81,16 +81,10 @@ impl TilePicker {
 
     fn init(&mut self, geom: &Geom, map_size: Size2<Int>) {
         self.shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
-        self.shader.activate();
-        let position_attr = self.shader.get_attr("in_vertex_coordinates");
-        let color_attr = self.shader.get_attr("color");
-        position_attr.enable();
-        color_attr.enable();
-        position_attr.vertex_pointer(3);
-        color_attr.vertex_pointer(3);
         let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
         self.map_mesh.set_vertex_coords(vertex_data);
         self.map_mesh.set_color(color_data);
+        self.map_mesh.prepare(&self.shader);
         self.mat_id = MatId(self.shader.get_uniform("mvp_mat"));
     }
 

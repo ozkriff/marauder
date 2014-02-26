@@ -4,6 +4,7 @@ use gl_helpers::{
     Texture,
     Shader,
     Vbo,
+    Vao,
     draw_mesh,
     Triangles,
 };
@@ -20,6 +21,7 @@ pub struct Mesh {
     priv texture_coords_vbo: Option<Vbo>,
     priv texture: Option<Texture>,
     priv length: Int,
+    priv vao: Vao,
 }
 
 impl Mesh {
@@ -30,6 +32,7 @@ impl Mesh {
             texture_coords_vbo: None,
             texture: None,
             length: 0,
+            vao: Vao(0),
         }
     }
 
@@ -52,24 +55,37 @@ impl Mesh {
         self.texture = Some(texture);
     }
 
-    pub fn draw(&self, shader: &Shader) {
-        if !self.texture.is_none() {
-            self.texture.unwrap().enable(shader);
-        }
+    pub fn prepare(&mut self, shader: &Shader) {
+        self.vao = Vao::new();
+        self.vao.bind();
+        shader.activate();
         if !self.texture_coords_vbo.is_none() {
             self.texture_coords_vbo.get_ref().bind();
             let p = shader.get_attr("in_texture_coordinates");
+            p.enable();
             p.vertex_pointer(2);
         }
         if !self.color_vbo.is_none() {
             self.color_vbo.get_ref().bind();
             let p = shader.get_attr("color");
+            p.enable();
             p.vertex_pointer(3);
         }
         self.vertex_coords_vbo.bind();
         let p = shader.get_attr("in_vertex_coordinates");
+        p.enable();
         p.vertex_pointer(3);
+        self.vao.unbind();
+    }
+
+    pub fn draw(&self, shader: &Shader) {
+        self.vao.bind();
+        shader.activate();
+        if !self.texture.is_none() {
+            self.texture.unwrap().enable(shader);
+        }
         draw_mesh(Triangles, self.length);
+        self.vao.unbind();
     }
 }
 

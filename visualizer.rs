@@ -207,25 +207,18 @@ impl<'a> Visualizer<'a> {
 
     fn init_models(&mut self) {
         self.shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
-        self.shader.activate();
         self.mvp_mat = MatId(self.shader.get_uniform("mvp_mat"));
-        let vertex_coordinates_attr =
-            self.shader.get_attr("in_vertex_coordinates");
-        vertex_coordinates_attr.enable();
-        vertex_coordinates_attr.vertex_pointer(3);
-        let texture_coords_attr =
-            self.shader.get_attr("in_texture_coordinates");
-        texture_coords_attr.enable();
-        texture_coords_attr.vertex_pointer(3);
         let map_size = self.core.map_size();
         let map_vertex_data = build_hex_mesh(&self.geom, map_size);
         self.map_mesh.set_vertex_coords(map_vertex_data);
         self.map_mesh.set_texture_coords(build_hex_tex_coord(map_size));
         self.map_mesh.set_texture(Texture::new(~"data/floor.png"));
+        self.map_mesh.prepare(&self.shader);
         let unit_obj = obj::Model::new("data/tank.obj");
         self.unit_mesh.set_vertex_coords(unit_obj.build());
         self.unit_mesh.set_texture_coords(unit_obj.build_tex_coord());
         self.unit_mesh.set_texture(Texture::new(~"data/tank.png"));
+        self.unit_mesh.prepare(&self.shader);
     }
 
     fn scene<'a>(&'a self) -> &'a Scene {

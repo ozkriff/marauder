@@ -216,6 +216,39 @@ impl Drop for Shader {
     }
 }
 
+pub struct Vao(GLuint);
+
+impl Vao {
+    pub fn new() -> Vao {
+        let mut id = 0;
+        unsafe {
+            gl::GenVertexArrays(1, &mut id);
+        }
+        let vao = Vao(id);
+        vao.bind();
+        gl::EnableVertexAttribArray(id);
+        vao
+    }
+
+    pub fn bind(&self) {
+        let Vao(id) = *self;
+        gl::BindVertexArray(id);
+    }
+
+    pub fn unbind(&self) {
+        gl::BindVertexArray(0);
+    }
+}
+
+impl Drop for Vao {
+    fn drop(&mut self) {
+        let Vao(id) = *self;
+        unsafe {
+            gl::DeleteVertexArrays(1, &id);
+        }
+    }
+}
+
 pub struct Vbo(GLuint);
 
 fn get_new_vbo_id() -> GLuint {
