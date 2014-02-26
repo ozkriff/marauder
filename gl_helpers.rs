@@ -95,7 +95,7 @@ fn compile_program(vertex_shader_src: &str, frag_shader_src: &str) -> Shader {
     // mark shaders for deletion after program deletion
     gl::DeleteShader(fragment_shader);
     gl::DeleteShader(vertex_shader);
-    Shader(program)
+    Shader{id: program}
 }
 
 pub enum MeshRenderMode {
@@ -162,7 +162,9 @@ pub fn set_viewport(size: Size2<Int>) {
     gl::Viewport(0, 0, size.w, size.h);
 }
 
-pub struct Texture(GLuint);
+pub struct Texture {
+    priv id: GLuint,
+}
 
 impl Texture {
     pub fn new(path: ~str) -> Texture {
@@ -170,15 +172,16 @@ impl Texture {
     }
 
     pub fn enable(&self, shader: &Shader) {
-        let Texture(id) = *self;
         let basic_texture_loc = shader.get_uniform("basic_texture") as GLint;
         gl::Uniform1ui(basic_texture_loc, 0);
         gl::ActiveTexture(gl::TEXTURE0);
-        gl::BindTexture(gl::TEXTURE_2D, id);
+        gl::BindTexture(gl::TEXTURE_2D, self.id);
     }
 }
 
-pub struct Shader(GLuint);
+pub struct Shader {
+    priv id: GLuint,
+}
 
 impl Shader {
     pub fn new(vs: &str, fs: &str) -> Shader {
@@ -189,15 +192,13 @@ impl Shader {
     }
 
     pub fn activate(&self) {
-        let Shader(id) = *self;
-        gl::UseProgram(id);
+        gl::UseProgram(self.id);
     }
 
     pub fn enable_attr(&self, name:&str, components_count: Int) {
-        let Shader(shader_id) = *self;
         let mut attr_id;
         unsafe {
-            attr_id = gl::GetAttribLocation(shader_id, c_str(name));
+            attr_id = gl::GetAttribLocation(self.id, c_str(name));
         }
         gl::EnableVertexAttribArray(attr_id as GLuint);
         let normalized = gl::FALSE;
@@ -215,17 +216,15 @@ impl Shader {
     }
 
     pub fn get_uniform(&self, name: &str) -> GLuint {
-        let Shader(id) = *self;
         unsafe {
-            gl::GetUniformLocation(id, c_str(name)) as GLuint
+            gl::GetUniformLocation(self.id, c_str(name)) as GLuint
         }
     }
 }
 
 impl Drop for Shader {
     fn drop(&mut self) {
-        let Shader(id) = *self;
-        gl::DeleteProgram(id);
+        gl::DeleteProgram(self.id);
     }
 }
 
@@ -345,7 +344,7 @@ fn load_texture(path: ~str) -> Texture {
         gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
     gl::TexParameteri(gl::TEXTURE_2D,
         gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
-    Texture(id)
+    Texture{id: id}
 }
 
 pub fn get_vec2_from_pixel(
