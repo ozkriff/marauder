@@ -5,6 +5,7 @@ use gl_helpers::{
     Shader,
     Vbo,
     draw_mesh,
+    Triangles,
 };
 use gl_types::{
     Color3,
@@ -68,7 +69,7 @@ impl Mesh {
         self.vertex_coords_vbo.bind();
         let p = shader.get_attr("in_vertex_coordinates");
         p.vertex_pointer(3);
-        draw_mesh(self.length);
+        draw_mesh(Triangles, self.length);
     }
 }
 

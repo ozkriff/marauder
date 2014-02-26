@@ -98,10 +98,25 @@ fn compile_program(vertex_shader_src: &str, frag_shader_src: &str) -> Shader {
     Shader(program)
 }
 
-pub fn draw_mesh(faces_count: Int) {
+pub enum MeshRenderMode {
+    Triangles,
+    Lines,
+}
+
+impl MeshRenderMode {
+    fn to_gl_type(&self) -> GLuint {
+        match *self {
+            Triangles => gl::TRIANGLES,
+            Lines => gl::LINES,
+        }
+    }
+}
+
+pub fn draw_mesh(mesh_mode: MeshRenderMode, faces_count: Int) {
     let starting_index = 0;
     let vertices_count = faces_count * 3;
-    gl::DrawArrays(gl::TRIANGLES, starting_index, vertices_count);
+    let mode = mesh_mode.to_gl_type();
+    gl::DrawArrays(mode, starting_index, vertices_count);
 }
 
 pub fn uniform_mat4f(mat_id: MatId, mat: &Mat4<Float>) {
