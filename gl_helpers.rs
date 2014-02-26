@@ -193,11 +193,24 @@ impl Shader {
         gl::UseProgram(id);
     }
 
-    pub fn get_attr(&self, name: &str) -> Attr {
+    pub fn enable_attr(&self, name:&str, components_count: Int) {
+        let Shader(shader_id) = *self;
+        let mut attr_id;
         unsafe {
-            let Shader(id) = *self;
-            let attr_id = gl::GetAttribLocation(id, c_str(name));
-            Attr(attr_id as GLuint)
+            attr_id = gl::GetAttribLocation(shader_id, c_str(name));
+        }
+        gl::EnableVertexAttribArray(attr_id as GLuint);
+        let normalized = gl::FALSE;
+        let stride = 0;
+        unsafe {
+            gl::VertexAttribPointer(
+                attr_id as GLuint,
+                components_count,
+                gl::FLOAT,
+                normalized,
+                stride,
+                std::ptr::null(),
+            );
         }
     }
 
@@ -283,32 +296,6 @@ impl Drop for Vbo {
         unsafe {
             let Vbo(id) = *self;
             gl::DeleteBuffers(1, &id);
-        }
-    }
-}
-
-pub struct Attr(GLuint);
-
-impl Attr {
-    pub fn enable(&self) {
-        let Attr(id) = *self;
-        gl::EnableVertexAttribArray(id);
-    }
-
-    // TODO: Rename
-    pub fn vertex_pointer(&self, components_count: Int) {
-        let normalized = gl::FALSE;
-        let stride = 0;
-        let Attr(id) = *self;
-        unsafe {
-            gl::VertexAttribPointer(
-                id,
-                components_count,
-                gl::FLOAT,
-                normalized,
-                stride,
-                std::ptr::null(),
-            );
         }
     }
 }
