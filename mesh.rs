@@ -32,7 +32,7 @@ impl Mesh {
             texture_coords_vbo: None,
             texture: None,
             length: 0,
-            vao: Vao(0),
+            vao: Vao::new(),
         }
     }
 
@@ -53,7 +53,6 @@ impl Mesh {
     }
 
     pub fn prepare(&mut self, shader: &Shader) {
-        self.vao = Vao::new();
         self.vao.bind();
         shader.activate();
         if !self.texture_coords_vbo.is_none() {
