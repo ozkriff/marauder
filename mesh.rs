@@ -65,7 +65,6 @@ impl Mesh {
 
     pub fn draw(&self, shader: &Shader) {
         self.vao.bind();
-        shader.activate();
         if !self.texture.is_none() {
             self.texture.unwrap().enable(shader);
         }

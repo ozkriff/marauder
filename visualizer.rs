@@ -240,7 +240,6 @@ impl<'a> Visualizer<'a> {
     }
 
     fn draw_units(&self) {
-        self.shader.activate();
         for (_, unit) in self.scene().iter() {
             let m = tr(self.camera.mat(), unit.pos);
             uniform_mat4f(self.mvp_mat_id, &m);
