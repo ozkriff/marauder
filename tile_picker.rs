@@ -15,31 +15,31 @@ use camera::Camera;
 use geom::Geom;
 use mesh::Mesh;
 use core_types::{
-    Int,
+    MInt,
     Size2,
     MapPos,
 };
 use gl_types::{
     VertexCoord,
     Color3,
-    Float,
+    MFloat,
     MatId,
 };
 use shader::Shader;
 
 fn build_hex_map_mesh(
     geom: &Geom,
-    map_size: Size2<Int>
+    map_size: Size2<MInt>
 ) -> (~[VertexCoord], ~[Color3]) {
     let mut c_data = ~[];
     let mut v_data = ~[];
     for tile_pos in MapPosIter::new(map_size) {
         let pos3d = geom.map_pos_to_world_pos(tile_pos);
-        for num in range(0 as Int, 6) {
+        for num in range(0 as MInt, 6) {
             let vertex = geom.index_to_hex_vertex(num);
             let next_vertex = geom.index_to_hex_vertex(num + 1);
-            let col_x = tile_pos.x as Float / 255.0;
-            let col_y = tile_pos.y as Float / 255.0;
+            let col_x = tile_pos.x as MFloat / 255.0;
+            let col_y = tile_pos.y as MFloat / 255.0;
             let color = Color3{r: col_x, g: col_y, b: 1.0};
             v_data.push(pos3d + vertex);
             c_data.push(color);
@@ -52,7 +52,7 @@ fn build_hex_map_mesh(
     (v_data, c_data)
 }
 
-fn get_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
+fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
     let mut mesh = Mesh::new(vertex_data);
     mesh.set_color(color_data);
@@ -64,14 +64,14 @@ pub struct TilePicker {
     shader: Shader,
     map_mesh: Mesh,
     mvp_mat_id: MatId,
-    win_size: Size2<Int>,
+    win_size: Size2<MInt>,
 }
 
 impl TilePicker {
     pub fn new(
-        win_size: Size2<Int>,
+        win_size: Size2<MInt>,
         geom: &Geom,
-        map_size: Size2<Int>
+        map_size: Size2<MInt>
     ) -> ~TilePicker {
         let shader = Shader::new("pick.vs.glsl", "pick.fs.glsl");
         let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
@@ -85,14 +85,14 @@ impl TilePicker {
         tile_picker
     }
 
-    pub fn set_win_size(&mut self, win_size: Size2<Int>) {
+    pub fn set_win_size(&mut self, win_size: Size2<MInt>) {
         self.win_size = win_size;
     }
 
     pub fn pick_tile(
         &mut self,
         camera: &Camera,
-        mouse_pos: Vec2<Int>
+        mouse_pos: Vec2<MInt>
     ) -> Option<MapPos> {
         self.shader.activate();
         uniform_mat4f(self.mvp_mat_id, &camera.mat());

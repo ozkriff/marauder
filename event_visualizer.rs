@@ -3,15 +3,15 @@
 use cgmath::vector::Vector;
 use geom::Geom;
 use core_types::{
-    Bool,
-    Int,
+    MBool,
+    MInt,
     MapPos,
     UnitId,
 };
 use gl_types::{
     Scene,
     SceneNode,
-    Float,
+    MFloat,
     WorldPos,
     NodeId,
 };
@@ -22,21 +22,21 @@ fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
 }
 
 pub trait EventVisualizer {
-    fn is_finished(&self) -> Bool;
+    fn is_finished(&self) -> MBool;
     fn draw(&mut self, geom: &Geom, scene: &mut Scene);
     fn end(&mut self, geom: &Geom, scene: &mut Scene);
 }
 
-static MOVE_SPEED: Float = 40.0; // TODO: config?
+static MOVE_SPEED: MFloat = 40.0; // TODO: config?
 
 pub struct EventMoveVisualizer {
     unit_id: UnitId,
     path: ~[MapPos],
-    current_move_index: Int,
+    current_move_index: MInt,
 }
 
 impl EventVisualizer for EventMoveVisualizer {
-    fn is_finished(&self) -> Bool {
+    fn is_finished(&self) -> MBool {
         assert!(self.current_move_index <= self.frames_count());
         self.current_move_index == self.frames_count()
     }
@@ -64,9 +64,9 @@ impl EventMoveVisualizer {
         } as ~EventVisualizer
     }
 
-    fn frames_count(&self) -> Int {
-        let len = self.path.len() as Int - 1;
-        (len * MOVE_SPEED as Int) - 1
+    fn frames_count(&self) -> MInt {
+        let len = self.path.len() as MInt - 1;
+        (len * MOVE_SPEED as MInt) - 1
     }
 
     fn current_tile(&self) -> MapPos {
@@ -77,19 +77,19 @@ impl EventMoveVisualizer {
         self.path[self.current_tile_index() + 1]
     }
 
-    fn current_tile_index(&self) -> Int {
-        self.current_move_index / MOVE_SPEED as Int
+    fn current_tile_index(&self) -> MInt {
+        self.current_move_index / MOVE_SPEED as MInt
     }
 
-    fn node_index(&self) -> Int {
-        self.current_move_index - self.current_tile_index() * MOVE_SPEED as Int
+    fn node_index(&self) -> MInt {
+        self.current_move_index - self.current_tile_index() * MOVE_SPEED as MInt
     }
 
     fn current_position(&self, geom: &Geom) -> WorldPos {
         let from = geom.map_pos_to_world_pos(self.current_tile());
         let to = geom.map_pos_to_world_pos(self.next_tile());
         let diff = to.sub_v(&from).div_s(MOVE_SPEED);
-        from.add_v(&diff.mul_s(self.node_index() as Float))
+        from.add_v(&diff.mul_s(self.node_index() as MFloat))
     }
 }
 
@@ -102,7 +102,7 @@ impl EventEndTurnVisualizer {
 }
 
 impl EventVisualizer for EventEndTurnVisualizer {
-    fn is_finished(&self) -> Bool {
+    fn is_finished(&self) -> MBool {
         true
     }
 
@@ -114,8 +114,8 @@ impl EventVisualizer for EventEndTurnVisualizer {
 pub struct EventCreateUnitVisualizer {
     id: UnitId,
     pos: MapPos,
-    anim_index: Int,
-    is_initialized: Bool,
+    anim_index: MInt,
+    is_initialized: MBool,
 }
 
 impl EventCreateUnitVisualizer {
@@ -130,8 +130,8 @@ impl EventCreateUnitVisualizer {
 }
 
 impl EventVisualizer for EventCreateUnitVisualizer {
-    fn is_finished(&self) -> Bool {
-        self.anim_index == MOVE_SPEED as Int
+    fn is_finished(&self) -> MBool {
+        self.anim_index == MOVE_SPEED as MInt
     }
 
     fn draw(&mut self, geom: &Geom, scene: &mut Scene) {
@@ -142,7 +142,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
             self.is_initialized = true;
         }
         let mut pos = geom.map_pos_to_world_pos(self.pos);
-        pos.z -= 0.02 * (MOVE_SPEED / self.anim_index as Float);
+        pos.z -= 0.02 * (MOVE_SPEED / self.anim_index as MFloat);
         scene.get_mut(&node_id).pos = pos;
         self.anim_index += 1;
     }
@@ -154,7 +154,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
 pub struct EventAttackUnitVisualizer {
     attacker_id: UnitId,
     defender_id: UnitId,
-    anim_index: Int,
+    anim_index: MInt,
 }
 
 impl EventAttackUnitVisualizer {
@@ -168,8 +168,8 @@ impl EventAttackUnitVisualizer {
 }
 
 impl EventVisualizer for EventAttackUnitVisualizer {
-    fn is_finished(&self) -> Bool {
-        self.anim_index == MOVE_SPEED as Int
+    fn is_finished(&self) -> MBool {
+        self.anim_index == MOVE_SPEED as MInt
     }
 
     fn draw(&mut self, _: &Geom, scene: &mut Scene) {

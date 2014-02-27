@@ -2,7 +2,7 @@
 
 use cgmath::vector::Vec2;
 use core_types::{
-    Int,
+    MInt,
     MapPos,
 };
 
@@ -36,7 +36,7 @@ static DIR_TO_POS_DIFF: [[MapPos, ..6], ..2] = [
 
 
 impl Dir {
-    pub fn from_int(n: Int) -> Dir {
+    pub fn from_int(n: MInt) -> Dir {
         assert!(n >= 0 && n < 6);
         let dirs = [
             NorthEast,
@@ -49,7 +49,7 @@ impl Dir {
         dirs[n]
     }
 
-    pub fn to_int(&self) -> Int {
+    pub fn to_int(&self) -> MInt {
         match *self {
             NorthEast => 0,
             East => 1,
@@ -63,7 +63,7 @@ impl Dir {
     pub fn get_dir_from_to(from: MapPos, to: MapPos) -> Dir {
         // assert!(from.distance(to) == 1);
         let diff = to - from;
-        for i in range(0 as Int, 6) {
+        for i in range(0 as MInt, 6) {
             if diff == DIR_TO_POS_DIFF[from.y % 2][i] {
                 return Dir::from_int(i);
             }
@@ -73,7 +73,7 @@ impl Dir {
 
     pub fn get_neighbour_pos(pos: MapPos, dir: Dir) -> MapPos {
         let is_odd_row = pos.y % 2 == 1;
-        let subtable_index: Int = if is_odd_row { 1 } else { 0 };
+        let subtable_index: MInt = if is_odd_row { 1 } else { 0 };
         let direction_index = dir.to_int();
         assert!(direction_index >= 0 && direction_index < 6);
         let difference = DIR_TO_POS_DIFF[subtable_index][direction_index];

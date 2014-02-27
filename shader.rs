@@ -9,7 +9,7 @@ use gl::types::{
     GLenum,
 };
 use core_types::{
-    Int,
+    MInt,
 };
 use misc::read_file;
 
@@ -35,7 +35,7 @@ impl Shader {
         gl::UseProgram(self.id);
     }
 
-    pub fn enable_attr(&self, name:&str, components_count: Int) {
+    pub fn enable_attr(&self, name:&str, components_count: MInt) {
         let mut attr_id;
         unsafe {
             attr_id = gl::GetAttribLocation(self.id, c_str(name));

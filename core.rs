@@ -4,7 +4,7 @@ use collections::hashmap::HashMap;
 use cgmath::vector::Vec2;
 use core_types::{
     Size2,
-    Int,
+    MInt,
     UnitId,
     PlayerId,
     MapPos,
@@ -39,7 +39,7 @@ pub struct Core<'a> {
     priv current_player_id: PlayerId,
     priv core_event_list: ~[~CoreEvent],
     priv event_lists: HashMap<PlayerId, ~[Event]>,
-    priv map_size: Size2<Int>,
+    priv map_size: Size2<MInt>,
 }
 
 fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
@@ -66,7 +66,7 @@ impl<'a> Core<'a> {
         core
     }
 
-    pub fn map_size(&self) -> Size2<Int> {
+    pub fn map_size(&self) -> Size2<MInt> {
         self.map_size
     }
 
@@ -117,7 +117,7 @@ impl<'a> Core<'a> {
 trait CoreEvent {
     fn apply(&self, core: &mut Core);
     fn to_event(&self) -> Event;
-    // TODO: fn is_visible(&self) -> Bool;
+    // TODO: fn is_visible(&self) -> MBool;
 }
 
 struct CoreEventMove {
@@ -153,7 +153,7 @@ struct CoreEventEndTurn {
 impl CoreEventEndTurn {
     fn new(core: &Core) -> ~CoreEventEndTurn {
         let PlayerId(old_id) = core.current_player_id;
-        let max_id = core.players.len() as Int;
+        let max_id = core.players.len() as MInt;
         let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
         ~CoreEventEndTurn{old_id: PlayerId(old_id), new_id: PlayerId(new_id)}
     }

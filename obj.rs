@@ -10,8 +10,8 @@ use cgmath::vector::{
     Vec2,
 };
 use core_types::{
-    Bool,
-    Int,
+    MBool,
+    MInt,
 };
 use gl_types::{
     VertexCoord,
@@ -20,9 +20,9 @@ use gl_types::{
 };
 
 struct Face {
-    vertex: [Int, ..3],
-    texture: [Int, ..3],
-    normal: [Int, ..3],
+    vertex: [MInt, ..3],
+    texture: [MInt, ..3],
+    normal: [MInt, ..3],
 }
 
 pub struct Model {
@@ -79,7 +79,7 @@ impl Model {
 
     fn read_line(&mut self, line: &str) {
         let mut words = line.words();
-        fn is_correct_tag(tag: &str) -> Bool {
+        fn is_correct_tag(tag: &str) -> MBool {
             tag.len() != 0 && tag[0] != ('#' as u8)
         }
         match words.next() {

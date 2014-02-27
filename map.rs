@@ -3,17 +3,17 @@
 use cgmath::vector::Vec2;
 use core_types::{
     Size2,
-    Int,
+    MInt,
     MapPos,
 };
 
 pub struct MapPosIter {
     cursor: MapPos,
-    map_size: Size2<Int>,
+    map_size: Size2<MInt>,
 }
 
 impl MapPosIter {
-    pub fn new(map_size: Size2<Int>) -> MapPosIter {
+    pub fn new(map_size: Size2<MInt>) -> MapPosIter {
         MapPosIter {
             cursor: Vec2::zero(),
             map_size: map_size,

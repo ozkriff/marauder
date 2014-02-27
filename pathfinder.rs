@@ -1,8 +1,8 @@
 // See LICENSE file for copyright and license details.
 
 use core_types::{
-    Bool,
-    Int,
+    MBool,
+    MInt,
     MapPos,
     Size2,
 };
@@ -13,16 +13,16 @@ use game_state::GameState;
 use dir::Dir;
 
 struct Tile {
-    cost: Int,
+    cost: MInt,
     parent: Option<Dir>,
 }
 
 struct Map {
-    size: Size2<Int>,
+    size: Size2<MInt>,
     tiles: ~[Tile],
 }
 
-fn max_cost() -> Int {
+fn max_cost() -> MInt {
     30000
 }
 
@@ -35,7 +35,7 @@ impl<'a> Map {
         &self.tiles[pos.x + (pos.y * self.size.w)]
     }
 
-    fn is_inboard(&self, pos: MapPos) -> Bool {
+    fn is_inboard(&self, pos: MapPos) -> MBool {
         let x = pos.x;
         let y = pos.y;
         x >= 0 && y >= 0 && x < self.size.w && y < self.size.h
@@ -47,7 +47,7 @@ pub struct Pathfinder {
     priv map: Map,
 }
 
-fn create_tiles(tiles_count: Int) -> ~[Tile] {
+fn create_tiles(tiles_count: MInt) -> ~[Tile] {
     let mut tiles = ~[];
     for _ in range(0, tiles_count) {
         tiles.push(Tile {
@@ -59,7 +59,7 @@ fn create_tiles(tiles_count: Int) -> ~[Tile] {
 }
 
 impl Pathfinder {
-    pub fn new(map_size: Size2<Int>) -> Pathfinder {
+    pub fn new(map_size: Size2<MInt>) -> Pathfinder {
         let tiles_count = map_size.w * map_size.h;
         Pathfinder {
             queue: ~[],
@@ -82,7 +82,7 @@ impl Pathfinder {
         if state.unit_at_opt(neighbour_pos).is_some() {
             return;
         }
-        let new_cost: Int = old_cost + 1;
+        let new_cost: MInt = old_cost + 1;
         if tile.cost > new_cost {
             self.queue.push(neighbour_pos);
             // update neighbour tile info
@@ -106,7 +106,7 @@ impl Pathfinder {
         pos: MapPos
     ) {
         assert!(self.map.is_inboard(pos));
-        for i in range(0 as Int, 6) {
+        for i in range(0 as MInt, 6) {
             let neighbour_pos = Dir::get_neighbour_pos(pos, Dir::from_int(i));
             if self.map.is_inboard(neighbour_pos) {
                 self.process_neighbour_pos(

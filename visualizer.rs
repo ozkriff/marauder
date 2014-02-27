@@ -40,8 +40,8 @@ use core::{
 };
 use core_types::{
     Size2,
-    Int,
-    Bool,
+    MInt,
+    MBool,
     UnitId,
     PlayerId,
     MapPos,
@@ -50,7 +50,7 @@ use gl_types::{
     Scene,
     VertexCoord,
     TextureCoord,
-    Float,
+    MFloat,
     Point2,
     MatId,
 };
@@ -67,11 +67,11 @@ use misc::read_file;
 use shader::Shader;
 use texture::Texture;
 
-fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
+fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> ~[VertexCoord] {
     let mut vertex_data = ~[];
     for tile_pos in MapPosIter::new(map_size) {
         let pos = geom.map_pos_to_world_pos(tile_pos);
-        for num in range(0 as Int, 6) {
+        for num in range(0 as MInt, 6) {
             let vertex = geom.index_to_hex_vertex(num);
             let next_vertex = geom.index_to_hex_vertex(num + 1);
             vertex_data.push(pos + vertex);
@@ -82,7 +82,7 @@ fn build_hex_mesh(&geom: &Geom, map_size: Size2<Int>) -> ~[VertexCoord] {
     vertex_data
 }
 
-fn build_hex_tex_coord(map_size: Size2<Int>) -> ~[TextureCoord] {
+fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
     let mut vertex_data = ~[];
     for _ in MapPosIter::new(map_size) {
         for _ in range(0, 6) {
@@ -94,15 +94,15 @@ fn build_hex_tex_coord(map_size: Size2<Int>) -> ~[TextureCoord] {
     vertex_data
 }
 
-fn read_win_size(config_path: &str) -> Size2<Int> {
+fn read_win_size(config_path: &str) -> Size2<MInt> {
     let path = Path::new(config_path);
     let json = json::from_str(read_file(&path)).unwrap();
     let mut decoder = json::Decoder::new(json);
-    let size: Size2<Int> = Decodable::decode(&mut decoder);
+    let size: Size2<MInt> = Decodable::decode(&mut decoder);
     size
 }
 
-fn init_win(win_size: Size2<Int>) -> glfw::Window {
+fn init_win(win_size: Size2<MInt>) -> glfw::Window {
     glfw::set_error_callback(~glfw::LogErrorHandler);
     let init_status = glfw::init();
     if !init_status.is_ok() {
@@ -119,7 +119,7 @@ fn init_win(win_size: Size2<Int>) -> glfw::Window {
     win
 }
 
-fn get_scenes(players_count: Int) -> HashMap<PlayerId, Scene> {
+fn get_scenes(players_count: MInt) -> HashMap<PlayerId, Scene> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
         m.insert(PlayerId(i), HashMap::new());
@@ -127,7 +127,7 @@ fn get_scenes(players_count: Int) -> HashMap<PlayerId, Scene> {
     m
 }
 
-fn get_game_states(players_count: Int) -> HashMap<PlayerId, GameState> {
+fn get_game_states(players_count: MInt) -> HashMap<PlayerId, GameState> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
         m.insert(PlayerId(i), GameState::new());
@@ -136,8 +136,8 @@ fn get_game_states(players_count: Int) -> HashMap<PlayerId, GameState> {
 }
 
 fn get_pathfinders(
-    players_count: Int,
-    map_size: Size2<Int>,
+    players_count: MInt,
+    map_size: Size2<MInt>,
 ) -> HashMap<PlayerId, Pathfinder> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
@@ -146,7 +146,7 @@ fn get_pathfinders(
     m
 }
 
-fn get_map_mesh(geom: &Geom, map_size: Size2<Int>, shader: &Shader) -> Mesh {
+fn get_map_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let tex = Texture::new(~"data/floor.png");
     let mut mesh = Mesh::new(build_hex_mesh(geom, map_size));
     mesh.set_texture(tex, build_hex_tex_coord(map_size));
@@ -169,7 +169,7 @@ pub struct Visualizer<'a> {
     unit_mesh: Mesh,
     mvp_mat_id: MatId,
     win: glfw::Window,
-    mouse_pos: Point2<Float>,
+    mouse_pos: Point2<MFloat>,
     camera: Camera,
     tile_picker: ~TilePicker,
     selected_tile_pos: Option<MapPos>,
@@ -266,7 +266,7 @@ impl<'a> Visualizer<'a> {
         self.win().swap_buffers();
     }
 
-    pub fn is_running(&self) -> Bool {
+    pub fn is_running(&self) -> MBool {
         return !self.win().should_close()
     }
 
@@ -316,7 +316,7 @@ impl<'a> Visualizer<'a> {
         }
     }
 
-    fn handle_cursor_pos_event(&mut self, pos: Point2<Float>) {
+    fn handle_cursor_pos_event(&mut self, pos: Point2<MFloat>) {
         let button = self.win().get_mouse_button(glfw::MouseButtonRight);
         if button == glfw::Press {
             self.camera.z_angle += (self.mouse_pos.x - pos.x) / 2.0;
@@ -361,7 +361,7 @@ impl<'a> Visualizer<'a> {
                 self.handle_key_event(key);
             },
             glfw::CursorPosEvent(x, y) => {
-                let p = Vec2{x: x as Float, y: y as Float};
+                let p = Vec2{x: x as MFloat, y: y as MFloat};
                 self.handle_cursor_pos_event(p);
             },
             glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
@@ -383,8 +383,8 @@ impl<'a> Visualizer<'a> {
 
     fn pick_tile(&mut self) {
         let mouse_pos = Vec2 {
-            x: self.mouse_pos.x as Int,
-            y: self.mouse_pos.y as Int,
+            x: self.mouse_pos.x as MInt,
+            y: self.mouse_pos.y as MInt,
         };
         self.selected_tile_pos =
             self.tile_picker.pick_tile(&self.camera, mouse_pos);

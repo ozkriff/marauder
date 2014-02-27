@@ -10,7 +10,7 @@ use gl_types::{
     VertexCoord,
     TextureCoord,
 };
-use core_types::Int;
+use core_types::MInt;
 use shader::Shader;
 use texture::Texture;
 
@@ -19,13 +19,13 @@ pub struct Mesh {
     priv color_vbo: Option<Vbo>,
     priv texture_coords_vbo: Option<Vbo>,
     priv texture: Option<Texture>,
-    priv length: Int,
+    priv length: MInt,
     priv vao: Vao,
 }
 
 impl Mesh {
     pub fn new(data: &[VertexCoord]) -> Mesh {
-        let length = data.len() as Int;
+        let length = data.len() as MInt;
         Mesh {
             vertex_coords_vbo: Vbo::from_data(data),
             color_vbo: None,
@@ -37,12 +37,12 @@ impl Mesh {
     }
 
     pub fn set_color(&mut self, data: &[Color3]) {
-        assert_eq!(self.length, data.len() as Int);
+        assert_eq!(self.length, data.len() as MInt);
         self.color_vbo = Some(Vbo::from_data(data));
     }
 
     pub fn set_texture(&mut self, texture: Texture, data: &[TextureCoord]) {
-        assert_eq!(self.length, data.len() as Int);
+        assert_eq!(self.length, data.len() as MInt);
         self.texture_coords_vbo = Some(Vbo::from_data(data));
         self.texture = Some(texture);
     }

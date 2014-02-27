@@ -15,20 +15,20 @@ use gl_helpers::{
 };
 use misc::deg_to_rad;
 use gl_types::{
-    Float,
+    MFloat,
     WorldPos,
 };
 
 pub struct Camera {
-    x_angle: Float,
-    z_angle: Float,
+    x_angle: MFloat,
+    z_angle: MFloat,
     pos: WorldPos,
-    zoom: Float,
-    projection_mat: Mat4<Float>,
+    zoom: MFloat,
+    projection_mat: Mat4<MFloat>,
 }
 
-fn get_projection_mat() -> Mat4<Float> {
-    let fov = angle::deg(45.0 as Float);
+fn get_projection_mat() -> Mat4<MFloat> {
+    let fov = angle::deg(45.0 as MFloat);
     let ratio = 4.0 / 3.0;
     let display_range_min = 0.1;
     let display_range_max = 100.0;
@@ -47,7 +47,7 @@ impl Camera {
         }
     }
 
-    pub fn mat(&self) -> Mat4<Float> {
+    pub fn mat(&self) -> Mat4<MFloat> {
         let mut m = self.projection_mat;
         m = tr(m, Vec3{x: 0.0, y: 0.0, z: -self.zoom});
         m = rot_x(m, -self.x_angle);
@@ -56,7 +56,7 @@ impl Camera {
         m
     }
 
-    pub fn move(&mut self, angle: Float) {
+    pub fn move(&mut self, angle: MFloat) {
         let speed_in_radians = deg_to_rad(self.z_angle - angle);
         let dx = sin(speed_in_radians);
         let dy = cos(speed_in_radians);

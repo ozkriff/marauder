@@ -3,9 +3,9 @@
 use std::f32::consts::PI;
 use std::io::File;
 use std::str::from_utf8_owned;
-use gl_types::Float;
+use gl_types::MFloat;
 
-pub fn deg_to_rad(n: Float) -> Float {
+pub fn deg_to_rad(n: MFloat) -> MFloat {
     n * PI / 180.0
 }
 

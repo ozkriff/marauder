@@ -19,12 +19,12 @@ use cgmath::vector::{
 use cgmath::angle;
 use misc::deg_to_rad;
 use gl_types::{
-    Float,
+    MFloat,
     MatId,
 };
 use core_types::{
     Size2,
-    Int,
+    MInt,
 };
 
 pub use load_gl_funcs_with = gl::load_with;
@@ -43,28 +43,28 @@ impl MeshRenderMode {
     }
 }
 
-pub fn uniform_mat4f(mat_id: MatId, mat: &Mat4<Float>) {
+pub fn uniform_mat4f(mat_id: MatId, mat: &Mat4<MFloat>) {
     unsafe {
         let MatId(id) = mat_id;
-        gl::UniformMatrix4fv(id as Int, 1, gl::FALSE, mat.cr(0, 0));
+        gl::UniformMatrix4fv(id as MInt, 1, gl::FALSE, mat.cr(0, 0));
     }
 }
 
-pub fn tr(m: Mat4<Float>, v: Vec3<Float>) -> Mat4<Float> {
-    let mut t = Mat4::<Float>::identity();
+pub fn tr(m: Mat4<MFloat>, v: Vec3<MFloat>) -> Mat4<MFloat> {
+    let mut t = Mat4::<MFloat>::identity();
     *t.mut_cr(3, 0) = v.x;
     *t.mut_cr(3, 1) = v.y;
     *t.mut_cr(3, 2) = v.z;
     m.mul_m(&t)
 }
 
-pub fn rot_x(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
+pub fn rot_x(m: Mat4<MFloat>, angle: MFloat) -> Mat4<MFloat> {
     let rad = angle::rad(deg_to_rad(angle));
     let r = Mat3::from_angle_x(rad).to_mat4();
     m.mul_m(&r)
 }
 
-pub fn rot_z(m: Mat4<Float>, angle: Float) -> Mat4<Float> {
+pub fn rot_z(m: Mat4<MFloat>, angle: MFloat) -> Mat4<MFloat> {
     let rad = angle::rad(deg_to_rad(angle));
     let r = Mat3::from_angle_z(rad).to_mat4();
     m.mul_m(&r)
@@ -74,7 +74,7 @@ pub fn init_opengl() {
     gl::Enable(gl::DEPTH_TEST);
 }
 
-pub fn set_clear_color(r: Float, g: Float, b: Float) {
+pub fn set_clear_color(r: MFloat, g: MFloat, b: MFloat) {
     gl::ClearColor(r, g, b, 1.0);
 }
 
@@ -82,7 +82,7 @@ pub fn clear_screen() {
     gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 }
 
-pub fn set_viewport(size: Size2<Int>) {
+pub fn set_viewport(size: Size2<MInt>) {
     gl::Viewport(0, 0, size.w, size.h);
 }
 
@@ -110,7 +110,7 @@ impl Vao {
         gl::BindVertexArray(0);
     }
 
-    pub fn draw_array(&self, mesh_mode: MeshRenderMode, faces_count: Int) {
+    pub fn draw_array(&self, mesh_mode: MeshRenderMode, faces_count: MInt) {
         let starting_index = 0;
         let vertices_count = faces_count * 3;
         let mode = mesh_mode.to_gl_type();
@@ -165,9 +165,9 @@ impl Drop for Vbo {
 }
 
 pub fn get_vec2_from_pixel(
-    win_size: Size2<Int>,
-    mouse_pos: Vec2<Int>,
-) -> Option<Vec2<Int>> {
+    win_size: Size2<MInt>,
+    mouse_pos: Vec2<MInt>,
+) -> Option<Vec2<MInt>> {
     let height = win_size.h;
     let reverted_h = height - mouse_pos.y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
@@ -181,7 +181,7 @@ pub fn get_vec2_from_pixel(
         );
     }
     if data[2] != 0 {
-        Some(Vec2{x: data[0] as Int, y: data[1] as Int})
+        Some(Vec2{x: data[0] as MInt, y: data[1] as MInt})
     } else {
         None
     }
