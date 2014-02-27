@@ -269,6 +269,34 @@ impl<'a> Visualizer<'a> {
         return !self.win().should_close()
     }
 
+    fn end_turn(&mut self) {
+        self.core.do_command(CommandEndTurn);
+        self.selected_unit_id = None;
+    }
+
+    fn create_unit(&mut self) {
+        let pos_opt = self.selected_tile_pos;
+        if pos_opt.is_some() {
+            let pos = pos_opt.unwrap();
+            if self.unit_at_opt(pos).is_none() {
+                let cmd = CommandCreateUnit(pos);
+                self.core.do_command(cmd);
+            }
+        }
+    }
+
+    fn attack_unit(&mut self) {
+        let pos_opt = self.selected_tile_pos;
+        if pos_opt.is_some() {
+            let pos = pos_opt.unwrap();
+            if self.unit_at_opt(pos).is_some() {
+                let defender_id = self.unit_at_opt(pos).unwrap().id;
+                let cmd = CommandAttackUnit(UnitId(0), defender_id);
+                self.core.do_command(cmd);
+            }
+        }
+    }
+
     fn handle_key_event(&mut self, key: glfw::Key) {
         match key {
             glfw::KeyEscape | glfw::KeyQ => {
@@ -286,31 +314,9 @@ impl<'a> Visualizer<'a> {
             return;
         }
         match key {
-            glfw::KeyT => {
-                self.core.do_command(CommandEndTurn);
-                self.selected_unit_id = None;
-            },
-            glfw::KeyU => {
-                let pos_opt = self.selected_tile_pos;
-                if pos_opt.is_some() {
-                    let pos = pos_opt.unwrap();
-                    if self.unit_at_opt(pos).is_none() {
-                        let cmd = CommandCreateUnit(pos);
-                        self.core.do_command(cmd);
-                    }
-                }
-            },
-            glfw::KeyA => {
-                let pos_opt = self.selected_tile_pos;
-                if pos_opt.is_some() {
-                    let pos = pos_opt.unwrap();
-                    if self.unit_at_opt(pos).is_some() {
-                        let defender_id = self.unit_at_opt(pos).unwrap().id;
-                        let cmd = CommandAttackUnit(UnitId(0), defender_id);
-                        self.core.do_command(cmd);
-                    }
-                }
-            },
+            glfw::KeyT => self.end_turn(),
+            glfw::KeyU => self.create_unit(),
+            glfw::KeyA => self.attack_unit(),
             _ => {},
         }
     }
