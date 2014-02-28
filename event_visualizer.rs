@@ -23,6 +23,7 @@ fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
 
 pub trait EventVisualizer {
     fn is_finished(&self) -> MBool;
+    fn start(&mut self, geom: &Geom, scene: &mut Scene);
     fn draw(&mut self, geom: &Geom, scene: &mut Scene);
     fn end(&mut self, geom: &Geom, scene: &mut Scene);
 }
@@ -36,6 +37,8 @@ pub struct EventMoveVisualizer {
 }
 
 impl EventVisualizer for EventMoveVisualizer {
+    fn start(&mut self, _: &Geom, _: &mut Scene) {}
+
     fn is_finished(&self) -> MBool {
         assert!(self.current_move_index <= self.frames_count());
         self.current_move_index == self.frames_count()
@@ -102,6 +105,8 @@ impl EventEndTurnVisualizer {
 }
 
 impl EventVisualizer for EventEndTurnVisualizer {
+    fn start(&mut self, _: &Geom, _: &mut Scene) {}
+
     fn is_finished(&self) -> MBool {
         true
     }
@@ -115,7 +120,6 @@ pub struct EventCreateUnitVisualizer {
     id: UnitId,
     pos: MapPos,
     anim_index: MInt,
-    is_initialized: MBool,
 }
 
 impl EventCreateUnitVisualizer {
@@ -124,23 +128,23 @@ impl EventCreateUnitVisualizer {
             id: id,
             pos: pos,
             anim_index: 0,
-            is_initialized: false,
         } as ~EventVisualizer
     }
 }
 
 impl EventVisualizer for EventCreateUnitVisualizer {
+    fn start(&mut self, geom: &Geom, scene: &mut Scene) {
+        let node_id = unit_id_to_node_id(self.id);
+        let world_pos = geom.map_pos_to_world_pos(self.pos);
+        scene.insert(node_id, SceneNode{pos: world_pos});
+    }
+
     fn is_finished(&self) -> MBool {
         self.anim_index == MOVE_SPEED as MInt
     }
 
     fn draw(&mut self, geom: &Geom, scene: &mut Scene) {
         let node_id = unit_id_to_node_id(self.id);
-        if !self.is_initialized {
-            let world_pos = geom.map_pos_to_world_pos(self.pos);
-            scene.insert(node_id, SceneNode{pos: world_pos});
-            self.is_initialized = true;
-        }
         let mut pos = geom.map_pos_to_world_pos(self.pos);
         pos.z -= 0.02 * (MOVE_SPEED / self.anim_index as MFloat);
         scene.get_mut(&node_id).pos = pos;
@@ -168,6 +172,8 @@ impl EventAttackUnitVisualizer {
 }
 
 impl EventVisualizer for EventAttackUnitVisualizer {
+    fn start(&mut self, _: &Geom, _: &mut Scene) {}
+
     fn is_finished(&self) -> MBool {
         self.anim_index == MOVE_SPEED as MInt
     }
