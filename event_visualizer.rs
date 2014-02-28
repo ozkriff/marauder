@@ -151,8 +151,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
         self.anim_index += 1;
     }
 
-    fn end(&mut self, _: &Geom, _: &mut Scene) {
-    }
+    fn end(&mut self, _: &Geom, _: &mut Scene) {}
 }
 
 pub struct EventAttackUnitVisualizer {
