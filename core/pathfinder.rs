@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use core::core_types::{
+use core::types::{
     MBool,
     MInt,
     MapPos,

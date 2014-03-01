@@ -3,7 +3,7 @@
 pub mod visualizer;
 pub mod gl_helpers;
 pub mod camera;
-pub mod gl_types;
+pub mod types;
 pub mod geom;
 pub mod tile_picker;
 pub mod obj;

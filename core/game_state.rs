@@ -9,7 +9,7 @@ use core::core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core::core_types::{
+use core::types::{
     UnitId,
     MapPos,
 };

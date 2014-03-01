@@ -8,7 +8,7 @@ use gl::types::{
     GLuint,
     GLenum,
 };
-use core::core_types::{
+use core::types::{
     MInt,
 };
 use core::misc::read_file;

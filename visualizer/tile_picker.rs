@@ -14,12 +14,12 @@ use core::map::MapPosIter;
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
-use core::core_types::{
+use core::types::{
     MInt,
     Size2,
     MapPos,
 };
-use visualizer::gl_types::{
+use visualizer::types::{
     VertexCoord,
     Color3,
     MFloat,

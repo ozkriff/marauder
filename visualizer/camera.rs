@@ -14,7 +14,7 @@ use visualizer::gl_helpers::{
     rot_z
 };
 use core::misc::deg_to_rad;
-use visualizer::gl_types::{
+use visualizer::types::{
     MFloat,
     WorldPos,
 };

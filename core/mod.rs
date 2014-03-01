@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 pub mod misc;
-pub mod core_types;
+pub mod types;
 pub mod pathfinder;
 pub mod dir;
 pub mod map;

@@ -9,11 +9,11 @@ use cgmath::vector::{
     Vec3,
     Vec2,
 };
-use core::core_types::{
+use core::types::{
     MBool,
     MInt,
 };
-use visualizer::gl_types::{
+use visualizer::types::{
     VertexCoord,
     TextureCoord,
     Normal,

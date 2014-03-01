@@ -38,7 +38,7 @@ use core::core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core::core_types::{
+use core::types::{
     Size2,
     MInt,
     MBool,
@@ -46,7 +46,7 @@ use core::core_types::{
     PlayerId,
     MapPos,
 };
-use visualizer::gl_types::{
+use visualizer::types::{
     Scene,
     VertexCoord,
     TextureCoord,

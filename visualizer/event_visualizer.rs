@@ -2,13 +2,13 @@
 
 use cgmath::vector::Vector;
 use visualizer::geom::Geom;
-use core::core_types::{
+use core::types::{
     MBool,
     MInt,
     MapPos,
     UnitId,
 };
-use visualizer::gl_types::{
+use visualizer::types::{
     Scene,
     SceneNode,
     MFloat,

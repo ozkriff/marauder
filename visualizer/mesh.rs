@@ -5,12 +5,12 @@ use visualizer::gl_helpers::{
     Vao,
     Triangles,
 };
-use visualizer::gl_types::{
+use visualizer::types::{
     Color3,
     VertexCoord,
     TextureCoord,
 };
-use core::core_types::MInt;
+use core::types::MInt;
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 

@@ -18,11 +18,11 @@ use cgmath::vector::{
 };
 use cgmath::angle;
 use core::misc::deg_to_rad;
-use visualizer::gl_types::{
+use visualizer::types::{
     MFloat,
     MatId,
 };
-use core::core_types::{
+use core::types::{
     Size2,
     MInt,
 };

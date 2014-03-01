@@ -18,7 +18,7 @@ SRC = \
   core/core.rs \
   core/game_state.rs \
   core/pathfinder.rs \
-  core/core_types.rs \
+  core/types.rs \
   visualizer/mod.rs \
   visualizer/camera.rs \
   visualizer/geom.rs \
@@ -29,7 +29,7 @@ SRC = \
   visualizer/event_visualizer.rs \
   visualizer/obj.rs \
   visualizer/tile_picker.rs \
-  visualizer/gl_types.rs \
+  visualizer/types.rs \
   visualizer/visualizer.rs \
 
 

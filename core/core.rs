@@ -2,7 +2,7 @@
 
 use collections::hashmap::HashMap;
 use cgmath::vector::Vec2;
-use core::core_types::{
+use core::types::{
     Size2,
     MInt,
     UnitId,
