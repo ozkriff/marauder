@@ -1,14 +1,8 @@
 // See LICENSE file for copyright and license details.
 
 use collections::hashmap::HashMap;
-use gl::types::{
-    GLfloat,
-    GLuint,
-};
-use cgmath::vector::{
-    Vec3,
-    Vec2,
-};
+use gl::types::{GLfloat, GLuint};
+use cgmath::vector::{Vec3, Vec2};
 use core::types::MInt;
 
 pub struct Color3 {

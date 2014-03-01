@@ -1,14 +1,7 @@
 // See LICENSE file for copyright and license details.
 
-use core::types::{
-    MBool,
-    MInt,
-    MapPos,
-    Size2,
-};
-use core::core::{
-    Unit,
-};
+use core::types::{MBool, MInt, MapPos, Size2};
+use core::core::Unit;
 use core::game_state::GameState;
 use core::dir::Dir;
 

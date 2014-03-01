@@ -1,10 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vec2;
-use core::types::{
-    MInt,
-    MapPos,
-};
+use core::types::{MInt, MapPos};
 
 pub enum Dir {
   NorthEast,

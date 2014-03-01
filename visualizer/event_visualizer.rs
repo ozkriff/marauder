@@ -2,19 +2,8 @@
 
 use cgmath::vector::Vector;
 use visualizer::geom::Geom;
-use core::types::{
-    MBool,
-    MInt,
-    MapPos,
-    UnitId,
-};
-use visualizer::types::{
-    Scene,
-    SceneNode,
-    MFloat,
-    WorldPos,
-    NodeId,
-};
+use core::types::{MBool, MInt, MapPos, UnitId};
+use visualizer::types::{Scene, SceneNode, MFloat, WorldPos, NodeId};
 
 fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
     let UnitId(id) = unit_id;

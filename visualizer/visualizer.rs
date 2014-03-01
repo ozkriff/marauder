@@ -1,30 +1,14 @@
 // See LICENSE file for copyright and license details.
 
 use collections::hashmap::HashMap;
-use serialize::{
-    Decodable,
-    json,
-};
+use serialize::{Decodable, json};
 use glfw;
-use cgmath::vector::{
-    Vec3,
-    Vec2,
-};
-use visualizer::gl_helpers::{
-    uniform_mat4f,
-    set_clear_color,
-    clear_screen,
-    init_opengl,
-    load_gl_funcs_with,
-    set_viewport,
-    tr,
-};
-use visualizer::camera::Camera;
+use cgmath::vector::{Vec3, Vec2};
 use core::map::MapPosIter;
-use visualizer::geom::Geom;
-use visualizer::tile_picker::TilePicker;
-use visualizer::obj;
-use visualizer::mesh::Mesh;
+use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos};
+use core::game_state::GameState;
+use core::pathfinder::Pathfinder;
+use core::misc::read_file;
 use core::core::{
     Core,
     Unit,
@@ -38,14 +22,20 @@ use core::core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core::types::{
-    Size2,
-    MInt,
-    MBool,
-    UnitId,
-    PlayerId,
-    MapPos,
+use visualizer::gl_helpers::{
+    uniform_mat4f,
+    set_clear_color,
+    clear_screen,
+    init_opengl,
+    load_gl_funcs_with,
+    set_viewport,
+    tr,
 };
+use visualizer::camera::Camera;
+use visualizer::geom::Geom;
+use visualizer::tile_picker::TilePicker;
+use visualizer::obj;
+use visualizer::mesh::Mesh;
 use visualizer::types::{
     Scene,
     VertexCoord,
@@ -61,9 +51,6 @@ use visualizer::event_visualizer::{
     EventCreateUnitVisualizer,
     EventAttackUnitVisualizer,
 };
-use core::game_state::GameState;
-use core::pathfinder::Pathfinder;
-use core::misc::read_file;
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 

@@ -9,10 +9,7 @@ use core::core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core::types::{
-    UnitId,
-    MapPos,
-};
+use core::types::{UnitId, MapPos};
 
 pub struct GameState {
     units: HashMap<UnitId, Unit>,

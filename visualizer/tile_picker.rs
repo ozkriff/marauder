@@ -1,30 +1,18 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::{
-    Vec3,
-    Vec2,
-};
+use cgmath::vector::{Vec3, Vec2};
+use core::map::MapPosIter;
+use core::types::{MInt, Size2, MapPos};
 use visualizer::gl_helpers::{
     uniform_mat4f,
     set_clear_color,
     clear_screen,
     get_vec2_from_pixel,
 };
-use core::map::MapPosIter;
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
-use core::types::{
-    MInt,
-    Size2,
-    MapPos,
-};
-use visualizer::types::{
-    VertexCoord,
-    Color3,
-    MFloat,
-    MatId,
-};
+use visualizer::types::{VertexCoord, Color3, MFloat, MatId};
 use visualizer::shader::Shader;
 
 fn build_hex_map_mesh(

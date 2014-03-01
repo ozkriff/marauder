@@ -1,23 +1,10 @@
 // See LICENSE file for copyright and license details.
 
 use std::str::Words;
-use std::io::{
-    BufferedReader,
-    File
-};
-use cgmath::vector::{
-    Vec3,
-    Vec2,
-};
-use core::types::{
-    MBool,
-    MInt,
-};
-use visualizer::types::{
-    VertexCoord,
-    TextureCoord,
-    Normal,
-};
+use std::io::{BufferedReader, File};
+use cgmath::vector::{Vec3, Vec2};
+use core::types::{MBool, MInt};
+use visualizer::types::{VertexCoord, TextureCoord, Normal};
 
 struct Face {
     vertex: [MInt, ..3],

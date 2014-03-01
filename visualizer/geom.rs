@@ -1,29 +1,10 @@
 // See LICENSE file for copyright and license details.
 
-use std::f32::consts::{
-    PI,
-    FRAC_PI_2,
-};
-use std::num::{
-    sqrt,
-    pow,
-    sin,
-    cos,
-};
-use cgmath::vector::{
-    Vec2,
-    Vec3,
-    Vector,
-};
-use core::types::{
-    MInt,
-    MapPos,
-};
-use visualizer::types::{
-    WorldPos,
-    MFloat,
-    VertexCoord,
-};
+use std::f32::consts::{PI, FRAC_PI_2 };
+use std::num::{sqrt, pow, sin, cos};
+use cgmath::vector::{Vec2, Vec3, Vector};
+use core::types::{MInt, MapPos};
+use visualizer::types::{WorldPos, MFloat, VertexCoord};
 
 pub struct Geom {
     hex_ex_radius: MFloat,

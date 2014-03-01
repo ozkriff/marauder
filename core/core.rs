@@ -2,13 +2,7 @@
 
 use collections::hashmap::HashMap;
 use cgmath::vector::Vec2;
-use core::types::{
-    Size2,
-    MInt,
-    UnitId,
-    PlayerId,
-    MapPos,
-};
+use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 
 pub enum Command {
     CommandMove(UnitId, ~[MapPos]),

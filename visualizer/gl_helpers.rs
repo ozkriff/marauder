@@ -2,30 +2,13 @@
 
 use std;
 use gl;
-use gl::types::{
-    GLuint,
-    GLsizeiptr,
-};
-use cgmath::matrix::{
-    Matrix,
-    Mat4,
-    Mat3,
-    ToMat4,
-};
-use cgmath::vector::{
-    Vec2,
-    Vec3,
-};
+use gl::types::{GLuint, GLsizeiptr};
+use cgmath::matrix::{Matrix, Mat4, Mat3, ToMat4};
+use cgmath::vector::{Vec2, Vec3};
 use cgmath::angle;
 use core::misc::deg_to_rad;
-use visualizer::types::{
-    MFloat,
-    MatId,
-};
-use core::types::{
-    Size2,
-    MInt,
-};
+use core::types::{Size2, MInt};
+use visualizer::types::{MFloat, MatId};
 
 pub use load_gl_funcs_with = gl::load_with;
 

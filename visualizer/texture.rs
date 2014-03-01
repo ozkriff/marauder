@@ -2,11 +2,7 @@
 
 use std;
 use gl;
-use gl::types::{
-    GLint,
-    GLuint,
-    GLsizei,
-};
+use gl::types::{GLint, GLuint, GLsizei};
 use stb_image::image;
 use visualizer::shader::Shader;
 

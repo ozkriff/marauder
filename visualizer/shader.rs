@@ -2,15 +2,8 @@
 
 use std;
 use gl;
-use gl::types::{
-    GLint,
-    GLchar,
-    GLuint,
-    GLenum,
-};
-use core::types::{
-    MInt,
-};
+use gl::types::{GLint, GLchar, GLuint, GLenum};
+use core::types::MInt;
 use core::misc::read_file;
 
 fn c_str(s: &str) -> *GLchar {

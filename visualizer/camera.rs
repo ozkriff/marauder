@@ -1,23 +1,13 @@
 // See LICENSE file for copyright and license details.
 
-use std::num::{
-    sin,
-    cos,
-};
+use std::num::{sin, cos};
 use cgmath::projection;
 use cgmath::angle;
 use cgmath::matrix::Mat4;
 use cgmath::vector::Vec3;
-use visualizer::gl_helpers::{
-    tr,
-    rot_x,
-    rot_z
-};
 use core::misc::deg_to_rad;
-use visualizer::types::{
-    MFloat,
-    WorldPos,
-};
+use visualizer::gl_helpers::{tr, rot_x, rot_z};
+use visualizer::types::{MFloat, WorldPos};
 
 pub struct Camera {
     x_angle: MFloat,
