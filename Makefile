@@ -10,25 +10,28 @@ RUSTC = rustc ${RUSTC_FLAGS}
 all: marauder
 
 SRC = \
-  camera.rs \
-  geom.rs \
-  gl_helpers.rs \
   main.rs \
-  misc.rs \
-  map.rs \
-  dir.rs \
-  mesh.rs \
-  core.rs \
-  shader.rs \
-  texture.rs \
-  event_visualizer.rs \
-  obj.rs \
-  tile_picker.rs \
-  core_types.rs \
-  gl_types.rs \
-  game_state.rs \
-  pathfinder.rs \
-  visualizer.rs
+  core/mod.rs \
+  core/misc.rs \
+  core/map.rs \
+  core/dir.rs \
+  core/core.rs \
+  core/game_state.rs \
+  core/pathfinder.rs \
+  core/core_types.rs \
+  visualizer/mod.rs \
+  visualizer/camera.rs \
+  visualizer/geom.rs \
+  visualizer/gl_helpers.rs \
+  visualizer/mesh.rs \
+  visualizer/shader.rs \
+  visualizer/texture.rs \
+  visualizer/event_visualizer.rs \
+  visualizer/obj.rs \
+  visualizer/tile_picker.rs \
+  visualizer/gl_types.rs \
+  visualizer/visualizer.rs \
+
 
 marauder: Makefile ${SRC}
 	${RUSTC} main.rs -o marauder

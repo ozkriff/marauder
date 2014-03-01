@@ -10,7 +10,7 @@ use cgmath::vector::{
     Vec3,
     Vec2,
 };
-use gl_helpers::{
+use visualizer::gl_helpers::{
     uniform_mat4f,
     set_clear_color,
     clear_screen,
@@ -19,13 +19,13 @@ use gl_helpers::{
     set_viewport,
     tr,
 };
-use camera::Camera;
-use map::MapPosIter;
-use geom::Geom;
-use tile_picker::TilePicker;
-use obj;
-use mesh::Mesh;
-use core::{
+use visualizer::camera::Camera;
+use core::map::MapPosIter;
+use visualizer::geom::Geom;
+use visualizer::tile_picker::TilePicker;
+use visualizer::obj;
+use visualizer::mesh::Mesh;
+use core::core::{
     Core,
     Unit,
     CommandEndTurn,
@@ -38,7 +38,7 @@ use core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core_types::{
+use core::core_types::{
     Size2,
     MInt,
     MBool,
@@ -46,7 +46,7 @@ use core_types::{
     PlayerId,
     MapPos,
 };
-use gl_types::{
+use visualizer::gl_types::{
     Scene,
     VertexCoord,
     TextureCoord,
@@ -54,18 +54,18 @@ use gl_types::{
     Point2,
     MatId,
 };
-use event_visualizer::{
+use visualizer::event_visualizer::{
     EventVisualizer,
     EventMoveVisualizer,
     EventEndTurnVisualizer,
     EventCreateUnitVisualizer,
     EventAttackUnitVisualizer,
 };
-use game_state::GameState;
-use pathfinder::Pathfinder;
-use misc::read_file;
-use shader::Shader;
-use texture::Texture;
+use core::game_state::GameState;
+use core::pathfinder::Pathfinder;
+use core::misc::read_file;
+use visualizer::shader::Shader;
+use visualizer::texture::Texture;
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> ~[VertexCoord] {
     let mut vertex_data = ~[];

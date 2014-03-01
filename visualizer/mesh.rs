@@ -1,18 +1,18 @@
 // See LICENSE file for copyright and license details.
 
-use gl_helpers::{
+use visualizer::gl_helpers::{
     Vbo,
     Vao,
     Triangles,
 };
-use gl_types::{
+use visualizer::gl_types::{
     Color3,
     VertexCoord,
     TextureCoord,
 };
-use core_types::MInt;
-use shader::Shader;
-use texture::Texture;
+use core::core_types::MInt;
+use visualizer::shader::Shader;
+use visualizer::texture::Texture;
 
 pub struct Mesh {
     priv vertex_coords_vbo: Vbo,

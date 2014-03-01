@@ -4,28 +4,28 @@ use cgmath::vector::{
     Vec3,
     Vec2,
 };
-use gl_helpers::{
+use visualizer::gl_helpers::{
     uniform_mat4f,
     set_clear_color,
     clear_screen,
     get_vec2_from_pixel,
 };
-use map::MapPosIter;
-use camera::Camera;
-use geom::Geom;
-use mesh::Mesh;
-use core_types::{
+use core::map::MapPosIter;
+use visualizer::camera::Camera;
+use visualizer::geom::Geom;
+use visualizer::mesh::Mesh;
+use core::core_types::{
     MInt,
     Size2,
     MapPos,
 };
-use gl_types::{
+use visualizer::gl_types::{
     VertexCoord,
     Color3,
     MFloat,
     MatId,
 };
-use shader::Shader;
+use visualizer::shader::Shader;
 
 fn build_hex_map_mesh(
     geom: &Geom,

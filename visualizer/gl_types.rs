@@ -9,7 +9,7 @@ use cgmath::vector::{
     Vec3,
     Vec2,
 };
-use core_types::MInt;
+use core::core_types::MInt;
 
 pub struct Color3 {
     r: MFloat,

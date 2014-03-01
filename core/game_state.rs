@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use collections::hashmap::HashMap;
-use core::{
+use core::core::{
     Unit,
     Event,
     EventMove,
@@ -9,7 +9,7 @@ use core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core_types::{
+use core::core_types::{
     UnitId,
     MapPos,
 };

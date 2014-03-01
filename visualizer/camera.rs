@@ -8,13 +8,13 @@ use cgmath::projection;
 use cgmath::angle;
 use cgmath::matrix::Mat4;
 use cgmath::vector::Vec3;
-use gl_helpers::{
+use visualizer::gl_helpers::{
     tr,
     rot_x,
     rot_z
 };
-use misc::deg_to_rad;
-use gl_types::{
+use core::misc::deg_to_rad;
+use visualizer::gl_types::{
     MFloat,
     WorldPos,
 };

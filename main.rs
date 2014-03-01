@@ -13,27 +13,13 @@ extern crate glfw = "glfw-rs";
 extern crate gl;
 extern crate stb_image;
 
-mod misc;
-mod visualizer;
-mod gl_helpers;
-mod camera;
-mod map;
-mod gl_types;
-mod game_state;
-mod geom;
-mod tile_picker;
-mod obj;
-mod mesh;
+use visualizer::visualizer::Visualizer;
+
 mod core;
-mod event_visualizer;
-mod core_types;
-mod pathfinder;
-mod dir;
-mod shader;
-mod texture;
+mod visualizer;
 
 fn main() {
-    let mut visualizer = visualizer::Visualizer::new();
+    let mut visualizer = Visualizer::new();
     while visualizer.is_running() {
         visualizer.tick();
     }

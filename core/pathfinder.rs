@@ -1,16 +1,16 @@
 // See LICENSE file for copyright and license details.
 
-use core_types::{
+use core::core_types::{
     MBool,
     MInt,
     MapPos,
     Size2,
 };
-use core::{
+use core::core::{
     Unit,
 };
-use game_state::GameState;
-use dir::Dir;
+use core::game_state::GameState;
+use core::dir::Dir;
 
 struct Tile {
     cost: MInt,

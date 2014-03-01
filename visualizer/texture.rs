@@ -8,7 +8,7 @@ use gl::types::{
     GLsizei,
 };
 use stb_image::image;
-use shader::Shader;
+use visualizer::shader::Shader;
 
 pub struct Texture {
     priv id: GLuint,

@@ -17,12 +17,12 @@ use cgmath::vector::{
     Vec3,
 };
 use cgmath::angle;
-use misc::deg_to_rad;
-use gl_types::{
+use core::misc::deg_to_rad;
+use visualizer::gl_types::{
     MFloat,
     MatId,
 };
-use core_types::{
+use core::core_types::{
     Size2,
     MInt,
 };

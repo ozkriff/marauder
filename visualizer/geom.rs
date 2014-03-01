@@ -15,11 +15,11 @@ use cgmath::vector::{
     Vec3,
     Vector,
 };
-use core_types::{
+use core::core_types::{
     MInt,
     MapPos,
 };
-use gl_types::{
+use visualizer::gl_types::{
     WorldPos,
     MFloat,
     VertexCoord,

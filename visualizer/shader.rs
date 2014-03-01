@@ -8,10 +8,10 @@ use gl::types::{
     GLuint,
     GLenum,
 };
-use core_types::{
+use core::core_types::{
     MInt,
 };
-use misc::read_file;
+use core::misc::read_file;
 
 fn c_str(s: &str) -> *GLchar {
     unsafe {

@@ -1,14 +1,14 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vector;
-use geom::Geom;
-use core_types::{
+use visualizer::geom::Geom;
+use core::core_types::{
     MBool,
     MInt,
     MapPos,
     UnitId,
 };
-use gl_types::{
+use visualizer::gl_types::{
     Scene,
     SceneNode,
     MFloat,
