@@ -9,19 +9,7 @@ use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos};
 use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
 use core::misc::read_file;
-use core::core::{
-    Core,
-    Unit,
-    CommandEndTurn,
-    CommandMove,
-    CommandCreateUnit,
-    CommandAttackUnit,
-    Event,
-    EventMove,
-    EventEndTurn,
-    EventCreateUnit,
-    EventAttackUnit,
-};
+use core::core;
 use visualizer::gl_helpers::{
     uniform_mat4f,
     set_clear_color,
@@ -163,8 +151,8 @@ pub struct Visualizer<'a> {
     selected_unit_id: Option<UnitId>,
     geom: Geom,
     scenes: HashMap<PlayerId, Scene>,
-    core: ~Core<'a>,
-    event: Option<Event>,
+    core: ~core::Core<'a>,
+    event: Option<core::Event>,
     event_visualizer: Option<~EventVisualizer>,
     game_state: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
@@ -178,7 +166,7 @@ impl<'a> Visualizer<'a> {
         load_gl_funcs_with(glfw::get_proc_address);
         init_opengl();
         let geom = Geom::new();
-        let core = Core::new();
+        let core = core::Core::new();
         let map_size = core.map_size();
         let tile_picker = TilePicker::new(
             win_size, &geom, core.map_size());
@@ -214,7 +202,7 @@ impl<'a> Visualizer<'a> {
         self.scenes.get(&self.core.player_id())
     }
 
-    fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
+    fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a core::Unit> {
         let mut res = None;
         let id = self.core.player_id();
         for (_, unit) in self.game_state.get(&id).units.iter() {
@@ -257,7 +245,7 @@ impl<'a> Visualizer<'a> {
     }
 
     fn end_turn(&mut self) {
-        self.core.do_command(CommandEndTurn);
+        self.core.do_command(core::CommandEndTurn);
         self.selected_unit_id = None;
     }
 
@@ -266,7 +254,7 @@ impl<'a> Visualizer<'a> {
         if pos_opt.is_some() {
             let pos = pos_opt.unwrap();
             if self.unit_at_opt(pos).is_none() {
-                let cmd = CommandCreateUnit(pos);
+                let cmd = core::CommandCreateUnit(pos);
                 self.core.do_command(cmd);
             }
         }
@@ -278,7 +266,7 @@ impl<'a> Visualizer<'a> {
             let pos = pos_opt.unwrap();
             if self.unit_at_opt(pos).is_some() {
                 let defender_id = self.unit_at_opt(pos).unwrap().id;
-                let cmd = CommandAttackUnit(UnitId(0), defender_id);
+                let cmd = core::CommandAttackUnit(UnitId(0), defender_id);
                 self.core.do_command(cmd);
             }
         }
@@ -333,7 +321,7 @@ impl<'a> Visualizer<'a> {
                 let unit_id = self.selected_unit_id.unwrap();
                 let pf = self.pathfinders.get_mut(&self.core.player_id());
                 let path = pf.get_path(pos);
-                self.core.do_command(CommandMove(unit_id, path));
+                self.core.do_command(core::CommandMove(unit_id, path));
             }
         }
     }
@@ -382,18 +370,18 @@ impl<'a> Visualizer<'a> {
             self.tile_picker.pick_tile(&self.camera, mouse_pos);
     }
 
-    fn make_event_visualizer(&mut self, event: &Event) -> ~EventVisualizer {
+    fn make_event_visualizer(&mut self, event: &core::Event) -> ~EventVisualizer {
         match *event {
-            EventMove(ref unit_id, ref path) => {
+            core::EventMove(ref unit_id, ref path) => {
                 EventMoveVisualizer::new(*unit_id, path.clone())
             },
-            EventEndTurn(_, _) => {
+            core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
             },
-            EventCreateUnit(id, ref pos) => {
+            core::EventCreateUnit(id, ref pos) => {
                 EventCreateUnitVisualizer::new(id, *pos)
             },
-            EventAttackUnit(attacker_id, defender_id) => {
+            core::EventAttackUnit(attacker_id, defender_id) => {
                 EventAttackUnitVisualizer::new(attacker_id, defender_id)
             },
         }
