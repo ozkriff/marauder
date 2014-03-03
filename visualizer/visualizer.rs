@@ -72,12 +72,12 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
 // TODO: Simplify
 fn read_win_size(config_path: &str) -> Size2<MInt> {
     let path = Path::new(config_path);
-    let mut json = match json::from_str(read_file(&path)) {
+    let json = match json::from_str(read_file(&path)) {
         Ok(json::Object(obj)) => obj,
         _ => fail!("Config error"),
     };
-    let screen_size = match json.pop(&~"screen_size") {
-        Some(size) => size,
+    let screen_size = match json.find(&~"screen_size") {
+        Some(size) => size.clone(),
         None => fail!("No field 'screen_size'"),
     };
     let extructed_size: Size2<MInt> = Decodable::decode(
