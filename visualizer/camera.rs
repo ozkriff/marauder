@@ -5,6 +5,7 @@ use cgmath::projection;
 use cgmath::angle;
 use cgmath::matrix::Mat4;
 use cgmath::vector::Vec3;
+use core::types::{MInt, Size2};
 use core::misc::deg_to_rad;
 use visualizer::gl_helpers::{tr, rot_x, rot_z};
 use visualizer::types::{MFloat, WorldPos};
@@ -17,9 +18,9 @@ pub struct Camera {
     projection_mat: Mat4<MFloat>,
 }
 
-fn get_projection_mat() -> Mat4<MFloat> {
+fn get_projection_mat(win_size: Size2<MInt>) -> Mat4<MFloat> {
     let fov = angle::deg(45.0 as MFloat);
-    let ratio = 4.0 / 3.0;
+    let ratio = win_size.w as MFloat / win_size.h as MFloat;
     let display_range_min = 0.1;
     let display_range_max = 100.0;
     projection::perspective(
@@ -27,13 +28,13 @@ fn get_projection_mat() -> Mat4<MFloat> {
 }
 
 impl Camera {
-    pub fn new() -> Camera {
+    pub fn new(win_size: Size2<MInt>) -> Camera {
         Camera {
             x_angle: 45.0,
             z_angle: 0.0,
             pos: Vec3::zero(),
             zoom: 10.0,
-            projection_mat: get_projection_mat(),
+            projection_mat: get_projection_mat(win_size),
         }
     }
 
@@ -52,6 +53,10 @@ impl Camera {
         let dy = cos(speed_in_radians);
         self.pos.x -= dy;
         self.pos.y -= dx;
+    }
+
+    pub fn set_win_size(&mut self, win_size: Size2<MInt>) {
+        self.projection_mat = get_projection_mat(win_size);
     }
 }
 

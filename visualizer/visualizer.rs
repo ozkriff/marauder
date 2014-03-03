@@ -187,7 +187,7 @@ impl<'a> Visualizer<'a> {
             shader: shader,
             win: win,
             mouse_pos: Vec2::zero(),
-            camera: Camera::new(),
+            camera: Camera::new(win_size),
             tile_picker: tile_picker,
             selected_tile_pos: None,
             selected_unit_id: None,
@@ -356,8 +356,10 @@ impl<'a> Visualizer<'a> {
                 self.handle_mouse_button_event();
             },
             glfw::SizeEvent(w, h) => {
-                set_viewport(Size2{w: w, h: h});
-                self.tile_picker.set_win_size(Size2{w: w, h: h});
+                let size = Size2{w: w, h: h};
+                set_viewport(size);
+                self.tile_picker.set_win_size(size);
+                self.camera.set_win_size(size);
             },
             _ => {},
         }
