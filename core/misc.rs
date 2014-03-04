@@ -9,14 +9,21 @@ pub fn deg_to_rad(n: MFloat) -> MFloat {
     n * PI / 180.0
 }
 
-// TODO: handle errors
 pub fn read_file(path: &Path) -> ~str {
     if !path.exists() {
-        fail!("no such path");
+        fail!("Path does not exists: {}", path.display());
     }
-    let shader = File::open(path).map(|mut v| v.read_to_end()).unwrap();
-    let shader = from_utf8_owned(shader.unwrap());
-    shader.unwrap()
+    let shader = match File::open(path).map(|mut v| v.read_to_end()) {
+        Ok(txt) => from_utf8_owned(match txt {
+            Ok(txt) => txt,
+            Err(_) => fail!("Can not read file {}", path.display()),
+        }),
+        Err(_) => fail!("Can not read file {}", path.display()),
+    };
+    match shader {
+        Some(shader) => shader,
+        None => fail!("Can not read file {}", path.display()),
+    }
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
