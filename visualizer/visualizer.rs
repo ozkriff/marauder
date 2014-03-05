@@ -1,14 +1,13 @@
 // See LICENSE file for copyright and license details.
 
 use collections::hashmap::HashMap;
-use serialize::{Decodable, json};
 use glfw;
 use cgmath::vector::{Vec3, Vec2};
 use core::map::MapPosIter;
 use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos};
 use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
-use core::misc::read_file;
+use core::conf::Config;
 use core::core;
 use visualizer::gl_helpers::{
     uniform_mat4f,
@@ -67,37 +66,6 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
         }
     }
     vertex_data
-}
-
-pub struct Config {
-    priv json: ~json::Object,
-}
-
-fn decode<A: Decodable<json::Decoder>>(json_obj: json::Json) -> A {
-    let mut decoder = json::Decoder::new(json_obj);
-    let decoded: A = Decodable::decode(&mut decoder);
-    decoded
-}
-
-impl Config {
-    pub fn new(path: &str) -> Config {
-        let path = Path::new(path);
-        let json = match json::from_str(read_file(&path)) {
-            Ok(json::Object(obj)) => obj,
-            _ => fail!("Config error"),
-        };
-        Config {
-            json: json,
-        }
-    }
-
-    fn get<A: Decodable<json::Decoder>>(&self, name: &str) -> A {
-        let owned_name_str = name.into_owned();
-        decode(match self.json.find(&owned_name_str) {
-            Some(val) => val.clone(),
-            None => fail!("No field '{}", name),
-        })
-    }
 }
 
 fn init_win(win_size: Size2<MInt>) -> glfw::Window {

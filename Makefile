@@ -13,6 +13,7 @@ SRC = \
   main.rs \
   core/mod.rs \
   core/misc.rs \
+  core/conf.rs \
   core/map.rs \
   core/dir.rs \
   core/core.rs \
