@@ -3,6 +3,7 @@
 use collections::hashmap::HashMap;
 use cgmath::vector::Vec2;
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
+use core::conf::Config;
 
 pub enum Command {
     CommandMove(UnitId, ~[MapPos]),
@@ -45,13 +46,15 @@ fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
 
 impl<'a> Core<'a> {
     pub fn new() -> ~Core {
+        let config = Config::new("conf_core.json");
+        let map_size = config.get("map_size");
         let mut core = ~Core {
             units: HashMap::new(),
             players: ~[Player{id: PlayerId(0)}, Player{id: PlayerId(1)}],
             current_player_id: PlayerId(0),
             core_event_list: ~[],
             event_lists: get_event_lists(),
-            map_size: Size2{w: 4, h: 8}, // TODO: Read from json config
+            map_size: map_size,
         };
         core.do_command(CommandCreateUnit(Vec2{x: 0, y: 0}));
         core.do_command(CommandCreateUnit(Vec2{x: 0, y: 1}));
