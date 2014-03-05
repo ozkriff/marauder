@@ -210,16 +210,15 @@ impl<'a> Visualizer<'a> {
         self.scenes.get(&self.core.player_id())
     }
 
-    fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a core::Unit> {
-        let mut res = None;
+    fn units_at(&'a self, pos: MapPos) -> ~[&'a core::Unit] {
+        let mut units = ~[];
         let id = self.core.player_id();
         for (_, unit) in self.game_state.get(&id).units.iter() {
             if unit.pos == pos {
-                res = Some(unit);
-                break;
+                units.push(unit);
             }
         }
-        res
+        units
     }
 
     fn draw_units(&self) {
@@ -243,7 +242,8 @@ impl<'a> Visualizer<'a> {
         self.draw_map();
         if !self.event_visualizer.is_none() {
             let scene = self.scenes.get_mut(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().draw(&self.geom, scene);
+            let state = self.game_state.get(&self.core.player_id());
+            self.event_visualizer.get_mut_ref().draw(&self.geom, scene, state);
         }
         self.win().swap_buffers();
     }
@@ -261,10 +261,8 @@ impl<'a> Visualizer<'a> {
         let pos_opt = self.selected_tile_pos;
         if pos_opt.is_some() {
             let pos = pos_opt.unwrap();
-            if self.unit_at_opt(pos).is_none() {
-                let cmd = core::CommandCreateUnit(pos);
-                self.core.do_command(cmd);
-            }
+            let cmd = core::CommandCreateUnit(pos);
+            self.core.do_command(cmd);
         }
     }
 
@@ -272,10 +270,23 @@ impl<'a> Visualizer<'a> {
         let pos_opt = self.selected_tile_pos;
         if pos_opt.is_some() {
             let pos = pos_opt.unwrap();
-            if self.unit_at_opt(pos).is_some() {
-                let defender_id = self.unit_at_opt(pos).unwrap().id;
+            if self.units_at(pos).len() != 0 {
+                let defender_id = self.units_at(pos)[0].id;
                 let cmd = core::CommandAttackUnit(UnitId(0), defender_id);
                 self.core.do_command(cmd);
+            }
+        }
+    }
+
+    fn select_unit(&mut self) {
+        if self.selected_tile_pos.is_some() {
+            let pos = self.selected_tile_pos.unwrap();
+            if self.units_at(pos).len() != 0 {
+                let unit_id = self.units_at(pos)[0].id;
+                self.selected_unit_id = Some(unit_id);
+                let state = self.game_state.get(&self.core.player_id());
+                let pf = self.pathfinders.get_mut(&self.core.player_id());
+                pf.fill_map(state, state.units.get(&unit_id));
             }
         }
     }
@@ -300,6 +311,7 @@ impl<'a> Visualizer<'a> {
             glfw::KeyT => self.end_turn(),
             glfw::KeyU => self.create_unit(),
             glfw::KeyA => self.attack_unit(),
+            glfw::KeyS => self.select_unit(),
             _ => {},
         }
     }
@@ -317,21 +329,20 @@ impl<'a> Visualizer<'a> {
         if self.event_visualizer.is_some() {
             return;
         }
-        if self.selected_tile_pos.is_some() {
-            let pos = self.selected_tile_pos.unwrap();
-            if self.unit_at_opt(pos).is_some() {
-                let unit_id = self.unit_at_opt(pos).unwrap().id;
-                let state = self.game_state.get_mut(&self.core.player_id());
-                self.selected_unit_id = Some(unit_id);
-                let pf = self.pathfinders.get_mut(&self.core.player_id());
-                pf.fill_map(state, state.units.get(&unit_id));
-            } else if self.selected_unit_id.is_some() {
-                let unit_id = self.selected_unit_id.unwrap();
-                let pf = self.pathfinders.get_mut(&self.core.player_id());
-                let path = pf.get_path(pos);
-                self.core.do_command(core::CommandMove(unit_id, path));
-            }
+        if self.selected_tile_pos.is_none() {
+            return;
         }
+        let pos = self.selected_tile_pos.unwrap();
+        if self.selected_unit_id.is_none() {
+            return;
+        }
+        let unit_id = self.selected_unit_id.unwrap();
+        let pf = self.pathfinders.get_mut(&self.core.player_id());
+        let path = pf.get_path(pos);
+        if path.len() < 2 {
+            return;
+        }
+        self.core.do_command(core::CommandMove(unit_id, path));
     }
 
     fn get_events(&mut self) -> ~[glfw::WindowEvent] {
@@ -406,12 +417,13 @@ impl<'a> Visualizer<'a> {
                 self.event = Some(event);
                 self.event_visualizer = Some(vis);
                 let scene = self.scenes.get_mut(&self.core.player_id());
-                self.event_visualizer.get_mut_ref().start(&self.geom, scene);
+                let state = self.game_state.get(&self.core.player_id());
+                self.event_visualizer.get_mut_ref().start(&self.geom, scene, state);
             }
         } else if self.event_visualizer.get_ref().is_finished() {
             let scene = self.scenes.get_mut(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().end(&self.geom, scene);
             let state = self.game_state.get_mut(&self.core.player_id());
+            self.event_visualizer.get_mut_ref().end(&self.geom, scene, state);
             state.apply_event(self.event.get_ref());
             self.event_visualizer = None;
             self.event = None;

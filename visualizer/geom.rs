@@ -13,7 +13,7 @@ pub struct Geom {
 
 impl Geom {
     pub fn new() -> Geom {
-        let hex_ex_radius: MFloat = 1.0;
+        let hex_ex_radius: MFloat = 1.2;
         let hex_in_radius = sqrt(
                 pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2));
         Geom {
@@ -41,6 +41,10 @@ impl Geom {
 
     pub fn index_to_hex_vertex(&self, i: MInt) -> VertexCoord {
         self.index_to_circle_vertex(6, i)
+    }
+
+    pub fn slot_pos(&self, slot_index: MInt) -> VertexCoord {
+        self.index_to_circle_vertex(6, slot_index).mul_s(0.6)
     }
 }
 

@@ -9,7 +9,7 @@ use core::core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core::types::{UnitId, MapPos};
+use core::types::{UnitId, MapPos, MInt};
 
 pub struct GameState {
     units: HashMap<UnitId, Unit>,
@@ -22,15 +22,14 @@ impl<'a> GameState {
         }
     }
 
-    pub fn unit_at_opt(&'a self, pos: MapPos) -> Option<&'a Unit> {
-        let mut res = None;
+    pub fn units_at(&'a self, pos: MapPos) -> ~[&'a Unit] {
+        let mut units = ~[];
         for (_, unit) in self.units.iter() {
             if unit.pos == pos {
-                res = Some(unit);
-                break;
+                units.push(unit);
             }
         }
-        res
+        units
     }
 
     pub fn apply_event(&mut self, event: &Event) {
@@ -49,6 +48,17 @@ impl<'a> GameState {
                 self.units.remove(&defender_id);
             },
         }
+    }
+
+    pub fn get_slot_index(&self, unit_id: UnitId, pos: MapPos) -> MInt {
+        let mut index = 0;
+        for unit in self.units_at(pos).iter() {
+            if unit.id == unit_id {
+                break;
+            }
+            index += 1;
+        }
+        index
     }
 }
 
