@@ -69,23 +69,35 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
     vertex_data
 }
 
+pub struct Config {
+    priv json: ~json::Object,
+}
+
 fn decode<A: Decodable<json::Decoder>>(json_obj: json::Json) -> A {
     let mut decoder = json::Decoder::new(json_obj);
     let decoded: A = Decodable::decode(&mut decoder);
     decoded
 }
 
-fn read_win_size(config_path: &str) -> Size2<MInt> {
-    let path = Path::new(config_path);
-    let json = match json::from_str(read_file(&path)) {
-        Ok(json::Object(obj)) => obj,
-        _ => fail!("Config error"),
-    };
-    let screen_size = match json.find(&~"screen_size") {
-        Some(size) => size.clone(),
-        None => fail!("No field 'screen_size'"),
-    };
-    decode(screen_size)
+impl Config {
+    pub fn new(path: &str) -> Config {
+        let path = Path::new(path);
+        let json = match json::from_str(read_file(&path)) {
+            Ok(json::Object(obj)) => obj,
+            _ => fail!("Config error"),
+        };
+        Config {
+            json: json,
+        }
+    }
+
+    fn get<A: Decodable<json::Decoder>>(&self, name: &str) -> A {
+        let owned_name_str = name.into_owned();
+        decode(match self.json.find(&owned_name_str) {
+            Some(val) => val.clone(),
+            None => fail!("No field '{}", name),
+        })
+    }
 }
 
 fn init_win(win_size: Size2<MInt>) -> glfw::Window {
@@ -172,7 +184,8 @@ pub struct Visualizer<'a> {
 impl<'a> Visualizer<'a> {
     pub fn new() -> ~Visualizer {
         let players_count = 2;
-        let win_size = read_win_size("conf_visualizer.json");
+        let config = Config::new("conf_visualizer.json");
+        let win_size = config.get("screen_size");
         let win = init_win(win_size);
         load_gl_funcs_with(glfw::get_proc_address);
         init_opengl();
