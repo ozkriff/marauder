@@ -69,7 +69,12 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
     vertex_data
 }
 
-// TODO: Simplify
+fn decode<A: Decodable<json::Decoder>>(json_obj: json::Json) -> A {
+    let mut decoder = json::Decoder::new(json_obj);
+    let decoded: A = Decodable::decode(&mut decoder);
+    decoded
+}
+
 fn read_win_size(config_path: &str) -> Size2<MInt> {
     let path = Path::new(config_path);
     let json = match json::from_str(read_file(&path)) {
@@ -80,9 +85,7 @@ fn read_win_size(config_path: &str) -> Size2<MInt> {
         Some(size) => size.clone(),
         None => fail!("No field 'screen_size'"),
     };
-    let extructed_size: Size2<MInt> = Decodable::decode(
-        &mut json::Decoder::new(screen_size));
-    extructed_size
+    decode(screen_size)
 }
 
 fn init_win(win_size: Size2<MInt>) -> glfw::Window {
