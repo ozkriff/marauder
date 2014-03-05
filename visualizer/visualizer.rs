@@ -172,7 +172,7 @@ pub struct Visualizer<'a> {
 impl<'a> Visualizer<'a> {
     pub fn new() -> ~Visualizer {
         let players_count = 2;
-        let win_size = read_win_size("config.json");
+        let win_size = read_win_size("conf_visualizer.json");
         let win = init_win(win_size);
         load_gl_funcs_with(glfw::get_proc_address);
         init_opengl();
