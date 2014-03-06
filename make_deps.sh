@@ -1,21 +1,19 @@
 # See LICENSE file for copyright and license details.
 #!/bin/sh
+set -e
 
 echo Creating 'deps' dir...
 mkdir deps
-cd deps
-
-echo === glfw3 ===
-git clone --depth=1 https://github.com/glfw/glfw.git
-cd glfw
-cmake -DBUILD_SHARED_LIBS=ON
-make glfw # build without examples or tests
-cp src/libglfw.so* .. # copy dynamic libraries to 'deps' dir
-cd ..
+cd deps # '.' -> './deps'
 
 echo === glfw-rs ===
 git clone --depth=1 https://github.com/bjz/glfw-rs
-rustc glfw-rs/src/lib/lib.rs --out-dir .
+cd glfw-rs
+git clone --depth=1 https://github.com/glfw/glfw.git
+cd glfw; cmake -DBUILD_SHARED_LIBS=ON; make glfw; cp src/lib*.so* ..; cd ..
+PKG_CONFIG_PATH=glfw/src make lib
+cp lib/*.rlib lib/*.so *.so* ..
+cd ..
 
 echo === gl-rs ===
 git clone --depth=1 https://github.com/bjz/gl-rs
@@ -27,13 +25,8 @@ rustc cgmath-rs/src/cgmath/lib.rs --out-dir .
 
 echo === rust-stb-image ===
 git clone --depth=1 https://github.com/mozilla-servo/rust-stb-image
-cd rust-stb-image
-./configure
-make
-cp *.rlib *.a ..
-cd ..
+cd rust-stb-image; ./configure; make; cp *.rlib *.a ..; cd ..
 
-# Return from 'deps' dir
-cd ..
+cd .. # './deps' -> '.'
 
 echo Done!
