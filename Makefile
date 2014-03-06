@@ -3,7 +3,6 @@
 # RUSTC_FLAGS += -g
 # RUSTC_FLAGS += --opt-level 3
 RUSTC_FLAGS += -L deps
-# RUSTC_FLAGS += -C link-args=-lglfw
 
 RUSTC = rustc ${RUSTC_FLAGS}
 
