@@ -6,12 +6,6 @@ use gl::types::{GLint, GLchar, GLuint, GLenum};
 use core::types::MInt;
 use core::misc::read_file;
 
-fn c_str(s: &str) -> *GLchar {
-    unsafe {
-        s.to_c_str().unwrap()
-    }
-}
-
 pub struct Shader {
     priv id: GLuint,
 }
@@ -29,9 +23,11 @@ impl Shader {
     }
 
     pub fn enable_attr(&self, name:&str, components_count: MInt) {
-        let mut attr_id;
+        let mut attr_id = 0;
         unsafe {
-            attr_id = gl::GetAttribLocation(self.id, c_str(name));
+            name.with_c_str(|name| {
+                attr_id = gl::GetAttribLocation(self.id, name);
+            });
         }
         gl::EnableVertexAttribArray(attr_id as GLuint);
         let normalized = gl::FALSE;
@@ -50,7 +46,9 @@ impl Shader {
 
     pub fn get_uniform(&self, name: &str) -> GLuint {
         unsafe {
-            gl::GetUniformLocation(self.id, c_str(name)) as GLuint
+            name.with_c_str(|name| {
+                gl::GetUniformLocation(self.id, name) as GLuint
+            })
         }
     }
 }
@@ -64,7 +62,9 @@ impl Drop for Shader {
 fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
     let shader = gl::CreateShader(shader_type);
     unsafe {
-        gl::ShaderSource(shader, 1, &c_str(src), std::ptr::null());
+        src.with_c_str(|src| {
+            gl::ShaderSource(shader, 1, &src, std::ptr::null());
+        });
         gl::CompileShader(shader);
         let mut status = gl::FALSE as GLint;
         gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
