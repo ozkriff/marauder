@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use collections::hashmap::HashMap;
+use time::precise_time_ns;
 use glfw;
 use cgmath::vector::{Vec3, Vec2};
 use core::map::MapPosIter;
@@ -147,6 +148,8 @@ pub struct Visualizer<'a> {
     event_visualizer: Option<~EventVisualizer>,
     game_state: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
+    last_time: u64, // TODO: typedef
+    dtime: MInt,
 }
 
 impl<'a> Visualizer<'a> {
@@ -182,6 +185,8 @@ impl<'a> Visualizer<'a> {
             scenes: get_scenes(players_count),
             game_state: get_game_states(players_count),
             pathfinders: get_pathfinders(players_count, map_size),
+            last_time: precise_time_ns(),
+            dtime: 0,
         };
         vis
     }
@@ -227,7 +232,8 @@ impl<'a> Visualizer<'a> {
         if !self.event_visualizer.is_none() {
             let scene = self.scenes.get_mut(&self.core.player_id());
             let state = self.game_state.get(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().draw(&self.geom, scene, state);
+            self.event_visualizer.get_mut_ref().draw(
+                &self.geom, scene, state, self.dtime);
         }
         self.win().swap_buffers();
     }
@@ -378,7 +384,11 @@ impl<'a> Visualizer<'a> {
     fn make_event_visualizer(&mut self, event: &core::Event) -> ~EventVisualizer {
         match *event {
             core::EventMove(ref unit_id, ref path) => {
-                EventMoveVisualizer::new(*unit_id, path.clone())
+                let player_id = self.core.player_id();
+                let scene = self.scenes.get_mut(&player_id);
+                let state = self.game_state.get(&player_id);
+                let geom = &self.geom;
+                EventMoveVisualizer::new(geom, scene, state, *unit_id, path.clone())
             },
             core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
@@ -424,6 +434,12 @@ impl<'a> Visualizer<'a> {
         self.logic();
         self.pick_tile();
         self.draw();
+
+        let time = precise_time_ns();
+        self.dtime = (time - self.last_time) as MInt;
+        self.last_time = time;
+
+        // println!("dt: {}", self.dtime as MFloat / 1000000000.0);
     }
 }
 

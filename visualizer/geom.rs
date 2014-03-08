@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::f32::consts::{PI, FRAC_PI_2 };
-use std::num::{sqrt, pow, sin, cos};
+use std::num::{sqrt, pow, sin, cos, abs};
 use cgmath::vector::{Vec2, Vec3, Vector};
 use core::types::{MInt, MapPos};
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
@@ -45,6 +45,12 @@ impl Geom {
 
     pub fn slot_pos(&self, slot_index: MInt) -> VertexCoord {
         self.index_to_circle_vertex(6, slot_index).mul_s(0.6)
+    }
+
+    pub fn dist(&self, a: WorldPos, b: WorldPos) -> MFloat {
+        let dx = abs(b.x - a.x);
+        let dy = abs(b.y - a.y);
+        sqrt(pow(dx, 2) + pow(dy, 2))
     }
 }
 

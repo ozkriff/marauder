@@ -1,6 +1,10 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::Vector;
+use cgmath::vector::{
+    Vec3,
+    Vector,
+    EuclideanVector,
+};
 use visualizer::geom::Geom;
 use core::types::{MBool, MInt, MapPos, UnitId};
 use core::game_state::GameState;
@@ -14,7 +18,7 @@ fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
 pub trait EventVisualizer {
     fn is_finished(&self) -> MBool;
     fn start(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
-    fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState, dtime: MInt);
     fn end(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
 }
 
@@ -25,7 +29,7 @@ fn unit_pos(
     unit_id: UnitId,
     map_pos: MapPos,
     geom: &Geom,
-    state: &GameState
+    state: &GameState,
 ) -> WorldPos {
     let slot_id = state.get_slot_index(unit_id, map_pos);
     let center_pos = geom.map_pos_to_world_pos(map_pos);
@@ -35,68 +39,85 @@ fn unit_pos(
 
 pub struct EventMoveVisualizer {
     unit_id: UnitId,
-    path: ~[MapPos],
-    current_move_index: MInt,
+    path: ~[WorldPos],
+    dist: MFloat,
+    current_dist: MFloat,
+    dir: Vec3<MFloat>,
 }
 
 impl EventVisualizer for EventMoveVisualizer {
-    fn start(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
+    fn start(&mut self, geom: &Geom, _: &mut Scene, _: &GameState) {
+        self.reset_dir(geom);
+    }
 
     fn is_finished(&self) -> MBool {
-        assert!(self.current_move_index <= self.frames_count());
-        self.current_move_index == self.frames_count()
+        self.path.len() == 1
     }
 
-    fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState) {
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene, _: &GameState, dtime: MInt) {
         let node_id = unit_id_to_node_id(self.unit_id);
         let node = scene.get_mut(&node_id);
-        node.pos = self.current_position(geom, state);
-        self.current_move_index += 1;
+        let dt = dtime as MFloat / 1000000000.0;
+        let speed = 3.8; // TODO: Get from UnitType
+        let step = self.dir.mul_s(dt).mul_s(speed);
+        node.pos.add_self_v(&step);
+        self.current_dist += step.length();
+        if self.current_dist > self.dist {
+            let _ = self.path.shift();
+            if self.path.len() > 1 {
+                self.reset_dir(geom);
+            }
+            node.pos = self.current_waypoint();
+        }
     }
 
-    fn end(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState) {
+    fn end(&mut self, _: &Geom, scene: &mut Scene, _: &GameState) {
+        assert!(self.path.len() == 1);
         let node_id = unit_id_to_node_id(self.unit_id);
         let unit_node = scene.get_mut(&node_id);
-        unit_node.pos = self.current_position(geom, state);
+        unit_node.pos = self.current_waypoint();
     }
 }
 
 impl EventMoveVisualizer {
-    pub fn new(unit_id: UnitId, path: ~[MapPos]) -> ~EventVisualizer {
+    // TODO: Merge 'new' and 'start'
+    pub fn new(
+        geom: &Geom,
+        _: &mut Scene,
+        state: &GameState,
+        unit_id: UnitId,
+        path: ~[MapPos]
+    ) -> ~EventVisualizer {
+        let mut world_path = ~[];
+        for map_pos in path.iter() {
+            let world_pos = unit_pos(unit_id, *map_pos, geom, state);
+            world_path.push(world_pos);
+        }
         ~EventMoveVisualizer {
             unit_id: unit_id,
-            path: path,
-            current_move_index: 0,
+            path: world_path,
+            dist: 0.0,
+            current_dist: 0.0,
+            dir: Vec3::zero(),
         } as ~EventVisualizer
     }
 
-    fn frames_count(&self) -> MInt {
-        let len = self.path.len() as MInt - 1;
-        (len * MOVE_SPEED as MInt) - 1
+    fn reset_dir(&mut self, geom: &Geom) {
+        let next = self.next_waypoint();
+        let current = self.current_waypoint();
+        self.dist = geom.dist(current, next);
+        self.dir = next.sub_v(&current).normalize();
+        self.current_dist = 0.0;
     }
 
-    fn current_tile(&self) -> MapPos {
-        self.path[self.current_tile_index()]
+    fn current_waypoint(&self) -> WorldPos {
+        assert!(self.path.len() >= 1);
+        self.path[0]
     }
 
-    fn next_tile(&self) -> MapPos {
-        self.path[self.current_tile_index() + 1]
-    }
-
-    fn current_tile_index(&self) -> MInt {
-        self.current_move_index / MOVE_SPEED as MInt
-    }
-
-    fn node_index(&self) -> MInt {
-        self.current_move_index - self.current_tile_index() * MOVE_SPEED as MInt
-    }
-
-    fn current_position(&self, geom: &Geom, state: &GameState) -> WorldPos {
-        let unit_id = self.unit_id;
-        let from = unit_pos(unit_id, self.current_tile(), geom, state);
-        let to = unit_pos(unit_id, self.next_tile(), geom, state);
-        let diff = to.sub_v(&from).div_s(MOVE_SPEED);
-        from.add_v(&diff.mul_s(self.node_index() as MFloat))
+    fn next_waypoint(&self) -> WorldPos {
+        assert!(self.path.len() >= 2);
+        self.path[1]
     }
 }
 
@@ -115,7 +136,7 @@ impl EventVisualizer for EventEndTurnVisualizer {
         true
     }
 
-    fn draw(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
+    fn draw(&mut self, _: &Geom, _: &mut Scene, _: &GameState, _: MInt) {}
 
     fn end(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
 }
@@ -147,7 +168,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
         self.anim_index == MOVE_SPEED as MInt
     }
 
-    fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState) {
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState, _: MInt) {
         let node_id = unit_id_to_node_id(self.id);
         let mut pos = unit_pos(self.id, self.pos, geom, state);
         pos.z -= 0.02 * (MOVE_SPEED / self.anim_index as MFloat);
@@ -181,7 +202,7 @@ impl EventVisualizer for EventAttackUnitVisualizer {
         self.anim_index == MOVE_SPEED as MInt
     }
 
-    fn draw(&mut self, _: &Geom, scene: &mut Scene, _: &GameState) {
+    fn draw(&mut self, _: &Geom, scene: &mut Scene, _: &GameState, _: MInt) {
         let node_id = unit_id_to_node_id(self.defender_id);
         scene.get_mut(&node_id).pos.z -= 0.01;
         self.anim_index += 1;
