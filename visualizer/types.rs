@@ -22,7 +22,7 @@ pub struct MatId(GLuint);
 
 pub struct SceneNode {
     pos: WorldPos,
-    // rot: Angle,
+    rot: MFloat,
 }
 
 #[deriving(Ord, Eq, Hash)]

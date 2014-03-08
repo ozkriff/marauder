@@ -1,9 +1,10 @@
 // See LICENSE file for copyright and license details.
 
 use std::f32::consts::{PI, FRAC_PI_2 };
-use std::num::{sqrt, pow, sin, cos, abs};
+use std::num::{sqrt, pow, sin, asin, cos, abs};
 use cgmath::vector::{Vec2, Vec3, Vector};
 use core::types::{MInt, MapPos};
+use core::misc::{rad_to_deg};
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
 
 pub struct Geom {
@@ -51,6 +52,14 @@ impl Geom {
         let dx = abs(b.x - a.x);
         let dy = abs(b.y - a.y);
         sqrt(pow(dx, 2) + pow(dy, 2))
+    }
+
+    pub fn get_rot_angle(&self, a: WorldPos, b: WorldPos) -> MFloat {
+        let mut angle = rad_to_deg(asin((b.x - a.x) / self.dist(a, b)));
+        if b.y - a.y > 0.0 {
+            angle = -(180.0 + angle);
+        }
+        angle
     }
 }
 

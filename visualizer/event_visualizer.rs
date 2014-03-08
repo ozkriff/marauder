@@ -1,10 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::{
-    Vec3,
-    Vector,
-    EuclideanVector,
-};
+use cgmath::vector::{Vec3, Vector, EuclideanVector};
 use visualizer::geom::Geom;
 use core::types::{MBool, MInt, MapPos, UnitId};
 use core::game_state::GameState;
@@ -46,8 +42,12 @@ pub struct EventMoveVisualizer {
 }
 
 impl EventVisualizer for EventMoveVisualizer {
-    fn start(&mut self, geom: &Geom, _: &mut Scene, _: &GameState) {
+    fn start(&mut self, geom: &Geom, scene: &mut Scene, _: &GameState) {
         self.reset_dir(geom);
+        let node_id = unit_id_to_node_id(self.unit_id);
+        let node = scene.get_mut(&node_id);
+        node.rot = geom.get_rot_angle(
+            self.current_waypoint(), self.next_waypoint());
     }
 
     fn is_finished(&self) -> MBool {
@@ -66,6 +66,8 @@ impl EventVisualizer for EventMoveVisualizer {
             let _ = self.path.shift();
             if self.path.len() > 1 {
                 self.reset_dir(geom);
+                node.rot = geom.get_rot_angle(
+                    self.current_waypoint(), self.next_waypoint());
             }
             node.pos = self.current_waypoint();
         }
@@ -161,7 +163,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
     fn start(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState) {
         let node_id = unit_id_to_node_id(self.id);
         let world_pos = unit_pos(self.id, self.pos, geom, state);
-        scene.insert(node_id, SceneNode{pos: world_pos});
+        scene.insert(node_id, SceneNode{pos: world_pos, rot: 0.0});
     }
 
     fn is_finished(&self) -> MBool {

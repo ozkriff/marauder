@@ -9,6 +9,10 @@ pub fn deg_to_rad(n: MFloat) -> MFloat {
     n * PI / 180.0
 }
 
+pub fn rad_to_deg(n: MFloat) -> MFloat {
+    (n * 180.0) / PI
+}
+
 pub fn read_file(path: &Path) -> ~str {
     if !path.exists() {
         fail!("Path does not exists: {}", path.display());

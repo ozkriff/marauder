@@ -18,6 +18,7 @@ use visualizer::gl_helpers::{
     load_gl_funcs_with,
     set_viewport,
     tr,
+    rot_z,
 };
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
@@ -211,8 +212,9 @@ impl<'a> Visualizer<'a> {
     }
 
     fn draw_units(&self) {
-        for (_, unit) in self.scene().iter() {
-            let m = tr(self.camera.mat(), unit.pos);
+        for (_, node) in self.scene().iter() {
+            let mut m = tr(self.camera.mat(), node.pos);
+            m = rot_z(m, node.rot);
             uniform_mat4f(self.mvp_mat_id, &m);
             self.unit_mesh.draw(&self.shader);
         }
