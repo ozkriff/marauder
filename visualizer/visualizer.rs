@@ -151,6 +151,7 @@ pub struct Visualizer<'a> {
     pathfinders: HashMap<PlayerId, Pathfinder>,
     last_time: u64, // TODO: typedef
     dtime: MInt,
+    win_size: Size2<MInt>,
 }
 
 impl<'a> Visualizer<'a> {
@@ -188,6 +189,7 @@ impl<'a> Visualizer<'a> {
             pathfinders: get_pathfinders(players_count, map_size),
             last_time: precise_time_ns(),
             dtime: 0,
+            win_size: win_size,
         };
         vis
     }
@@ -311,8 +313,11 @@ impl<'a> Visualizer<'a> {
     fn handle_cursor_pos_event(&mut self, pos: Point2<MFloat>) {
         let button = self.win().get_mouse_button(glfw::MouseButtonRight);
         if button == glfw::Press {
-            self.camera.z_angle += (self.mouse_pos.x - pos.x) / 2.0;
-            self.camera.x_angle += (self.mouse_pos.y - pos.y) / 2.0;
+            let diff = self.mouse_pos - pos;
+            let win_w = self.win_size.w as MFloat;
+            let win_h = self.win_size.h as MFloat;
+            self.camera.z_angle += diff.x * (360.0 / win_w);
+            self.camera.x_angle += diff.y * (360.0 / win_h);
         }
         self.mouse_pos = pos;
     }
@@ -363,6 +368,7 @@ impl<'a> Visualizer<'a> {
                 set_viewport(size);
                 self.tile_picker.set_win_size(size);
                 self.camera.set_win_size(size);
+                self.win_size = size;
             },
             _ => {},
         }
