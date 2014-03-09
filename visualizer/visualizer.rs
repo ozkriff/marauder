@@ -390,22 +390,22 @@ impl<'a> Visualizer<'a> {
     }
 
     fn make_event_visualizer(&mut self, event: &core::Event) -> ~EventVisualizer {
+        let player_id = self.core.player_id();
+        let scene = self.scenes.get_mut(&player_id);
+        let state = self.game_state.get(&player_id);
+        let geom = &self.geom;
         match *event {
             core::EventMove(ref unit_id, ref path) => {
-                let player_id = self.core.player_id();
-                let scene = self.scenes.get_mut(&player_id);
-                let state = self.game_state.get(&player_id);
-                let geom = &self.geom;
                 EventMoveVisualizer::new(geom, scene, state, *unit_id, path.clone())
             },
             core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
             },
             core::EventCreateUnit(id, ref pos) => {
-                EventCreateUnitVisualizer::new(id, *pos)
+                EventCreateUnitVisualizer::new(geom, scene, state, id, *pos)
             },
             core::EventAttackUnit(attacker_id, defender_id) => {
-                EventAttackUnitVisualizer::new(attacker_id, defender_id)
+                EventAttackUnitVisualizer::new(geom, scene, state, attacker_id, defender_id)
             },
         }
     }
