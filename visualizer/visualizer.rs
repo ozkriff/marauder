@@ -71,6 +71,23 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
     vertex_data
 }
 
+fn get_shell_mesh(shader: &Shader) -> Mesh {
+    let n = 0.2;
+    let mut vertex_data = ~[];
+    vertex_data.push(Vec3{x: -n, y: 0.0, z: 0.1});
+    vertex_data.push(Vec3{x: 0.0, y: n * 1.4, z: 0.1});
+    vertex_data.push(Vec3{x: n, y: 0.0, z: 0.1});
+    let mut tex_data = ~[];
+    tex_data.push(Vec2{x: 0.0, y: 0.0});
+    tex_data.push(Vec2{x: 1.0, y: 0.0});
+    tex_data.push(Vec2{x: 0.5, y: 0.5});
+    let mut mesh = Mesh::new(vertex_data);
+    let tex = Texture::new(~"data/tank.png"); // TODO
+    mesh.set_texture(tex, tex_data);
+    mesh.prepare(shader);
+    mesh
+}
+
 fn init_win(win_size: Size2<MInt>) -> glfw::Window {
     glfw::set_error_callback(~glfw::LogErrorHandler);
     let init_status = glfw::init();
@@ -132,10 +149,17 @@ fn load_unit_mesh(shader: &Shader) -> Mesh {
     mesh
 }
 
+fn add_mesh(meshes: &mut ~[Mesh], mesh: Mesh) -> MInt {
+    meshes.push(mesh);
+    (meshes.len() as MInt) - 1
+}
+
 pub struct Visualizer<'a> {
     shader: Shader,
-    map_mesh: Mesh,
-    unit_mesh: Mesh,
+    map_mesh_id: MInt,
+    unit_mesh_id: MInt,
+    shell_mesh_id: MInt,
+    meshes: ~[Mesh],
     mvp_mat_id: MatId,
     win: glfw::Window,
     mouse_pos: Point2<MFloat>,
@@ -170,9 +194,15 @@ impl<'a> Visualizer<'a> {
             win_size, &geom, core.map_size());
         let shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
         let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
+        let mut meshes = ~[];
+        let map_mesh_id = add_mesh(&mut meshes, get_map_mesh(&geom, map_size, &shader));
+        let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
+        let shell_mesh_id = add_mesh(&mut meshes, get_shell_mesh(&shader));
         let vis = ~Visualizer {
-            map_mesh: get_map_mesh(&geom, map_size, &shader),
-            unit_mesh: load_unit_mesh(&shader),
+            map_mesh_id: map_mesh_id,
+            unit_mesh_id: unit_mesh_id,
+            shell_mesh_id: shell_mesh_id,
+            meshes: meshes,
             mvp_mat_id: mvp_mat_id,
             shader: shader,
             win: win,
@@ -219,13 +249,13 @@ impl<'a> Visualizer<'a> {
             let mut m = tr(self.camera.mat(), node.pos);
             m = rot_z(m, node.rot);
             uniform_mat4f(self.mvp_mat_id, &m);
-            self.unit_mesh.draw(&self.shader);
+            self.meshes[node.mesh_id].draw(&self.shader);
         }
     }
 
     fn draw_map(&self) {
         uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
-        self.map_mesh.draw(&self.shader);
+        self.meshes[self.map_mesh_id].draw(&self.shader);
     }
 
     fn draw(&mut self) {
@@ -267,7 +297,8 @@ impl<'a> Visualizer<'a> {
             let pos = pos_opt.unwrap();
             if self.units_at(pos).len() != 0 {
                 let defender_id = self.units_at(pos)[0].id;
-                let cmd = core::CommandAttackUnit(UnitId(0), defender_id);
+                let attacker_id = self.selected_unit_id.unwrap();
+                let cmd = core::CommandAttackUnit(attacker_id, defender_id);
                 self.core.do_command(cmd);
             }
         }
@@ -403,10 +434,10 @@ impl<'a> Visualizer<'a> {
                 EventEndTurnVisualizer::new()
             },
             core::EventCreateUnit(id, ref pos) => {
-                EventCreateUnitVisualizer::new(geom, scene, state, id, *pos)
+                EventCreateUnitVisualizer::new(geom, scene, state, id, *pos, self.unit_mesh_id)
             },
             core::EventAttackUnit(attacker_id, defender_id) => {
-                EventAttackUnitVisualizer::new(geom, scene, state, attacker_id, defender_id)
+                EventAttackUnitVisualizer::new(geom, scene, state, attacker_id, defender_id, self.shell_mesh_id)
             },
         }
     }

@@ -144,13 +144,14 @@ impl EventCreateUnitVisualizer {
         scene: &mut Scene,
         state: &GameState,
         id: UnitId,
-        pos: MapPos
+        pos: MapPos,
+        mesh_id: MInt
     ) -> ~EventVisualizer {
         let node_id = unit_id_to_node_id(id);
         let world_pos = unit_pos(id, pos, geom, state);
         let to = world_pos;
         let from = to.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
-        scene.insert(node_id, SceneNode{pos: from, rot: 0.0});
+        scene.insert(node_id, SceneNode{pos: from, rot: 0.0, mesh_id: mesh_id});
         let move = MoveHelper::new(geom, from, to, 1.0);
         ~EventCreateUnitVisualizer {
             id: id,
@@ -222,6 +223,8 @@ pub struct EventAttackUnitVisualizer {
     priv attacker_id: UnitId,
     priv defender_id: UnitId,
     priv move: MoveHelper,
+    priv shell_move: MoveHelper,
+    priv shell_node_id: NodeId,
 }
 
 impl EventAttackUnitVisualizer {
@@ -230,35 +233,51 @@ impl EventAttackUnitVisualizer {
         scene: &mut Scene,
         _: &GameState,
         attacker_id: UnitId,
-        defender_id: UnitId
+        defender_id: UnitId,
+        shell_mesh_id: MInt
     ) -> ~EventVisualizer {
         let node_id = unit_id_to_node_id(defender_id);
-        let node = scene.get_mut(&node_id);
-        let from = node.pos;
+        let from = scene.get(&node_id).pos;
         let to = from.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
         let move = MoveHelper::new(geom, from, to, 1.0);
+        let shell_node_id = NodeId(666); // TODO
+        let shell_move = {
+            let from = scene.get(&unit_id_to_node_id(attacker_id)).pos;
+            let to = scene.get(&unit_id_to_node_id(defender_id)).pos;
+            scene.insert(shell_node_id, SceneNode {
+                pos: from,
+                rot: 0.0,
+                mesh_id: shell_mesh_id,
+            });
+            MoveHelper::new(geom, from, to, 10.0)
+        };
         ~EventAttackUnitVisualizer {
             attacker_id: attacker_id,
             defender_id: defender_id,
             move: move,
+            shell_move: shell_move,
+            shell_node_id: shell_node_id,
         } as ~EventVisualizer
     }
 }
 
 impl EventVisualizer for EventAttackUnitVisualizer {
     fn is_finished(&self) -> MBool {
-        self.move.is_finished()
+        self.move.is_finished() && self.shell_move.is_finished()
     }
 
     fn draw(&mut self, _: &Geom, scene: &mut Scene, _: &GameState, dtime: MInt) {
-        let node_id = unit_id_to_node_id(self.defender_id);
-        let node = scene.get_mut(&node_id);
-        node.pos = self.move.step(dtime);
+        scene.get_mut(&self.shell_node_id).pos = self.shell_move.step(dtime);
+        if self.shell_move.is_finished() {
+            let node_id = unit_id_to_node_id(self.defender_id);
+            scene.get_mut(&node_id).pos = self.move.step(dtime);
+        }
     }
 
     fn end(&mut self, _: &Geom, scene: &mut Scene, _: &GameState) {
         let node_id = unit_id_to_node_id(self.defender_id);
         scene.remove(&node_id);
+        scene.remove(&self.shell_node_id);
     }
 }
 

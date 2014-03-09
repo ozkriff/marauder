@@ -24,6 +24,7 @@ pub struct MatId(GLuint);
 pub struct SceneNode {
     pos: WorldPos,
     rot: MFloat,
+    mesh_id: MInt,
 }
 
 #[deriving(Ord, Eq, Hash)]
