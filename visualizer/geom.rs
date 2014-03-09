@@ -51,7 +51,8 @@ impl Geom {
     pub fn dist(&self, a: WorldPos, b: WorldPos) -> MFloat {
         let dx = abs(b.x - a.x);
         let dy = abs(b.y - a.y);
-        sqrt(pow(dx, 2) + pow(dy, 2))
+        let dz = abs(b.z - a.z);
+        sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2))
     }
 
     pub fn get_rot_angle(&self, a: WorldPos, b: WorldPos) -> MFloat {
