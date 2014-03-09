@@ -31,10 +31,10 @@ fn unit_pos(
 }
 
 pub struct EventMoveVisualizer {
-    unit_id: UnitId,
-    path: ~[WorldPos],
-    move: MoveHelper,
-    speed: MFloat,
+    priv unit_id: UnitId,
+    priv path: ~[WorldPos],
+    priv move: MoveHelper,
+    priv speed: MFloat,
 }
 
 impl EventVisualizer for EventMoveVisualizer {
@@ -134,8 +134,8 @@ impl EventVisualizer for EventEndTurnVisualizer {
 }
 
 pub struct EventCreateUnitVisualizer {
-    id: UnitId,
-    move: MoveHelper,
+    priv id: UnitId,
+    priv move: MoveHelper,
 }
 
 impl EventCreateUnitVisualizer {
@@ -174,12 +174,12 @@ impl EventVisualizer for EventCreateUnitVisualizer {
 }
 
 pub struct MoveHelper {
-    from: WorldPos,
-    to: WorldPos,
-    current: WorldPos,
-    dist: MFloat,
-    current_dist: MFloat,
-    dir: Vec3<MFloat>,
+    priv from: WorldPos,
+    priv to: WorldPos,
+    priv current: WorldPos,
+    priv dist: MFloat,
+    priv current_dist: MFloat,
+    priv dir: Vec3<MFloat>,
 }
 
 impl MoveHelper {
@@ -219,9 +219,9 @@ fn vec3_z(z: MFloat) -> Vec3<MFloat> {
 }
 
 pub struct EventAttackUnitVisualizer {
-    attacker_id: UnitId,
-    defender_id: UnitId,
-    move: MoveHelper,
+    priv attacker_id: UnitId,
+    priv defender_id: UnitId,
+    priv move: MoveHelper,
 }
 
 impl EventAttackUnitVisualizer {
