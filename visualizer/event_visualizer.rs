@@ -13,7 +13,6 @@ fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
 
 pub trait EventVisualizer {
     fn is_finished(&self) -> MBool;
-    fn start(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
     fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState, dtime: MInt);
     fn end(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
 }
@@ -39,8 +38,6 @@ pub struct EventMoveVisualizer {
 }
 
 impl EventVisualizer for EventMoveVisualizer {
-    fn start(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
-
     fn is_finished(&self) -> MBool {
         self.path.len() == 1
     }
@@ -67,7 +64,6 @@ impl EventVisualizer for EventMoveVisualizer {
 }
 
 impl EventMoveVisualizer {
-    // TODO: Merge 'new' and 'start'
     pub fn new(
         geom: &Geom,
         scene: &mut Scene,
@@ -128,8 +124,6 @@ impl EventEndTurnVisualizer {
 }
 
 impl EventVisualizer for EventEndTurnVisualizer {
-    fn start(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
-
     fn is_finished(&self) -> MBool {
         true
     }
@@ -166,8 +160,6 @@ impl EventCreateUnitVisualizer {
 }
 
 impl EventVisualizer for EventCreateUnitVisualizer {
-    fn start(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
-
     fn is_finished(&self) -> MBool {
         self.move.is_finished()
     }
@@ -254,8 +246,6 @@ impl EventAttackUnitVisualizer {
 }
 
 impl EventVisualizer for EventAttackUnitVisualizer {
-    fn start(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
-
     fn is_finished(&self) -> MBool {
         self.move.is_finished()
     }

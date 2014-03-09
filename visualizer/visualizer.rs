@@ -418,9 +418,6 @@ impl<'a> Visualizer<'a> {
                 let vis = self.make_event_visualizer(&event);
                 self.event = Some(event);
                 self.event_visualizer = Some(vis);
-                let scene = self.scenes.get_mut(&self.core.player_id());
-                let state = self.game_state.get(&self.core.player_id());
-                self.event_visualizer.get_mut_ref().start(&self.geom, scene, state);
             }
         } else if self.event_visualizer.get_ref().is_finished() {
             let scene = self.scenes.get_mut(&self.core.player_id());
