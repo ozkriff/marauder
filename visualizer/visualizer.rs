@@ -32,6 +32,7 @@ use visualizer::types::{
     MFloat,
     Point2,
     MatId,
+    Time,
 };
 use visualizer::event_visualizer::{
     EventVisualizer,
@@ -149,7 +150,7 @@ pub struct Visualizer<'a> {
     event_visualizer: Option<~EventVisualizer>,
     game_state: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
-    last_time: u64, // TODO: typedef
+    last_time: Time,
     dtime: MInt,
     win_size: Size2<MInt>,
 }

@@ -17,6 +17,7 @@ pub type VertexCoord = Vec3<MFloat>;
 pub type Normal = Vec3<MFloat>;
 pub type TextureCoord = Vec2<MFloat>;
 pub type Point2<T> = Vec2<T>;
+pub type Time = u64;
 
 pub struct MatId(GLuint);
 
