@@ -3,8 +3,10 @@
 use std;
 use gl;
 use gl::types::{GLint, GLchar, GLuint, GLenum};
+use cgmath::matrix::{Matrix, Mat4};
 use core::types::MInt;
 use core::misc::read_file;
+use visualizer::types::{MatId, MFloat};
 
 pub struct Shader {
     priv id: GLuint,
@@ -41,6 +43,13 @@ impl Shader {
                 stride,
                 std::ptr::null(),
             );
+        }
+    }
+
+    pub fn uniform_mat4f(&self, mat_id: MatId, mat: &Mat4<MFloat>) {
+        unsafe {
+            let MatId(id) = mat_id;
+            gl::UniformMatrix4fv(id as MInt, 1, gl::FALSE, mat.cr(0, 0));
         }
     }
 

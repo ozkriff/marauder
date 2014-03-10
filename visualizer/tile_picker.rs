@@ -4,7 +4,6 @@ use cgmath::vector::{Vec3, Vec2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos};
 use visualizer::gl_helpers::{
-    uniform_mat4f,
     set_clear_color,
     clear_screen,
     get_vec2_from_pixel,
@@ -83,7 +82,7 @@ impl TilePicker {
         mouse_pos: Vec2<MInt>
     ) -> Option<MapPos> {
         self.shader.activate();
-        uniform_mat4f(self.mvp_mat_id, &camera.mat());
+        self.shader.uniform_mat4f(self.mvp_mat_id, &camera.mat());
         set_clear_color(0.0, 0.0, 0.0);
         clear_screen();
         self.map_mesh.draw(&self.shader);

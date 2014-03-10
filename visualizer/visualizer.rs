@@ -11,7 +11,6 @@ use core::pathfinder::Pathfinder;
 use core::conf::Config;
 use core::core;
 use visualizer::gl_helpers::{
-    uniform_mat4f,
     set_clear_color,
     clear_screen,
     init_opengl,
@@ -248,13 +247,13 @@ impl<'a> Visualizer<'a> {
         for (_, node) in self.scene().iter() {
             let mut m = tr(self.camera.mat(), node.pos);
             m = rot_z(m, node.rot);
-            uniform_mat4f(self.mvp_mat_id, &m);
+            self.shader.uniform_mat4f(self.mvp_mat_id, &m);
             self.meshes[node.mesh_id].draw(&self.shader);
         }
     }
 
     fn draw_map(&self) {
-        uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
+        self.shader.uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
         self.meshes[self.map_mesh_id].draw(&self.shader);
     }
 

@@ -8,7 +8,7 @@ use cgmath::vector::{Vec2, Vec3};
 use cgmath::angle;
 use core::misc::deg_to_rad;
 use core::types::{Size2, MInt};
-use visualizer::types::{MFloat, MatId};
+use visualizer::types::{MFloat};
 
 pub use load_gl_funcs_with = gl::load_with;
 
@@ -23,13 +23,6 @@ impl MeshRenderMode {
             Triangles => gl::TRIANGLES,
             Lines => gl::LINES,
         }
-    }
-}
-
-pub fn uniform_mat4f(mat_id: MatId, mat: &Mat4<MFloat>) {
-    unsafe {
-        let MatId(id) = mat_id;
-        gl::UniformMatrix4fv(id as MInt, 1, gl::FALSE, mat.cr(0, 0));
     }
 }
 
