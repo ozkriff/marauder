@@ -280,9 +280,8 @@ impl<'a> Visualizer<'a> {
         self.draw_map();
         if !self.event_visualizer.is_none() {
             let scene = self.scenes.get_mut(&self.core.player_id());
-            let state = self.game_state.get(&self.core.player_id());
             self.event_visualizer.get_mut_ref().draw(
-                &self.geom, scene, state, self.dtime);
+                &self.geom, scene, self.dtime);
         }
         self.win().swap_buffers();
     }
@@ -436,14 +435,18 @@ impl<'a> Visualizer<'a> {
             self.tile_picker.pick_tile(&self.camera, mouse_pos);
     }
 
-    fn make_event_visualizer(&mut self, event: &core::Event) -> ~EventVisualizer {
+    fn make_event_visualizer(
+        &mut self,
+        event: &core::Event
+    ) -> ~EventVisualizer {
         let player_id = self.core.player_id();
         let scene = self.scenes.get_mut(&player_id);
         let state = self.game_state.get(&player_id);
         let geom = &self.geom;
         match *event {
             core::EventMove(ref unit_id, ref path) => {
-                EventMoveVisualizer::new(geom, scene, state, *unit_id, path.clone())
+                EventMoveVisualizer::new(
+                    geom, scene, state, *unit_id, path.clone())
             },
             core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
@@ -454,10 +457,25 @@ impl<'a> Visualizer<'a> {
                     PlayerId(1) => self.marker_2_mesh_id,
                     PlayerId(n) => fail!("Wrong player id: {}", n),
                 };
-                EventCreateUnitVisualizer::new(geom, scene, state, id, *pos, self.unit_mesh_id, marker_mesh)
+                EventCreateUnitVisualizer::new(
+                    geom,
+                    scene,
+                    state,
+                    id,
+                    *pos,
+                    self.unit_mesh_id,
+                    marker_mesh,
+                )
             },
             core::EventAttackUnit(attacker_id, defender_id) => {
-                EventAttackUnitVisualizer::new(geom, scene, state, attacker_id, defender_id, self.shell_mesh_id)
+                EventAttackUnitVisualizer::new(
+                    geom,
+                    scene,
+                    state,
+                    attacker_id,
+                    defender_id,
+                    self.shell_mesh_id,
+                )
             },
         }
     }
@@ -491,12 +509,9 @@ impl<'a> Visualizer<'a> {
         self.logic();
         self.pick_tile();
         self.draw();
-
         let time = precise_time_ns();
         self.dtime = (time - self.last_time) as MInt;
         self.last_time = time;
-
-        // println!("dt: {}", self.dtime as MFloat / 1000000000.0);
     }
 }
 

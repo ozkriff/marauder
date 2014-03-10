@@ -99,7 +99,11 @@ impl<'a> Core<'a> {
                 CoreEventMove::new(self, unit_id, path) as ~CoreEvent
             },
             CommandAttackUnit(attacker_id, defender_id) => {
-                CoreEventAttackUnit::new(self, attacker_id, defender_id) as ~CoreEvent
+                CoreEventAttackUnit::new(
+                    self,
+                    attacker_id,
+                    defender_id,
+                ) as ~CoreEvent
             },
         }
     }

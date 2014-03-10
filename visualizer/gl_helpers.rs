@@ -122,7 +122,12 @@ impl Vbo {
         let buf_size = (data.len() * size) as GLsizeiptr;
         unsafe {
             let data_ptr = std::cast::transmute(&data[0]);
-            gl::BufferData(gl::ARRAY_BUFFER, buf_size, data_ptr, gl::STATIC_DRAW);
+            gl::BufferData(
+                gl::ARRAY_BUFFER,
+                buf_size,
+                data_ptr,
+                gl::STATIC_DRAW,
+            );
         }
         vbo
     }

@@ -35,7 +35,11 @@ impl Geom {
         }
     }
 
-    pub fn index_to_circle_vertex(&self, count: MInt, i: MInt) -> VertexCoord {
+    pub fn index_to_circle_vertex(
+        &self,
+        count: MInt,
+        i: MInt
+    ) -> VertexCoord {
         let n = FRAC_PI_2 + 2.0 * PI * (i as MFloat) / (count as MFloat);
         Vec3{x: cos(n), y: sin(n), z: 0.0}.mul_s(self.hex_ex_radius)
     }

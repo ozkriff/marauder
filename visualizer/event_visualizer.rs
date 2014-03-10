@@ -20,7 +20,7 @@ fn marker_id(unit_id: UnitId) -> NodeId {
 
 pub trait EventVisualizer {
     fn is_finished(&self) -> MBool;
-    fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState, dtime: MInt);
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: MInt);
     fn end(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
 }
 
@@ -49,7 +49,7 @@ impl EventVisualizer for EventMoveVisualizer {
         self.path.len() == 1
     }
 
-    fn draw(&mut self, geom: &Geom, scene: &mut Scene, _: &GameState, dtime: MInt) {
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: MInt) {
         let pos = self.move.step(dtime);
         {
             let marker_node = scene.get_mut(&marker_id(self.unit_id));
@@ -140,7 +140,7 @@ impl EventVisualizer for EventEndTurnVisualizer {
         true
     }
 
-    fn draw(&mut self, _: &Geom, _: &mut Scene, _: &GameState, _: MInt) {}
+    fn draw(&mut self, _: &Geom, _: &mut Scene, _: MInt) {}
 
     fn end(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
 }
@@ -165,7 +165,11 @@ impl EventCreateUnitVisualizer {
         let to = world_pos;
         let from = to.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
         let rot = rand::task_rng().gen_range::<MFloat>(0.0, 360.0);
-        scene.insert(node_id, SceneNode{pos: from, rot: rot, mesh_id: mesh_id});
+        scene.insert(node_id, SceneNode {
+            pos: from,
+            rot: rot,
+            mesh_id: mesh_id,
+        });
         scene.insert(marker_id(id), SceneNode {
             pos: to.add_v(&vec3_z(geom.hex_ex_radius / 2.0)),
             rot: 0.0,
@@ -184,7 +188,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
         self.move.is_finished()
     }
 
-    fn draw(&mut self, _: &Geom, scene: &mut Scene, _: &GameState, dtime: MInt) {
+    fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: MInt) {
         let node_id = unit_id_to_node_id(self.id);
         let node = scene.get_mut(&node_id);
         node.pos = self.move.step(dtime);
@@ -285,7 +289,7 @@ impl EventVisualizer for EventAttackUnitVisualizer {
         self.move.is_finished() && self.shell_move.is_finished()
     }
 
-    fn draw(&mut self, _: &Geom, scene: &mut Scene, _: &GameState, dtime: MInt) {
+    fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: MInt) {
         scene.get_mut(&self.shell_node_id).pos = self.shell_move.step(dtime);
         if self.shell_move.is_finished() {
             let node_id = unit_id_to_node_id(self.defender_id);
