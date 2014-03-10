@@ -15,7 +15,7 @@ pub enum Command {
 pub enum Event {
     EventMove(UnitId, ~[MapPos]),
     EventEndTurn(PlayerId, PlayerId), // old_id, new_id
-    EventCreateUnit(UnitId, MapPos),
+    EventCreateUnit(UnitId, MapPos, PlayerId),
     EventAttackUnit(UnitId, UnitId),
 }
 
@@ -26,6 +26,7 @@ pub struct Player {
 pub struct Unit {
     id: UnitId,
     pos: MapPos,
+    player_id: PlayerId,
 }
 
 pub struct Core<'a> {
@@ -56,11 +57,17 @@ impl<'a> Core<'a> {
             event_lists: get_event_lists(),
             map_size: map_size,
         };
-        core.do_command(CommandCreateUnit(Vec2{x: 0, y: 0}));
-        core.do_command(CommandCreateUnit(Vec2{x: 0, y: 1}));
-        core.do_command(CommandCreateUnit(Vec2{x: 2, y: 0}));
-        core.do_command(CommandCreateUnit(Vec2{x: 2, y: 2}));
+        core.add_unit(Vec2{x: 0, y: 0}, PlayerId(0));
+        core.add_unit(Vec2{x: 0, y: 1}, PlayerId(0));
+        core.add_unit(Vec2{x: 2, y: 0}, PlayerId(1));
+        core.add_unit(Vec2{x: 2, y: 2}, PlayerId(1));
         core
+    }
+
+    fn add_unit(&mut self, pos: MapPos, player_id: PlayerId) {
+        let core_event = CoreEventCreateUnit::new(
+            self, pos, player_id);
+        self.do_core_event(core_event);
     }
 
     pub fn map_size(&self) -> Size2<MInt> {
@@ -82,7 +89,11 @@ impl<'a> Core<'a> {
                 CoreEventEndTurn::new(self) as ~CoreEvent
             },
             CommandCreateUnit(pos) => {
-                CoreEventCreateUnit::new(self, pos) as ~CoreEvent
+                CoreEventCreateUnit::new(
+                    self,
+                    pos,
+                    self.current_player_id,
+                ) as ~CoreEvent
             },
             CommandMove(unit_id, path) => {
                 CoreEventMove::new(self, unit_id, path) as ~CoreEvent
@@ -95,6 +106,10 @@ impl<'a> Core<'a> {
 
     pub fn do_command(&mut self, command: Command) {
         let core_event = self.command_to_core_event(command);
+        self.do_core_event(core_event);
+    }
+
+    fn do_core_event(&mut self, core_event: ~CoreEvent) {
         self.core_event_list.push(core_event);
         self.make_events();
     }
@@ -177,10 +192,15 @@ impl CoreEvent for CoreEventEndTurn {
 struct CoreEventCreateUnit {
     pos: MapPos,
     id: UnitId,
+    player_id: PlayerId,
 }
 
 impl CoreEventCreateUnit {
-    fn new(core: &Core, pos: MapPos) -> ~CoreEventCreateUnit {
+    fn new(
+        core: &Core,
+        pos: MapPos,
+        player_id: PlayerId
+    ) -> ~CoreEventCreateUnit {
         let new_id = match core.units.keys().max_by(|&n| n) {
             Some(n) => {
                 let UnitId(id) = *n;
@@ -188,18 +208,26 @@ impl CoreEventCreateUnit {
             },
             None => 0,
         };
-        ~CoreEventCreateUnit{id: UnitId(new_id), pos: pos}
+        ~CoreEventCreateUnit {
+            id: UnitId(new_id),
+            pos: pos,
+            player_id: player_id,
+        }
     }
 }
 
 impl CoreEvent for CoreEventCreateUnit {
     fn to_event(&self) -> Event {
-        EventCreateUnit(self.id, self.pos)
+        EventCreateUnit(self.id, self.pos, self.player_id)
     }
 
     fn apply(&self, core: &mut Core) {
         assert!(core.units.find(&self.id).is_none());
-        core.units.insert(self.id, Unit{id: self.id, pos: self.pos});
+        core.units.insert(self.id, Unit {
+            id: self.id,
+            pos: self.pos,
+            player_id: core.current_player_id,
+        });
     }
 }
 

@@ -39,9 +39,13 @@ impl<'a> GameState {
                 unit.pos = *path.last().unwrap();
             },
             EventEndTurn(_, _) => {},
-            EventCreateUnit(id, pos) => {
+            EventCreateUnit(id, pos, player_id) => {
                 assert!(self.units.find(&id).is_none());
-                self.units.insert(id, Unit{id: id, pos: pos});
+                self.units.insert(id, Unit {
+                    id: id,
+                    pos: pos,
+                    player_id: player_id,
+                });
             },
             EventAttackUnit(_, defender_id) => {
                 assert!(self.units.find(&defender_id).is_some());

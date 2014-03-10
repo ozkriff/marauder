@@ -13,6 +13,11 @@ fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
     NodeId(id)
 }
 
+fn marker_id(unit_id: UnitId) -> NodeId {
+    let UnitId(id) = unit_id;
+    NodeId(id + 1000)
+}
+
 pub trait EventVisualizer {
     fn is_finished(&self) -> MBool;
     fn draw(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState, dtime: MInt);
@@ -45,9 +50,14 @@ impl EventVisualizer for EventMoveVisualizer {
     }
 
     fn draw(&mut self, geom: &Geom, scene: &mut Scene, _: &GameState, dtime: MInt) {
+        let pos = self.move.step(dtime);
+        {
+            let marker_node = scene.get_mut(&marker_id(self.unit_id));
+            marker_node.pos = pos.add_v(&vec3_z(geom.hex_ex_radius / 2.0));
+        }
         let node_id = unit_id_to_node_id(self.unit_id);
         let node = scene.get_mut(&node_id);
-        node.pos = self.move.step(dtime);
+        node.pos = pos;
         if self.move.is_finished() {
             self.path.shift();
             if self.path.len() > 1 {
@@ -147,7 +157,8 @@ impl EventCreateUnitVisualizer {
         state: &GameState,
         id: UnitId,
         pos: MapPos,
-        mesh_id: MInt
+        mesh_id: MInt,
+        marker_mesh_id: MInt
     ) -> ~EventVisualizer {
         let node_id = unit_id_to_node_id(id);
         let world_pos = unit_pos(id, pos, geom, state);
@@ -155,6 +166,11 @@ impl EventCreateUnitVisualizer {
         let from = to.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
         let rot = rand::task_rng().gen_range::<MFloat>(0.0, 360.0);
         scene.insert(node_id, SceneNode{pos: from, rot: rot, mesh_id: mesh_id});
+        scene.insert(marker_id(id), SceneNode {
+            pos: to.add_v(&vec3_z(geom.hex_ex_radius / 2.0)),
+            rot: 0.0,
+            mesh_id: marker_mesh_id,
+        });
         let move = MoveHelper::new(geom, from, to, 1.0);
         ~EventCreateUnitVisualizer {
             id: id,
@@ -281,6 +297,7 @@ impl EventVisualizer for EventAttackUnitVisualizer {
         let node_id = unit_id_to_node_id(self.defender_id);
         scene.remove(&node_id);
         scene.remove(&self.shell_node_id);
+        scene.remove(&marker_id(self.defender_id));
     }
 }
 

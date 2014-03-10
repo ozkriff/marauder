@@ -70,7 +70,7 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
     vertex_data
 }
 
-fn get_shell_mesh(shader: &Shader) -> Mesh {
+fn get_marker_pre_mesh() -> (~[VertexCoord], ~[TextureCoord]) {
     let n = 0.2;
     let mut vertex_data = ~[];
     vertex_data.push(Vec3{x: -n, y: 0.0, z: 0.1});
@@ -80,8 +80,13 @@ fn get_shell_mesh(shader: &Shader) -> Mesh {
     tex_data.push(Vec2{x: 0.0, y: 0.0});
     tex_data.push(Vec2{x: 1.0, y: 0.0});
     tex_data.push(Vec2{x: 0.5, y: 0.5});
+    (vertex_data, tex_data)
+}
+
+fn get_marker(shader: &Shader, tex_path: ~str) -> Mesh {
+    let (vertex_data, tex_data) = get_marker_pre_mesh();
     let mut mesh = Mesh::new(vertex_data);
-    let tex = Texture::new(~"data/tank.png"); // TODO
+    let tex = Texture::new(tex_path);
     mesh.set_texture(tex, tex_data);
     mesh.prepare(shader);
     mesh
@@ -158,6 +163,8 @@ pub struct Visualizer<'a> {
     map_mesh_id: MInt,
     unit_mesh_id: MInt,
     shell_mesh_id: MInt,
+    marker_1_mesh_id: MInt,
+    marker_2_mesh_id: MInt,
     meshes: ~[Mesh],
     mvp_mat_id: MatId,
     win: glfw::Window,
@@ -194,13 +201,21 @@ impl<'a> Visualizer<'a> {
         let shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
         let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
         let mut meshes = ~[];
-        let map_mesh_id = add_mesh(&mut meshes, get_map_mesh(&geom, map_size, &shader));
+        let map_mesh_id = add_mesh(
+            &mut meshes, get_map_mesh(&geom, map_size, &shader));
         let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
-        let shell_mesh_id = add_mesh(&mut meshes, get_shell_mesh(&shader));
+        let shell_mesh_id = add_mesh(
+            &mut meshes, get_marker(&shader, ~"data/shell.png"));
+        let marker_1_mesh_id = add_mesh(
+            &mut meshes, get_marker(&shader, ~"data/flag1.png"));
+        let marker_2_mesh_id = add_mesh(
+            &mut meshes, get_marker(&shader, ~"data/flag2.png"));
         let vis = ~Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
             shell_mesh_id: shell_mesh_id,
+            marker_1_mesh_id: marker_1_mesh_id,
+            marker_2_mesh_id: marker_2_mesh_id,
             meshes: meshes,
             mvp_mat_id: mvp_mat_id,
             shader: shader,
@@ -433,8 +448,13 @@ impl<'a> Visualizer<'a> {
             core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
             },
-            core::EventCreateUnit(id, ref pos) => {
-                EventCreateUnitVisualizer::new(geom, scene, state, id, *pos, self.unit_mesh_id)
+            core::EventCreateUnit(id, ref pos, player_id) => {
+                let marker_mesh = match player_id {
+                    PlayerId(0) => self.marker_1_mesh_id,
+                    PlayerId(1) => self.marker_2_mesh_id,
+                    PlayerId(n) => fail!("Wrong player id: {}", n),
+                };
+                EventCreateUnitVisualizer::new(geom, scene, state, id, *pos, self.unit_mesh_id, marker_mesh)
             },
             core::EventAttackUnit(attacker_id, defender_id) => {
                 EventAttackUnitVisualizer::new(geom, scene, state, attacker_id, defender_id, self.shell_mesh_id)
