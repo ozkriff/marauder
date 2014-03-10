@@ -293,11 +293,12 @@ impl<'a> Visualizer<'a> {
 
     fn attack_unit(&mut self) {
         let pos_opt = self.selected_tile_pos;
-        if pos_opt.is_some() {
+        let attacker_id_opt = self.selected_unit_id;
+        if pos_opt.is_some() && attacker_id_opt.is_some() {
             let pos = pos_opt.unwrap();
             if self.units_at(pos).len() != 0 {
                 let defender_id = self.units_at(pos)[0].id;
-                let attacker_id = self.selected_unit_id.unwrap();
+                let attacker_id = attacker_id_opt.unwrap();
                 let cmd = core::CommandAttackUnit(attacker_id, defender_id);
                 self.core.do_command(cmd);
             }
