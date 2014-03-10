@@ -1,5 +1,7 @@
 // See LICENSE file for copyright and license details.
 
+use std::rand;
+use std::rand::Rng;
 use cgmath::vector::{Vec3, Vector, EuclideanVector};
 use visualizer::geom::Geom;
 use core::types::{MBool, MInt, MapPos, UnitId};
@@ -151,7 +153,8 @@ impl EventCreateUnitVisualizer {
         let world_pos = unit_pos(id, pos, geom, state);
         let to = world_pos;
         let from = to.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
-        scene.insert(node_id, SceneNode{pos: from, rot: 0.0, mesh_id: mesh_id});
+        let rot = rand::task_rng().gen_range::<MFloat>(0.0, 360.0);
+        scene.insert(node_id, SceneNode{pos: from, rot: rot, mesh_id: mesh_id});
         let move = MoveHelper::new(geom, from, to, 1.0);
         ~EventCreateUnitVisualizer {
             id: id,
