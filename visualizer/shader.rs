@@ -24,7 +24,7 @@ impl Shader {
         gl::UseProgram(self.id);
     }
 
-    pub fn enable_attr(&self, name:&str, components_count: MInt) {
+    pub fn enable_attr(&self, name: &str, components_count: MInt) {
         let mut attr_id = 0;
         unsafe {
             name.with_c_str(|name| {
