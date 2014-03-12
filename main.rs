@@ -9,6 +9,7 @@ extern crate native;
 extern crate serialize;
 extern crate collections;
 extern crate time;
+extern crate rand;
 extern crate cgmath;
 extern crate glfw = "glfw-rs";
 extern crate gl;
