@@ -336,10 +336,10 @@ impl<'a> Visualizer<'a> {
             glfw::KeyEscape | glfw::KeyQ => {
                 self.win().set_should_close(true);
             },
-            glfw::KeyUp => self.camera.move(270.0),
-            glfw::KeyDown => self.camera.move(90.0),
-            glfw::KeyRight => self.camera.move(0.0),
-            glfw::KeyLeft => self.camera.move(180.0),
+            glfw::KeyUp => self.camera.move(270.0, 1.0),
+            glfw::KeyDown => self.camera.move(90.0, 1.0),
+            glfw::KeyRight => self.camera.move(0.0, 1.0),
+            glfw::KeyLeft => self.camera.move(180.0, 1.0),
             glfw::KeyMinus => self.camera.zoom += 1.0,
             glfw::KeyEqual => self.camera.zoom -= 1.0,
             _ => {},
@@ -357,13 +357,20 @@ impl<'a> Visualizer<'a> {
     }
 
     fn handle_cursor_pos_event(&mut self, pos: Point2<MFloat>) {
-        let button = self.win().get_mouse_button(glfw::MouseButtonRight);
-        if button == glfw::Press {
+        let rmb = self.win().get_mouse_button(glfw::MouseButtonRight);
+        if rmb == glfw::Press {
             let diff = self.mouse_pos - pos;
             let win_w = self.win_size.w as MFloat;
             let win_h = self.win_size.h as MFloat;
             self.camera.z_angle += diff.x * (360.0 / win_w);
             self.camera.x_angle += diff.y * (360.0 / win_h);
+        }
+        let mmb = self.win().get_mouse_button(glfw::MouseButtonMiddle);
+        if mmb == glfw::Press {
+            // TODO: Remove 0.05
+            let diff = self.mouse_pos - pos;
+            self.camera.move(90.0, diff.y * 0.05);
+            self.camera.move(0.0, diff.x * 0.05);
         }
         self.mouse_pos = pos;
     }

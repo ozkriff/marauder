@@ -47,12 +47,12 @@ impl Camera {
         m
     }
 
-    pub fn move(&mut self, angle: MFloat) {
+    pub fn move(&mut self, angle: MFloat, speed: MFloat) {
         let speed_in_radians = deg_to_rad(self.z_angle - angle);
         let dx = sin(speed_in_radians);
         let dy = cos(speed_in_radians);
-        self.pos.x -= dy;
-        self.pos.y -= dx;
+        self.pos.x -= dy * speed;
+        self.pos.y -= dx * speed;
     }
 
     pub fn set_win_size(&mut self, win_size: Size2<MInt>) {
