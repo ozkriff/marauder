@@ -88,7 +88,7 @@ impl Model {
         let path = Path::new(filename);
         let mut file = BufferedReader::new(File::open(&path));
         for line in file.lines() {
-            self.read_line(line);
+            self.read_line(line.unwrap());
         }
     }
 
