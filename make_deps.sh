@@ -10,9 +10,9 @@ echo === glfw-rs ===
 git clone --depth=1 https://github.com/bjz/glfw-rs
 cd glfw-rs
 git clone --depth=1 https://github.com/glfw/glfw.git
-cd glfw; cmake -DBUILD_SHARED_LIBS=ON; make glfw; cp src/lib*.so* ..; cd ..
+cd glfw; cmake -DBUILD_SHARED_LIBS=ON; make glfw; mv src/lib*.so* ..; cd ..
 PKG_CONFIG_PATH=glfw/src make lib
-cp lib/*.rlib lib/*.so *.so* ..
+mv lib/*.rlib lib/*.so *.so* ..
 cd ..
 
 echo === gl-rs ===
@@ -25,7 +25,7 @@ rustc cgmath-rs/src/cgmath/lib.rs --out-dir .
 
 echo === rust-stb-image ===
 git clone --depth=1 https://github.com/mozilla-servo/rust-stb-image
-cd rust-stb-image; ./configure; make; cp *.rlib *.a ..; cd ..
+cd rust-stb-image; ./configure; make; mv *.rlib *.a ..; cd ..
 
 cd .. # './deps' -> '.'
 
