@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::vec_ng::Vec;
 use core::types::{MBool, MInt, MapPos, Size2};
 use core::core::Unit;
 use core::game_state::GameState;
@@ -12,7 +13,7 @@ struct Tile {
 
 struct Map {
     size: Size2<MInt>,
-    tiles: ~[Tile],
+    tiles: Vec<Tile>,
 }
 
 fn max_cost() -> MInt {
@@ -21,11 +22,11 @@ fn max_cost() -> MInt {
 
 impl<'a> Map {
     fn tile_mut(&'a mut self, pos: MapPos) -> &'a mut Tile {
-        &mut self.tiles[pos.x + (pos.y * self.size.w)]
+        self.tiles.get_mut((pos.x + pos.y * self.size.w) as uint)
     }
 
     fn tile(&'a self, pos: MapPos) -> &'a Tile {
-        &self.tiles[pos.x + (pos.y * self.size.w)]
+        self.tiles.get((pos.x + pos.y * self.size.w) as uint)
     }
 
     fn is_inboard(&self, pos: MapPos) -> MBool {
@@ -36,12 +37,12 @@ impl<'a> Map {
 }
 
 pub struct Pathfinder {
-    priv queue: ~[MapPos],
+    priv queue: Vec<MapPos>,
     priv map: Map,
 }
 
-fn create_tiles(tiles_count: MInt) -> ~[Tile] {
-    let mut tiles = ~[];
+fn create_tiles(tiles_count: MInt) -> Vec<Tile> {
+    let mut tiles = Vec::new();
     for _ in range(0, tiles_count) {
         tiles.push(Tile {
             cost: 0,
@@ -55,7 +56,7 @@ impl Pathfinder {
     pub fn new(map_size: Size2<MInt>) -> Pathfinder {
         let tiles_count = map_size.w * map_size.h;
         Pathfinder {
-            queue: ~[],
+            queue: Vec::new(),
             map: Map {
                 size: map_size,
                 tiles: create_tiles(tiles_count),
@@ -122,8 +123,8 @@ impl Pathfinder {
         }
     }
 
-    pub fn get_path(&self, destination: MapPos) -> ~[MapPos] {
-        let mut path = ~[];
+    pub fn get_path(&self, destination: MapPos) -> Vec<MapPos> {
+        let mut path = Vec::new();
         let mut pos = destination;
         assert!(self.map.is_inboard(pos));
         path.push(destination);

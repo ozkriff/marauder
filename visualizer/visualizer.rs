@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::vec_ng::Vec;
 use collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;
@@ -43,8 +44,8 @@ use visualizer::event_visualizer::{
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 
-fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> ~[VertexCoord] {
-    let mut vertex_data = ~[];
+fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> Vec<VertexCoord> {
+    let mut vertex_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
         let pos = geom.map_pos_to_world_pos(tile_pos);
         for num in range(0 as MInt, 6) {
@@ -58,8 +59,8 @@ fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> ~[VertexCoord] {
     vertex_data
 }
 
-fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
-    let mut vertex_data = ~[];
+fn build_hex_tex_coord(map_size: Size2<MInt>) -> Vec<TextureCoord> {
+    let mut vertex_data = Vec::new();
     for _ in MapPosIter::new(map_size) {
         for _ in range(0, 6) {
             vertex_data.push(Vec2{x: 0.0, y: 0.0});
@@ -70,13 +71,13 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> ~[TextureCoord] {
     vertex_data
 }
 
-fn get_marker_pre_mesh() -> (~[VertexCoord], ~[TextureCoord]) {
+fn get_marker_pre_mesh() -> (Vec<VertexCoord>, Vec<TextureCoord>) {
     let n = 0.2;
-    let mut vertex_data = ~[];
+    let mut vertex_data = Vec::new();
     vertex_data.push(Vec3{x: -n, y: 0.0, z: 0.1});
     vertex_data.push(Vec3{x: 0.0, y: n * 1.4, z: 0.1});
     vertex_data.push(Vec3{x: n, y: 0.0, z: 0.1});
-    let mut tex_data = ~[];
+    let mut tex_data = Vec::new();
     tex_data.push(Vec2{x: 0.0, y: 0.0});
     tex_data.push(Vec2{x: 1.0, y: 0.0});
     tex_data.push(Vec2{x: 0.5, y: 0.5});
@@ -85,9 +86,9 @@ fn get_marker_pre_mesh() -> (~[VertexCoord], ~[TextureCoord]) {
 
 fn get_marker(shader: &Shader, tex_path: ~str) -> Mesh {
     let (vertex_data, tex_data) = get_marker_pre_mesh();
-    let mut mesh = Mesh::new(vertex_data);
+    let mut mesh = Mesh::new(vertex_data.as_slice());
     let tex = Texture::new(tex_path);
-    mesh.set_texture(tex, tex_data);
+    mesh.set_texture(tex, tex_data.as_slice());
     mesh.prepare(shader);
     mesh
 }
@@ -138,8 +139,8 @@ fn get_pathfinders(
 
 fn get_map_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let tex = Texture::new(~"data/floor.png");
-    let mut mesh = Mesh::new(build_hex_mesh(geom, map_size));
-    mesh.set_texture(tex, build_hex_tex_coord(map_size));
+    let mut mesh = Mesh::new(build_hex_mesh(geom, map_size).as_slice());
+    mesh.set_texture(tex, build_hex_tex_coord(map_size).as_slice());
     mesh.prepare(shader);
     mesh
 }
@@ -147,13 +148,13 @@ fn get_map_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
 fn load_unit_mesh(shader: &Shader) -> Mesh {
     let tex = Texture::new(~"data/tank.png");
     let obj = obj::Model::new("data/tank.obj");
-    let mut mesh = Mesh::new(obj.build());
-    mesh.set_texture(tex, obj.build_tex_coord());
+    let mut mesh = Mesh::new(obj.build().as_slice());
+    mesh.set_texture(tex, obj.build_tex_coord().as_slice());
     mesh.prepare(shader);
     mesh
 }
 
-fn add_mesh(meshes: &mut ~[Mesh], mesh: Mesh) -> MInt {
+fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MInt {
     meshes.push(mesh);
     (meshes.len() as MInt) - 1
 }
@@ -165,7 +166,7 @@ pub struct Visualizer<'a> {
     shell_mesh_id: MInt,
     marker_1_mesh_id: MInt,
     marker_2_mesh_id: MInt,
-    meshes: ~[Mesh],
+    meshes: Vec<Mesh>,
     mvp_mat_id: MatId,
     win: glfw::Window,
     mouse_pos: Point2<MFloat>,
@@ -200,7 +201,7 @@ impl<'a> Visualizer<'a> {
             win_size, &geom, core.map_size());
         let shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
         let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
-        let mut meshes = ~[];
+        let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(&geom, map_size, &shader));
         let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
@@ -247,8 +248,8 @@ impl<'a> Visualizer<'a> {
         self.scenes.get(&self.core.player_id())
     }
 
-    fn units_at(&'a self, pos: MapPos) -> ~[&'a core::Unit] {
-        let mut units = ~[];
+    fn units_at(&'a self, pos: MapPos) -> Vec<&'a core::Unit> {
+        let mut units = Vec::new();
         let id = self.core.player_id();
         for (_, unit) in self.game_state.get(&id).units.iter() {
             if unit.pos == pos {
@@ -263,13 +264,13 @@ impl<'a> Visualizer<'a> {
             let mut m = tr(self.camera.mat(), node.pos);
             m = rot_z(m, node.rot);
             self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-            self.meshes[node.mesh_id].draw(&self.shader);
+            self.meshes.get(node.mesh_id as uint).draw(&self.shader);
         }
     }
 
     fn draw_map(&self) {
         self.shader.uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
-        self.meshes[self.map_mesh_id].draw(&self.shader);
+        self.meshes.get(self.map_mesh_id as uint).draw(&self.shader);
     }
 
     fn draw(&mut self) {
@@ -310,7 +311,7 @@ impl<'a> Visualizer<'a> {
         if pos_opt.is_some() && attacker_id_opt.is_some() {
             let pos = pos_opt.unwrap();
             if self.units_at(pos).len() != 0 {
-                let defender_id = self.units_at(pos)[0].id;
+                let defender_id = self.units_at(pos).get(0).id;
                 let attacker_id = attacker_id_opt.unwrap();
                 let cmd = core::CommandAttackUnit(attacker_id, defender_id);
                 self.core.do_command(cmd);
@@ -322,7 +323,7 @@ impl<'a> Visualizer<'a> {
         if self.selected_tile_pos.is_some() {
             let pos = self.selected_tile_pos.unwrap();
             if self.units_at(pos).len() != 0 {
-                let unit_id = self.units_at(pos)[0].id;
+                let unit_id = self.units_at(pos).get(0).id;
                 self.selected_unit_id = Some(unit_id);
                 let state = self.game_state.get(&self.core.player_id());
                 let pf = self.pathfinders.get_mut(&self.core.player_id());
@@ -395,9 +396,9 @@ impl<'a> Visualizer<'a> {
         self.core.do_command(core::CommandMove(unit_id, path));
     }
 
-    fn get_events(&mut self) -> ~[glfw::WindowEvent] {
+    fn get_events(&mut self) -> Vec<glfw::WindowEvent> {
         glfw::poll_events();
-        let mut events = ~[];
+        let mut events = Vec::new();
         for (_, event) in self.win().flush_events() {
             events.push(event);
         }

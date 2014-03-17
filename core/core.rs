@@ -1,19 +1,20 @@
 // See LICENSE file for copyright and license details.
 
+use std::vec_ng::Vec;
 use collections::hashmap::HashMap;
 use cgmath::vector::Vec2;
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::conf::Config;
 
 pub enum Command {
-    CommandMove(UnitId, ~[MapPos]),
+    CommandMove(UnitId, Vec<MapPos>),
     CommandEndTurn,
     CommandCreateUnit(MapPos),
     CommandAttackUnit(UnitId, UnitId),
 }
 
 pub enum Event {
-    EventMove(UnitId, ~[MapPos]),
+    EventMove(UnitId, Vec<MapPos>),
     EventEndTurn(PlayerId, PlayerId), // old_id, new_id
     EventCreateUnit(UnitId, MapPos, PlayerId),
     EventAttackUnit(UnitId, UnitId),
@@ -31,17 +32,17 @@ pub struct Unit {
 
 pub struct Core<'a> {
     priv units: HashMap<UnitId, Unit>,
-    priv players: ~[Player],
+    priv players: Vec<Player>,
     priv current_player_id: PlayerId,
-    priv core_event_list: ~[~CoreEvent],
-    priv event_lists: HashMap<PlayerId, ~[Event]>,
+    priv core_event_list: Vec<~CoreEvent>,
+    priv event_lists: HashMap<PlayerId, Vec<Event>>,
     priv map_size: Size2<MInt>,
 }
 
-fn get_event_lists() -> HashMap<PlayerId, ~[Event]> {
+fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
     let mut map = HashMap::new();
-    map.insert(PlayerId(0), ~[]);
-    map.insert(PlayerId(1), ~[]);
+    map.insert(PlayerId(0), Vec::new());
+    map.insert(PlayerId(1), Vec::new());
     map
 }
 
@@ -51,9 +52,9 @@ impl<'a> Core<'a> {
         let map_size = config.get("map_size");
         let mut core = ~Core {
             units: HashMap::new(),
-            players: ~[Player{id: PlayerId(0)}, Player{id: PlayerId(1)}],
+            players: vec!(Player{id: PlayerId(0)}, Player{id: PlayerId(1)}),
             current_player_id: PlayerId(0),
-            core_event_list: ~[],
+            core_event_list: Vec::new(),
             event_lists: get_event_lists(),
             map_size: map_size,
         };
@@ -138,11 +139,11 @@ trait CoreEvent {
 
 struct CoreEventMove {
     unit_id: UnitId,
-    path: ~[MapPos],
+    path: Vec<MapPos>,
 }
 
 impl CoreEventMove {
-    fn new(_: &Core, unit_id: UnitId, path: ~[MapPos]) -> ~CoreEventMove {
+    fn new(_: &Core, unit_id: UnitId, path: Vec<MapPos>) -> ~CoreEventMove {
         ~CoreEventMove {
             path: path,
             unit_id: unit_id,

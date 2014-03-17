@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::vec_ng::Vec;
 use cgmath::vector::{Vec3, Vec2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos};
@@ -17,9 +18,9 @@ use visualizer::shader::Shader;
 fn build_hex_map_mesh(
     geom: &Geom,
     map_size: Size2<MInt>
-) -> (~[VertexCoord], ~[Color3]) {
-    let mut c_data = ~[];
-    let mut v_data = ~[];
+) -> (Vec<VertexCoord>, Vec<Color3>) {
+    let mut c_data = Vec::new();
+    let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
         let pos3d = geom.map_pos_to_world_pos(tile_pos);
         for num in range(0 as MInt, 6) {
@@ -41,8 +42,8 @@ fn build_hex_map_mesh(
 
 fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
-    let mut mesh = Mesh::new(vertex_data);
-    mesh.set_color(color_data);
+    let mut mesh = Mesh::new(vertex_data.as_slice());
+    mesh.set_color(color_data.as_slice());
     mesh.prepare(shader);
     mesh
 }

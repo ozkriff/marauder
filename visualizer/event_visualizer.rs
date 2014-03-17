@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::vec_ng::Vec;
 use rand;
 use rand::Rng;
 use cgmath::vector::{Vec3, Vector, EuclideanVector};
@@ -39,7 +40,7 @@ fn unit_pos(
 
 pub struct EventMoveVisualizer {
     priv unit_id: UnitId,
-    priv path: ~[WorldPos],
+    priv path: Vec<WorldPos>,
     priv move: MoveHelper,
     priv speed: MFloat,
 }
@@ -81,9 +82,9 @@ impl EventMoveVisualizer {
         scene: &mut Scene,
         state: &GameState,
         unit_id: UnitId,
-        path: ~[MapPos]
+        path: Vec<MapPos>
     ) -> ~EventVisualizer {
-        let mut world_path = ~[];
+        let mut world_path = Vec::new();
         for map_pos in path.iter() {
             let world_pos = unit_pos(unit_id, *map_pos, geom, state);
             world_path.push(world_pos);
@@ -91,8 +92,8 @@ impl EventMoveVisualizer {
         let speed = 3.8; // TODO: Get from UnitType
         let node_id = unit_id_to_node_id(unit_id);
         let node = scene.get_mut(&node_id);
-        node.rot = geom.get_rot_angle(world_path[0], world_path[1]);
-        let move = MoveHelper::new(geom, world_path[0], world_path[1], speed);
+        node.rot = geom.get_rot_angle(*world_path.get(0), *world_path.get(1));
+        let move = MoveHelper::new(geom, *world_path.get(0), *world_path.get(1), speed);
         let mut vis = ~EventMoveVisualizer {
             unit_id: unit_id,
             path: world_path,
@@ -118,12 +119,12 @@ impl EventMoveVisualizer {
 
     fn current_waypoint(&self) -> WorldPos {
         assert!(self.path.len() >= 1);
-        self.path[0]
+        *self.path.get(0)
     }
 
     fn next_waypoint(&self) -> WorldPos {
         assert!(self.path.len() >= 2);
-        self.path[1]
+        *self.path.get(1)
     }
 }
 

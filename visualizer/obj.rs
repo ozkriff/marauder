@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::vec_ng::Vec;
 use std::str::Words;
 use std::io::{BufferedReader, File};
 use cgmath::vector::{Vec3, Vec2};
@@ -13,20 +14,20 @@ struct Face {
 }
 
 pub struct Model {
-    coords: ~[VertexCoord],
-    normals: ~[Normal],
-    texture_coords: ~[TextureCoord],
-    faces: ~[Face],
+    coords: Vec<VertexCoord>,
+    normals: Vec<Normal>,
+    texture_coords: Vec<TextureCoord>,
+    faces: Vec<Face>,
 }
 
 // TODO: unwrap() -> ...
 impl Model {
     pub fn new(filename: &str) -> Model {
         let mut obj = Model {
-            coords: ~[],
-            normals: ~[],
-            texture_coords: ~[],
-            faces: ~[],
+            coords: Vec::new(),
+            normals: Vec::new(),
+            texture_coords: Vec::new(),
+            faces: Vec::new(),
         };
         obj.read(filename);
         obj
@@ -92,23 +93,23 @@ impl Model {
         }
     }
 
-    pub fn build(&self) -> ~[VertexCoord] {
-        let mut mesh = ~[];
+    pub fn build(&self) -> Vec<VertexCoord> {
+        let mut mesh = Vec::new();
         for face in self.faces.iter() {
             for i in range(0, 3) {
                 let vertex_id = face.vertex[i] - 1;
-                mesh.push(self.coords[vertex_id]);
+                mesh.push(*self.coords.get(vertex_id as uint));
             }
         }
         mesh
     }
 
-    pub fn build_tex_coord(&self) -> ~[TextureCoord] {
-        let mut tex_coords = ~[];
+    pub fn build_tex_coord(&self) -> Vec<TextureCoord> {
+        let mut tex_coords = Vec::new();
         for face in self.faces.iter() {
             for i in range(0, 3) {
                 let texture_coord_id = face.texture[i] - 1;
-                tex_coords.push(self.texture_coords[texture_coord_id]);
+                tex_coords.push(*self.texture_coords.get(texture_coord_id as uint));
             }
         }
         tex_coords

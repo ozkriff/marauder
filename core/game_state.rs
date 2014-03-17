@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::vec_ng::Vec;
 use collections::hashmap::HashMap;
 use core::core::{
     Unit,
@@ -22,8 +23,8 @@ impl<'a> GameState {
         }
     }
 
-    pub fn units_at(&'a self, pos: MapPos) -> ~[&'a Unit] {
-        let mut units = ~[];
+    pub fn units_at(&'a self, pos: MapPos) -> Vec<&'a Unit> {
+        let mut units = Vec::new();
         for (_, unit) in self.units.iter() {
             if unit.pos == pos {
                 units.push(unit);
