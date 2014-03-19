@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std;
+use std::vec_ng::Vec;
 use gl;
 use gl::types::{GLint, GLchar, GLuint, GLenum};
 use cgmath::matrix::{Matrix, Mat4};
@@ -81,11 +82,11 @@ fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
             let mut len = 0;
             gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
             // subtract 1 to skip the trailing null character
-            let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
+            let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar
             );
-            fail!("compile_shader(): " + std::str::raw::from_utf8(buf));
+            fail!("compile_shader(): " + std::str::raw::from_utf8(buf.as_slice()));
         }
     }
     shader
@@ -103,11 +104,11 @@ fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
             let mut len = 0;
             gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
             // subtract 1 to skip the trailing null character
-            let mut buf = std::vec::from_elem(len as uint - 1, 0u8);
+            let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar
             );
-            fail!("link_program(): " + std::str::raw::from_utf8(buf));
+            fail!("link_program(): " + std::str::raw::from_utf8(buf.as_slice()));
         }
     }
     program
