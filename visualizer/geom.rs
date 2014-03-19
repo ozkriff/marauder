@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use std::f32::consts::{PI, FRAC_PI_2 };
+use std::f32::consts::{PI, FRAC_PI_2};
 use std::num::{sqrt, pow, sin, asin, cos, abs};
 use cgmath::vector::{Vec2, Vec3, Vector};
 use core::types::{MInt, MapPos};
