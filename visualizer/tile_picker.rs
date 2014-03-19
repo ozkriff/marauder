@@ -15,10 +15,7 @@ use visualizer::mesh::Mesh;
 use visualizer::types::{VertexCoord, Color3, MFloat, MatId};
 use visualizer::shader::Shader;
 
-fn build_hex_map_mesh(
-    geom: &Geom,
-    map_size: Size2<MInt>
-) -> (Vec<VertexCoord>, Vec<Color3>) {
+fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut c_data = Vec::new();
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
@@ -37,13 +34,8 @@ fn build_hex_map_mesh(
             c_data.push(color);
         }
     }
-    (v_data, c_data)
-}
-
-fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
-    let (vertex_data, color_data) = build_hex_map_mesh(geom, map_size);
-    let mut mesh = Mesh::new(vertex_data.as_slice());
-    mesh.set_color(color_data.as_slice());
+    let mut mesh = Mesh::new(v_data.as_slice());
+    mesh.set_color(c_data.as_slice());
     mesh.prepare(shader);
     mesh
 }
