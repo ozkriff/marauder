@@ -336,7 +336,6 @@ impl<'a> Visualizer<'a> {
         match key {
             glfw::KeyT => self.end_turn(),
             glfw::KeyU => self.create_unit(),
-            glfw::KeyA => self.attack_unit(),
             _ => {},
         }
     }
@@ -382,7 +381,17 @@ impl<'a> Visualizer<'a> {
             self.move_unit();
         }
         if self.unit_under_cursor_id.is_some() {
-            self.select_unit();
+            let id = self.unit_under_cursor_id.unwrap();
+            let player_id = {
+                let state = self.game_state.get(&self.core.player_id());
+                let unit = state.units.get(&id);
+                unit.player_id
+            };
+            if player_id == self.core.player_id() {
+                self.select_unit();
+            } else {
+                self.attack_unit();
+            }
         }
     }
 
