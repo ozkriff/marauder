@@ -86,7 +86,8 @@ fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
             gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar
             );
-            fail!("compile_shader(): " + std::str::raw::from_utf8(buf.as_slice()));
+            fail!("compile_shader(): "
+                + std::str::raw::from_utf8(buf.as_slice()));
         }
     }
     shader
@@ -108,7 +109,8 @@ fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
             gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar
             );
-            fail!("link_program(): " + std::str::raw::from_utf8(buf.as_slice()));
+            fail!("link_program(): "
+                + std::str::raw::from_utf8(buf.as_slice()));
         }
     }
     program

@@ -92,8 +92,10 @@ impl EventMoveVisualizer {
         let speed = 3.8; // TODO: Get from UnitType
         let node_id = unit_id_to_node_id(unit_id);
         let node = scene.get_mut(&node_id);
-        node.rot = geom.get_rot_angle(*world_path.get(0), *world_path.get(1));
-        let move = MoveHelper::new(geom, *world_path.get(0), *world_path.get(1), speed);
+        node.rot = geom.get_rot_angle(
+            *world_path.get(0), *world_path.get(1));
+        let move = MoveHelper::new(
+            geom, *world_path.get(0), *world_path.get(1), speed);
         let mut vis = ~EventMoveVisualizer {
             unit_id: unit_id,
             path: world_path,

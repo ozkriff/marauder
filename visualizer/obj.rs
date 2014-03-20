@@ -108,8 +108,8 @@ impl Model {
         let mut tex_coords = Vec::new();
         for face in self.faces.iter() {
             for i in range(0, 3) {
-                let texture_coord_id = face.texture[i] - 1;
-                tex_coords.push(*self.texture_coords.get(texture_coord_id as uint));
+                let texture_coord_id = face.texture[i] as uint - 1;
+                tex_coords.push(*self.texture_coords.get(texture_coord_id));
             }
         }
         tex_coords
