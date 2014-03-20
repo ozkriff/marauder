@@ -341,8 +341,8 @@ impl<'a> Visualizer<'a> {
             glfw::KeyDown => self.camera.move(90.0, 1.0),
             glfw::KeyRight => self.camera.move(0.0, 1.0),
             glfw::KeyLeft => self.camera.move(180.0, 1.0),
-            glfw::KeyMinus => self.camera.zoom *= 2.0,
-            glfw::KeyEqual => self.camera.zoom /= 2.0,
+            glfw::KeyMinus => self.camera.zoom *= 1.3,
+            glfw::KeyEqual => self.camera.zoom /= 1.3,
             _ => {},
         }
         if self.event_visualizer.is_some() {
