@@ -487,28 +487,35 @@ impl<'a> Visualizer<'a> {
         }
     }
 
+    fn start_event_visualization(&mut self, event: core::Event) {
+        let vis = self.make_event_visualizer(&event);
+        self.event = Some(event);
+        self.event_visualizer = Some(vis);
+    }
+
+    fn end_event_visualization(&mut self) {
+        let scene = self.scenes.get_mut(&self.core.player_id());
+        let state = self.game_state.get_mut(&self.core.player_id());
+        self.event_visualizer.get_mut_ref().end(&self.geom, scene, state);
+        state.apply_event(self.event.get_ref());
+        self.event_visualizer = None;
+        self.event = None;
+        if self.selected_unit_id.is_some() {
+            let unit_id = self.selected_unit_id.unwrap();
+            let pf = self.pathfinders.get_mut(&self.core.player_id());
+            pf.fill_map(state, state.units.get(&unit_id));
+        }
+        self.picker.update_units(&self.geom, scene);
+    }
+
     fn logic(&mut self) {
         if self.event_visualizer.is_none() {
-            let event_opt = self.core.get_event();
-            if event_opt.is_some() {
-                let event = event_opt.unwrap();
-                let vis = self.make_event_visualizer(&event);
-                self.event = Some(event);
-                self.event_visualizer = Some(vis);
+            match self.core.get_event() {
+                Some(e) => self.start_event_visualization(e),
+                None => {},
             }
         } else if self.event_visualizer.get_ref().is_finished() {
-            let scene = self.scenes.get_mut(&self.core.player_id());
-            let state = self.game_state.get_mut(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().end(&self.geom, scene, state);
-            state.apply_event(self.event.get_ref());
-            self.event_visualizer = None;
-            self.event = None;
-            if self.selected_unit_id.is_some() {
-                let unit_id = self.selected_unit_id.unwrap();
-                let pf = self.pathfinders.get_mut(&self.core.player_id());
-                pf.fill_map(state, state.units.get(&unit_id));
-            }
-            self.picker.update_units(&self.geom, scene);
+            self.end_event_visualization();
         }
     }
 
