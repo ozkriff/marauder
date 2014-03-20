@@ -5,7 +5,7 @@ pub mod gl_helpers;
 pub mod camera;
 pub mod types;
 pub mod geom;
-pub mod tile_picker;
+pub mod picker;
 pub mod obj;
 pub mod mesh;
 pub mod event_visualizer;

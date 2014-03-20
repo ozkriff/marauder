@@ -145,10 +145,10 @@ impl Drop for Vbo {
     }
 }
 
-pub fn get_vec2_from_pixel(
+pub fn read_pixel_bytes(
     win_size: Size2<MInt>,
     mouse_pos: Vec2<MInt>,
-) -> Option<Vec2<MInt>> {
+) -> (MInt, MInt, MInt, MInt) {
     let height = win_size.h;
     let reverted_h = height - mouse_pos.y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
@@ -161,11 +161,7 @@ pub fn get_vec2_from_pixel(
             data_ptr
         );
     }
-    if data[2] != 0 {
-        Some(Vec2{x: data[0] as MInt, y: data[1] as MInt})
-    } else {
-        None
-    }
+    (data[0] as MInt, data[1] as MInt, data[2] as MInt, data[3] as MInt)
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

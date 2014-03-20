@@ -28,7 +28,7 @@ SRC = \
   visualizer/texture.rs \
   visualizer/event_visualizer.rs \
   visualizer/obj.rs \
-  visualizer/tile_picker.rs \
+  visualizer/picker.rs \
   visualizer/types.rs \
   visualizer/visualizer.rs \
 
