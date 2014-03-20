@@ -512,14 +512,18 @@ impl<'a> Visualizer<'a> {
         }
     }
 
+    pub fn update_time(&mut self) {
+        let time = precise_time_ns();
+        self.dtime = (time - self.last_time) as MInt;
+        self.last_time = time;
+    }
+
     pub fn tick(&mut self) {
         self.handle_events();
         self.logic();
         self.pick_tile();
         self.draw();
-        let time = precise_time_ns();
-        self.dtime = (time - self.last_time) as MInt;
-        self.last_time = time;
+        self.update_time();
     }
 }
 
