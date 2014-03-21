@@ -1,7 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use std;
-use std::vec::Vec;
 use gl;
 use gl::types::{GLint, GLchar, GLuint, GLenum};
 use cgmath::matrix::{Matrix, Mat4};

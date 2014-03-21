@@ -1,6 +1,5 @@
 // See LICENSE file for copyright and license details.
 
-use std::vec::Vec;
 use core::types::{MBool, MInt, MapPos, Size2};
 use core::core::Unit;
 use core::game_state::GameState;

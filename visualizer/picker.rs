@@ -1,6 +1,5 @@
 // See LICENSE file for copyright and license details.
 
-use std::vec::Vec;
 use cgmath::vector::{Vector, Vec3, Vec2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
