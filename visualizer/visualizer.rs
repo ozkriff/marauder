@@ -330,10 +330,10 @@ impl<'a> Visualizer<'a> {
             glfw::KeyEscape | glfw::KeyQ => {
                 self.win().set_should_close(true);
             },
-            glfw::KeyUp => self.camera.move(270.0, 1.0),
-            glfw::KeyDown => self.camera.move(90.0, 1.0),
-            glfw::KeyRight => self.camera.move(0.0, 1.0),
-            glfw::KeyLeft => self.camera.move(180.0, 1.0),
+            glfw::KeyUp => self.camera.move(270.0, 0.1),
+            glfw::KeyDown => self.camera.move(90.0, 0.1),
+            glfw::KeyRight => self.camera.move(0.0, 0.1),
+            glfw::KeyLeft => self.camera.move(180.0, 0.1),
             glfw::KeyMinus => self.camera.zoom *= 1.3,
             glfw::KeyEqual => self.camera.zoom /= 1.3,
             _ => {},
@@ -361,8 +361,8 @@ impl<'a> Visualizer<'a> {
         if mmb == glfw::Press {
             // TODO: Remove 0.05
             let diff = self.mouse_pos - pos;
-            self.camera.move(90.0, diff.y * 0.05);
-            self.camera.move(0.0, diff.x * 0.05);
+            self.camera.move(90.0, diff.y * 0.01);
+            self.camera.move(0.0, diff.x * 0.01);
         }
         self.mouse_pos = pos;
     }

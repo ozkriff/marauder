@@ -51,8 +51,8 @@ impl Camera {
         let speed_in_radians = deg_to_rad(self.z_angle - angle);
         let dx = sin(speed_in_radians);
         let dy = cos(speed_in_radians);
-        self.pos.x -= dy * speed;
-        self.pos.y -= dx * speed;
+        self.pos.x -= dy * speed * self.zoom;
+        self.pos.y -= dx * speed * self.zoom;
     }
 
     pub fn set_win_size(&mut self, win_size: Size2<MInt>) {
