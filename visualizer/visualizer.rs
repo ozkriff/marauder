@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use std::vec_ng::Vec;
+use std::vec::Vec;
 use collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;

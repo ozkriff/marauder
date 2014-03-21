@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use std::vec_ng::Vec;
+use std::vec::Vec;
 use rand;
 use rand::Rng;
 use cgmath::vector::{Vec3, Vector, EuclideanVector};

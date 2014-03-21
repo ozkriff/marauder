@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use std::vec_ng::Vec;
+use std::vec::Vec;
 use std::str::Words;
 use std::io::{BufferedReader, File};
 use cgmath::vector::{Vec3, Vec2};
