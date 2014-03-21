@@ -286,10 +286,19 @@ impl<'a> Visualizer<'a> {
         self.selected_unit_id = None;
     }
 
+    fn is_full_tile(&self, pos: MapPos) -> MBool {
+        let state = self.game_state.get(&self.core.player_id());
+        let max_units_per_tile = 6;
+        state.units_at(pos).len() >= max_units_per_tile
+    }
+
     fn create_unit(&mut self) {
         let pos_opt = self.map_pos_under_cursor;
         if pos_opt.is_some() {
             let pos = pos_opt.unwrap();
+            if self.is_full_tile(pos) {
+                return;
+            }
             let cmd = core::CommandCreateUnit(pos);
             self.core.do_command(cmd);
         }
@@ -361,6 +370,9 @@ impl<'a> Visualizer<'a> {
     fn move_unit(&mut self) {
         let pos = self.map_pos_under_cursor.unwrap();
         if self.selected_unit_id.is_none() {
+            return;
+        }
+        if self.is_full_tile(pos) {
             return;
         }
         let unit_id = self.selected_unit_id.unwrap();
