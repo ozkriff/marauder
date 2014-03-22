@@ -19,6 +19,7 @@ fn i_to_f(n: MInt) -> f32 {
 }
 
 fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
+    use std::slice::Vector;
     let mut c_data = Vec::new();
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
@@ -81,6 +82,7 @@ impl TilePicker {
     }
 
     pub fn update_units( &mut self, geom: &Geom, scene: &Scene) {
+        use std::slice::Vector;
         fn get_hex_vertex(geom: &Geom, n: MInt) -> WorldPos {
             let scale_factor = 0.5;
             geom.index_to_hex_vertex(n).mul_s(scale_factor)
