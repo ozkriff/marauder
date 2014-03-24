@@ -9,7 +9,7 @@ pub struct Size2<T>{w: T, h: T}
 pub type MBool = bool;
 pub type MInt = i32;
 
-#[deriving(Ord, Eq, Hash)]
+#[deriving(Ord, Eq, TotalEq, Hash)]
 pub struct PlayerId(MInt);
 
 #[deriving(Ord, TotalOrd, Eq, TotalEq, Hash)]

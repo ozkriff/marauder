@@ -27,7 +27,7 @@ pub struct SceneNode {
     mesh_id: MInt,
 }
 
-#[deriving(Ord, Eq, Hash)]
+#[deriving(Ord, Eq, TotalEq, Hash)]
 pub struct NodeId(MInt);
 
 pub type Scene = HashMap<NodeId, SceneNode>;
