@@ -159,7 +159,7 @@ pub struct Visualizer<'a> {
     unit_under_cursor_id: Option<UnitId>,
     geom: Geom,
     scenes: HashMap<PlayerId, Scene>,
-    core: ~core::Core<'a>,
+    core: ~core::Core,
     event: Option<core::Event>,
     event_visualizer: Option<~EventVisualizer>,
     game_state: HashMap<PlayerId, GameState>,

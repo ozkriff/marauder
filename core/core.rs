@@ -29,7 +29,7 @@ pub struct Unit {
     player_id: PlayerId,
 }
 
-pub struct Core<'a> {
+pub struct Core {
     priv units: HashMap<UnitId, Unit>,
     priv players: Vec<Player>,
     priv current_player_id: PlayerId,
@@ -45,7 +45,7 @@ fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
     map
 }
 
-impl<'a> Core<'a> {
+impl Core {
     pub fn new() -> ~Core {
         let config = Config::new("conf_core.json");
         let map_size = config.get("map_size");
