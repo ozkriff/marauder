@@ -48,6 +48,8 @@ pub fn rot_z(m: Mat4<MFloat>, angle: MFloat) -> Mat4<MFloat> {
 
 pub fn init_opengl() {
     gl::Enable(gl::DEPTH_TEST);
+    gl::Enable(gl::BLEND);
+    gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
 }
 
 pub fn set_clear_color(r: MFloat, g: MFloat, b: MFloat) {
