@@ -122,14 +122,16 @@ impl Vbo {
         vbo.bind();
         let size = std::mem::size_of::<T>();
         let buf_size = (data.len() * size) as GLsizeiptr;
-        unsafe {
-            let data_ptr = std::cast::transmute(&data[0]);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                buf_size,
-                data_ptr,
-                gl::STATIC_DRAW,
-            );
+        if data.len() != 0 {
+            unsafe {
+                let data_ptr = std::cast::transmute(&data[0]);
+                gl::BufferData(
+                    gl::ARRAY_BUFFER,
+                    buf_size,
+                    data_ptr,
+                    gl::STATIC_DRAW,
+                );
+            }
         }
         vbo
     }
