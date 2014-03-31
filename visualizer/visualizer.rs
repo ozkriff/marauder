@@ -92,23 +92,6 @@ fn get_marker(shader: &Shader, tex_path: ~str) -> Mesh {
     mesh
 }
 
-fn init_win(win_size: Size2<MInt>) -> glfw::Window {
-    glfw::set_error_callback(~glfw::LogErrorHandler);
-    let init_status = glfw::init();
-    if !init_status.is_ok() {
-        fail!("Failed to initialize GLFW");
-    }
-    let win = glfw::Window::create(
-        win_size.w as u32,
-        win_size.h as u32,
-        "Marauder",
-        glfw::Windowed,
-    ).unwrap();
-    win.make_context_current();
-    win.set_all_polling(true);
-    win
-}
-
 fn get_scenes(players_count: MInt) -> HashMap<PlayerId, Scene> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
@@ -184,15 +167,27 @@ pub struct Visualizer<'a> {
     last_time: Time,
     dtime: MInt,
     win_size: Size2<MInt>,
+    glfw: glfw::Glfw,
+    events: Receiver<(f64, glfw::WindowEvent)>,
+    errors: Receiver<(glfw::ErrorType, ~str)>,
 }
 
 impl<'a> Visualizer<'a> {
     pub fn new() -> ~Visualizer {
         let players_count = 2;
         let config = Config::new("conf_visualizer.json");
-        let win_size = config.get("screen_size");
-        let win = init_win(win_size);
-        load_gl_funcs_with(glfw::get_proc_address);
+        let win_size = config.get::<Size2<MInt>>("screen_size");
+        let (glfw, errors) = glfw::init().unwrap();
+        glfw::fail_on_error(&errors);
+        let (win, events) = glfw.create_window(
+            win_size.w as u32,
+            win_size.h as u32,
+            "Marauder",
+            glfw::Windowed
+        ).unwrap();
+        glfw.make_context_current(Some(&win));
+        win.set_all_polling(true);
+        load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
         init_opengl();
         let geom = Geom::new();
         let core = core::Core::new();
@@ -237,6 +232,9 @@ impl<'a> Visualizer<'a> {
             last_time: precise_time_ns(),
             dtime: 0,
             win_size: win_size,
+            glfw: glfw,
+            events: events,
+            errors: errors,
         };
         vis
     }
@@ -407,9 +405,10 @@ impl<'a> Visualizer<'a> {
     }
 
     fn get_events(&mut self) -> Vec<glfw::WindowEvent> {
-        glfw::poll_events();
+        self.glfw.poll_events();
+        glfw::fail_on_error(&self.errors);
         let mut events = Vec::new();
-        for (_, event) in self.win().flush_events() {
+        for (_, event) in glfw::flush_messages(&self.events) {
             events.push(event);
         }
         events
