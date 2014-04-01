@@ -7,12 +7,12 @@ use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 
 pub struct Mesh {
-    priv vertex_coords_vbo: Vbo,
-    priv color_vbo: Option<Vbo>,
-    priv texture_coords_vbo: Option<Vbo>,
-    priv texture: Option<Texture>,
-    priv length: MInt,
-    priv vao: Vao,
+    vertex_coords_vbo: Vbo,
+    color_vbo: Option<Vbo>,
+    texture_coords_vbo: Option<Vbo>,
+    texture: Option<Texture>,
+    length: MInt,
+    vao: Vao,
 }
 
 impl Mesh {

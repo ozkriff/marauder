@@ -4,7 +4,7 @@ use serialize::{Decodable, json};
 use core::misc::read_file;
 
 pub struct Config {
-    priv json: ~json::Object,
+    json: ~json::Object,
 }
 
 fn decode<A: Decodable<json::Decoder, json::Error>>(json_obj: json::Json) -> A {

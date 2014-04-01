@@ -1,0 +1,35 @@
+diff a/visualizer/gl_helpers.rs b/visualizer/gl_helpers.rs	(rejected hunks)
+@@ -48,6 +48,8 @@ pub fn rot_z(m: Mat4<MFloat>, angle: MFloat) -> Mat4<MFloat> {
+ 
+ pub fn init_opengl() {
+     gl::Enable(gl::DEPTH_TEST);
++    gl::Enable(gl::BLEND);
++    gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+ }
+ 
+ pub fn set_clear_color(r: MFloat, g: MFloat, b: MFloat) {
+@@ -120,14 +122,16 @@ impl Vbo {
+         vbo.bind();
+         let size = std::mem::size_of::<T>();
+         let buf_size = (data.len() * size) as GLsizeiptr;
+-        unsafe {
+-            let data_ptr = std::cast::transmute(&data[0]);
+-            gl::BufferData(
+-                gl::ARRAY_BUFFER,
+-                buf_size,
+-                data_ptr,
+-                gl::STATIC_DRAW,
+-            );
++        if data.len() != 0 {
++            unsafe {
++                let data_ptr = std::cast::transmute(&data[0]);
++                gl::BufferData(
++                    gl::ARRAY_BUFFER,
++                    buf_size,
++                    data_ptr,
++                    gl::STATIC_DRAW,
++                );
++            }
+         }
+         vbo
+     }

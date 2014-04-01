@@ -12,7 +12,7 @@ use core::core::{
 use core::types::{UnitId, MapPos, MInt};
 
 pub struct GameState {
-    units: HashMap<UnitId, Unit>,
+    pub units: HashMap<UnitId, Unit>,
 }
 
 impl<'a> GameState {

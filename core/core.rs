@@ -20,22 +20,22 @@ pub enum Event {
 }
 
 pub struct Player {
-    id: PlayerId,
+    pub id: PlayerId,
 }
 
 pub struct Unit {
-    id: UnitId,
-    pos: MapPos,
-    player_id: PlayerId,
+    pub id: UnitId,
+    pub pos: MapPos,
+    pub player_id: PlayerId,
 }
 
 pub struct Core {
-    priv units: HashMap<UnitId, Unit>,
-    priv players: Vec<Player>,
-    priv current_player_id: PlayerId,
-    priv core_event_list: Vec<~CoreEvent>,
-    priv event_lists: HashMap<PlayerId, Vec<Event>>,
-    priv map_size: Size2<MInt>,
+    units: HashMap<UnitId, Unit>,
+    players: Vec<Player>,
+    current_player_id: PlayerId,
+    core_event_list: Vec<~CoreEvent>,
+    event_lists: HashMap<PlayerId, Vec<Event>>,
+    map_size: Size2<MInt>,
 }
 
 fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {

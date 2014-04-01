@@ -11,10 +11,10 @@ use visualizer::gl_helpers::{tr, rot_x, rot_z};
 use visualizer::types::{MFloat, WorldPos};
 
 pub struct Camera {
-    x_angle: MFloat,
-    z_angle: MFloat,
-    pos: WorldPos,
-    zoom: MFloat,
+    pub x_angle: MFloat,
+    pub z_angle: MFloat,
+    pub pos: WorldPos,
+    pub zoom: MFloat,
     projection_mat: Mat4<MFloat>,
 }
 

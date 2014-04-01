@@ -36,8 +36,8 @@ impl<'a> Map {
 }
 
 pub struct Pathfinder {
-    priv queue: Vec<MapPos>,
-    priv map: Map,
+    queue: Vec<MapPos>,
+    map: Map,
 }
 
 fn create_tiles(tiles_count: MInt) -> Vec<Tile> {

@@ -8,8 +8,8 @@ use core::misc::{rad_to_deg};
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
 
 pub struct Geom {
-    hex_ex_radius: MFloat,
-    hex_in_radius: MFloat,
+    pub hex_ex_radius: MFloat,
+    pub hex_in_radius: MFloat,
 }
 
 impl Geom {

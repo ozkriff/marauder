@@ -6,9 +6,9 @@ use cgmath::vector::{Vec3, Vec2};
 use core::types::MInt;
 
 pub struct Color3 {
-    r: MFloat,
-    g: MFloat,
-    b: MFloat,
+    pub r: MFloat,
+    pub g: MFloat,
+    pub b: MFloat,
 }
 
 pub type MFloat = GLfloat;
@@ -22,9 +22,9 @@ pub type Time = u64;
 pub struct MatId(GLuint);
 
 pub struct SceneNode {
-    pos: WorldPos,
-    rot: MFloat,
-    mesh_id: MInt,
+    pub pos: WorldPos,
+    pub rot: MFloat,
+    pub mesh_id: MInt,
 }
 
 #[deriving(Ord, Eq, TotalEq, Hash)]

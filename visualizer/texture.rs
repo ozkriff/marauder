@@ -7,7 +7,7 @@ use stb_image::image;
 use visualizer::shader::Shader;
 
 pub struct Texture {
-    priv id: GLuint,
+    id: GLuint,
 }
 
 impl Texture {

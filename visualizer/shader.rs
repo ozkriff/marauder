@@ -9,7 +9,7 @@ use core::misc::read_file;
 use visualizer::types::{MatId, MFloat};
 
 pub struct Shader {
-    priv id: GLuint,
+    id: GLuint,
 }
 
 impl Shader {

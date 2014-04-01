@@ -65,7 +65,7 @@ pub fn set_viewport(size: Size2<MInt>) {
 }
 
 pub struct Vao {
-    priv id: GLuint,
+    id: GLuint,
 }
 
 impl Vao {
@@ -105,7 +105,7 @@ impl Drop for Vao {
 }
 
 pub struct Vbo {
-    priv id: GLuint,
+    id: GLuint,
 }
 
 fn get_new_vbo_id() -> GLuint {
