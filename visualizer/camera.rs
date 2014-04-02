@@ -1,6 +1,5 @@
 // See LICENSE file for copyright and license details.
 
-use std::num::{sin, cos};
 use cgmath::projection;
 use cgmath::angle;
 use cgmath::matrix::Mat4;
@@ -49,8 +48,8 @@ impl Camera {
 
     pub fn move(&mut self, angle: MFloat, speed: MFloat) {
         let speed_in_radians = deg_to_rad(self.z_angle - angle);
-        let dx = sin(speed_in_radians);
-        let dy = cos(speed_in_radians);
+        let dx = speed_in_radians.sin();
+        let dy = speed_in_radians.cos();
         self.pos.x -= dy * speed * self.zoom;
         self.pos.y -= dx * speed * self.zoom;
     }
