@@ -36,8 +36,7 @@ get_cgmath_rs() {
 
 get_stb_image() {
     echo === rust-stb-image ===
-    # TODO: ozkriff -> mozilla-servo
-    git clone --depth=1 https://github.com/ozkriff/rust-stb-image
+    git clone --depth=1 https://github.com/mozilla-servo/rust-stb-image
     cd rust-stb-image
     ./configure
     make
