@@ -43,7 +43,7 @@ impl Dir {
             West,
             NorthWest,
         ];
-        dirs[n]
+        dirs[n as uint]
     }
 
     pub fn to_int(&self) -> MInt {
@@ -61,7 +61,7 @@ impl Dir {
         // assert!(from.distance(to) == 1);
         let diff = to - from;
         for i in range(0 as MInt, 6) {
-            if diff == DIR_TO_POS_DIFF[from.y % 2][i] {
+            if diff == DIR_TO_POS_DIFF[(from.y % 2) as uint][i as uint] {
                 return Dir::from_int(i);
             }
         }
@@ -70,10 +70,10 @@ impl Dir {
 
     pub fn get_neighbour_pos(pos: MapPos, dir: Dir) -> MapPos {
         let is_odd_row = pos.y % 2 == 1;
-        let subtable_index: MInt = if is_odd_row { 1 } else { 0 };
+        let subtable_index = if is_odd_row { 1 } else { 0 };
         let direction_index = dir.to_int();
         assert!(direction_index >= 0 && direction_index < 6);
-        let difference = DIR_TO_POS_DIFF[subtable_index][direction_index];
+        let difference = DIR_TO_POS_DIFF[subtable_index as uint][direction_index as uint];
         pos + difference
     }
 }
