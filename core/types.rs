@@ -9,6 +9,8 @@ pub struct Size2<T>{
     pub h: T,
 }
 
+pub type Point2<T> = Vec2<T>;
+
 pub type MBool = bool;
 pub type MInt = i32;
 

@@ -6,7 +6,7 @@ use glfw;
 use glfw::Context;
 use cgmath::vector::{Vec3, Vec2};
 use core::map::MapPosIter;
-use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos};
+use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos, Point2};
 use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
 use core::conf::Config;
@@ -30,7 +30,6 @@ use visualizer::types::{
     VertexCoord,
     TextureCoord,
     MFloat,
-    Point2,
     MatId,
     Time,
 };
