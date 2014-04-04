@@ -3,6 +3,7 @@
 use collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;
+use glfw::Context;
 use cgmath::vector::{Vec3, Vec2};
 use core::map::MapPosIter;
 use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos};
