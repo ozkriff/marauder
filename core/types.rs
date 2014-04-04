@@ -13,10 +13,10 @@ pub type MBool = bool;
 pub type MInt = i32;
 
 #[deriving(Ord, Eq, TotalEq, Hash)]
-pub struct PlayerId(MInt);
+pub struct PlayerId(pub MInt);
 
 #[deriving(Ord, TotalOrd, Eq, TotalEq, Hash)]
-pub struct UnitId(MInt);
+pub struct UnitId(pub MInt);
 
 pub type MapPos = Vec2<MInt>;
 

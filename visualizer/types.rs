@@ -19,7 +19,7 @@ pub type TextureCoord = Vec2<MFloat>;
 pub type Point2<T> = Vec2<T>;
 pub type Time = u64;
 
-pub struct MatId(GLuint);
+pub struct MatId(pub GLuint);
 
 pub struct SceneNode {
     pub pos: WorldPos,
@@ -28,7 +28,7 @@ pub struct SceneNode {
 }
 
 #[deriving(Ord, Eq, TotalEq, Hash)]
-pub struct NodeId(MInt);
+pub struct NodeId(pub MInt);
 
 pub type Scene = HashMap<NodeId, SceneNode>;
 
