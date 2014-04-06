@@ -169,7 +169,6 @@ pub struct Visualizer<'a> {
     win_size: Size2<MInt>,
     glfw: glfw::Glfw,
     events: Receiver<(f64, glfw::WindowEvent)>,
-    errors: Receiver<(glfw::ErrorType, ~str)>,
 }
 
 impl<'a> Visualizer<'a> {
@@ -177,8 +176,7 @@ impl<'a> Visualizer<'a> {
         let players_count = 2;
         let config = Config::new("conf_visualizer.json");
         let win_size = config.get::<Size2<MInt>>("screen_size");
-        let (glfw, errors) = glfw::init().unwrap();
-        glfw::fail_on_error(&errors);
+        let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         let (win, events) = glfw.create_window(
             win_size.w as u32,
             win_size.h as u32,
@@ -234,7 +232,6 @@ impl<'a> Visualizer<'a> {
             win_size: win_size,
             glfw: glfw,
             events: events,
-            errors: errors,
         };
         vis
     }
@@ -406,7 +403,6 @@ impl<'a> Visualizer<'a> {
 
     fn get_events(&mut self) -> Vec<glfw::WindowEvent> {
         self.glfw.poll_events();
-        glfw::fail_on_error(&self.errors);
         let mut events = Vec::new();
         for (_, event) in glfw::flush_messages(&self.events) {
             events.push(event);
