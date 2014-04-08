@@ -13,13 +13,14 @@ pub fn rad_to_deg(n: MFloat) -> MFloat {
     (n * 180.0) / PI
 }
 
+// TODO: Simplify this
 pub fn read_file(path: &Path) -> ~str {
     if !path.exists() {
         fail!("Path does not exists: {}", path.display());
     }
     let shader = match File::open(path).map(|mut v| v.read_to_end()) {
         Ok(txt) => from_utf8_owned(match txt {
-            Ok(txt) => txt,
+            Ok(txt) => txt.as_slice().to_owned(),
             Err(_) => fail!("Can not read file {}", path.display()),
         }),
         Err(_) => fail!("Can not read file {}", path.display()),
