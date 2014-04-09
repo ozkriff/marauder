@@ -44,6 +44,15 @@ get_stb_image() {
     cd ..
 }
 
+get_stb_tt_rs() {
+    echo === stb-tt-rs ===
+    git clone --depth=1 https://github.com/ozkriff/stb-tt-rs
+    cd stb-tt-rs
+    make
+    mv *.rlib *.a ..
+    cd ..
+}
+
 get_deps() {
     echo Creating 'deps' dir...
     mkdir deps
@@ -52,6 +61,7 @@ get_deps() {
     get_gl_rs
     get_cgmath_rs
     get_stb_image
+    get_stb_tt_rs
     cd ..
 }
 

@@ -42,6 +42,7 @@ use visualizer::event_visualizer::{
 };
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
+use visualizer::font_stash::FontStash;
 
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> Vec<VertexCoord> {
     let mut vertex_data = Vec::new();
@@ -169,6 +170,7 @@ pub struct Visualizer<'a> {
     win_size: Size2<MInt>,
     glfw: glfw::Glfw,
     events: Receiver<(f64, glfw::WindowEvent)>,
+    font_stash: FontStash,
 }
 
 impl<'a> Visualizer<'a> {
@@ -204,6 +206,7 @@ impl<'a> Visualizer<'a> {
             &mut meshes, get_marker(&shader, ~"data/flag1.png"));
         let marker_2_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, ~"data/flag2.png"));
+        let /*mut*/ font_stash = FontStash::new("data/DroidSerif-Regular.ttf", 100.0);
         let vis = ~Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
@@ -232,6 +235,7 @@ impl<'a> Visualizer<'a> {
             win_size: win_size,
             glfw: glfw,
             events: events,
+            font_stash: font_stash,
         };
         vis
     }
@@ -253,7 +257,7 @@ impl<'a> Visualizer<'a> {
         }
     }
 
-    fn draw_map(&self) {
+    fn draw_map(&mut self) {
         self.shader.uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
         self.meshes.get(self.map_mesh_id as uint).draw(&self.shader);
     }
@@ -268,6 +272,10 @@ impl<'a> Visualizer<'a> {
             let scene = self.scenes.get_mut(&self.core.player_id());
             self.event_visualizer.get_mut_ref().draw(
                 &self.geom, scene, self.dtime);
+        }
+        {
+            let m = self.font_stash.get_mesh("kill_them_all", &self.shader);
+            m.draw(&self.shader);
         }
         self.win().swap_buffers();
     }

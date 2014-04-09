@@ -14,6 +14,7 @@ extern crate cgmath;
 extern crate glfw;
 extern crate gl;
 extern crate stb_image;
+extern crate stb_tt;
 
 use visualizer::visualizer::Visualizer;
 

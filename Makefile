@@ -31,6 +31,7 @@ SRC = \
   visualizer/picker.rs \
   visualizer/types.rs \
   visualizer/visualizer.rs \
+  visualizer/font_stash.rs \
 
 
 marauder: Makefile ${SRC}

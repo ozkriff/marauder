@@ -11,5 +11,6 @@ pub mod mesh;
 pub mod event_visualizer;
 pub mod shader;
 pub mod texture;
+pub mod font_stash;
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
