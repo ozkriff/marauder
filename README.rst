@@ -6,6 +6,7 @@ Marauder
 Marauder is turn-based post-apocalyptic hexagonal strategy game
 written in Rust_.
 
+|screenshot|
 
 Contribute
 ==========
@@ -42,3 +43,5 @@ Marauder is licensed under the MIT license (see the "LICENSE" file).
 
 .. _Rust: https://rust-lang.org
 .. _`ozkriff/marauder`: https://github.com/ozkriff/marauder
+
+.. |screenshot| image:: http://i.imgur.com/U0iHH5R.gif
