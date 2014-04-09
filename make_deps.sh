@@ -8,7 +8,7 @@ get_glfw() {
     cd glfw
     cmake -DBUILD_SHARED_LIBS=ON
     make glfw
-    mv src/lib*.so* ..
+    mv src/libglfw* ..
     cd ..
 }
 
@@ -18,7 +18,7 @@ get_glfw_rs() {
     cd glfw-rs
     get_glfw
     PKG_CONFIG_PATH=glfw/src make lib
-    mv lib/*.rlib lib/*.so *.so* ..
+    mv lib/libglfw* libglfw* ..
     cd ..
 }
 
@@ -40,7 +40,7 @@ get_stb_image() {
     cd rust-stb-image
     ./configure
     make
-    mv *.rlib *.a ..
+    mv libstb* ..
     cd ..
 }
 
@@ -49,7 +49,7 @@ get_stb_tt_rs() {
     git clone --depth=1 https://github.com/ozkriff/stb-tt-rs
     cd stb-tt-rs
     make
-    mv *.rlib *.a ..
+    mv libstb* ..
     cd ..
 }
 
