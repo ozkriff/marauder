@@ -25,7 +25,12 @@ get_glfw_rs() {
 get_gl_rs() {
     echo === gl-rs ===
     git clone --depth=1 https://github.com/bjz/gl-rs
-    rustc gl-rs/src/gl/lib.rs --out-dir .
+    cd gl-rs
+    git submodule init
+    git submodule update # TODO: two glfw-rs repos? :(
+    make lib
+    mv lib/libgl* ..
+    cd ..
 }
 
 get_cgmath_rs() {
