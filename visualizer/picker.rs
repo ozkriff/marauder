@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::{Vector, Vec3, Vec2};
+use cgmath::vector::{Vector, Vector3, Vector2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
 use visualizer::gl_helpers::{
@@ -34,7 +34,7 @@ fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
             c_data.push(color);
             v_data.push(pos3d + next_vertex);
             c_data.push(color);
-            v_data.push(pos3d + Vec3::zero());
+            v_data.push(pos3d + Vector3::zero());
             c_data.push(color);
         }
     }
@@ -101,7 +101,7 @@ impl TilePicker {
                 c_data.push(color);
                 v_data.push(node.pos + get_hex_vertex(geom, num + 1));
                 c_data.push(color);
-                v_data.push(node.pos + Vec3::zero());
+                v_data.push(node.pos + Vector3::zero());
                 c_data.push(color);
             }
         }
@@ -117,7 +117,7 @@ impl TilePicker {
     pub fn pick_tile(
         &mut self,
         camera: &Camera,
-        mouse_pos: Vec2<MInt>
+        mouse_pos: Vector2<MInt>
     ) -> PickResult {
         self.shader.activate();
         self.shader.uniform_mat4f(self.mvp_mat_id, &camera.mat());
@@ -131,7 +131,7 @@ impl TilePicker {
         let (r, g, b, _) = read_pixel_bytes(self.win_size, mouse_pos);
         match b {
             0 => PickedNothing,
-            1 => PickedMapPos(Vec2{x: r, y: g}),
+            1 => PickedMapPos(Vector2{x: r, y: g}),
             2 => PickedUnitId(UnitId(r)),
             _ => fail!(),
         }

@@ -4,7 +4,7 @@ use collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;
 use glfw::Context;
-use cgmath::vector::{Vec3, Vec2};
+use cgmath::vector::{Vector3, Vector2};
 use core::map::MapPosIter;
 use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos, Point2};
 use core::game_state::GameState;
@@ -53,7 +53,7 @@ fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> Vec<VertexCoord> {
             let next_vertex = geom.index_to_hex_vertex(num + 1);
             vertex_data.push(pos + vertex);
             vertex_data.push(pos + next_vertex);
-            vertex_data.push(pos + Vec3::zero());
+            vertex_data.push(pos + Vector3::zero());
         }
     }
     vertex_data
@@ -63,9 +63,9 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> Vec<TextureCoord> {
     let mut vertex_data = Vec::new();
     for _ in MapPosIter::new(map_size) {
         for _ in range(0, 6) {
-            vertex_data.push(Vec2{x: 0.0, y: 0.0});
-            vertex_data.push(Vec2{x: 1.0, y: 0.0});
-            vertex_data.push(Vec2{x: 0.5, y: 0.5});
+            vertex_data.push(Vector2{x: 0.0, y: 0.0});
+            vertex_data.push(Vector2{x: 1.0, y: 0.0});
+            vertex_data.push(Vector2{x: 0.5, y: 0.5});
         }
     }
     vertex_data
@@ -74,13 +74,13 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> Vec<TextureCoord> {
 fn get_marker_pre_mesh() -> (Vec<VertexCoord>, Vec<TextureCoord>) {
     let n = 0.2;
     let mut vertex_data = Vec::new();
-    vertex_data.push(Vec3{x: -n, y: 0.0, z: 0.1});
-    vertex_data.push(Vec3{x: 0.0, y: n * 1.4, z: 0.1});
-    vertex_data.push(Vec3{x: n, y: 0.0, z: 0.1});
+    vertex_data.push(Vector3{x: -n, y: 0.0, z: 0.1});
+    vertex_data.push(Vector3{x: 0.0, y: n * 1.4, z: 0.1});
+    vertex_data.push(Vector3{x: n, y: 0.0, z: 0.1});
     let mut tex_data = Vec::new();
-    tex_data.push(Vec2{x: 0.0, y: 0.0});
-    tex_data.push(Vec2{x: 1.0, y: 0.0});
-    tex_data.push(Vec2{x: 0.5, y: 0.5});
+    tex_data.push(Vector2{x: 0.0, y: 0.0});
+    tex_data.push(Vector2{x: 1.0, y: 0.0});
+    tex_data.push(Vector2{x: 0.5, y: 0.5});
     (vertex_data, tex_data)
 }
 
@@ -217,7 +217,7 @@ impl<'a> Visualizer<'a> {
             mvp_mat_id: mvp_mat_id,
             shader: shader,
             win: win,
-            mouse_pos: Vec2::zero(),
+            mouse_pos: Vector2::zero(),
             camera: Camera::new(win_size),
             picker: picker,
             map_pos_under_cursor: None,
@@ -424,7 +424,7 @@ impl<'a> Visualizer<'a> {
                 self.handle_key_event(key);
             },
             glfw::CursorPosEvent(x, y) => {
-                let p = Vec2{x: x as MFloat, y: y as MFloat};
+                let p = Vector2{x: x as MFloat, y: y as MFloat};
                 self.handle_cursor_pos_event(p);
             },
             glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
@@ -448,7 +448,7 @@ impl<'a> Visualizer<'a> {
     }
 
     fn pick_tile(&mut self) {
-        let mouse_pos = Vec2 {
+        let mouse_pos = Vector2 {
             x: self.mouse_pos.x as MInt,
             y: self.mouse_pos.y as MInt,
         };

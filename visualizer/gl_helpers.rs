@@ -3,8 +3,8 @@
 use std;
 use gl;
 use gl::types::{GLuint, GLsizeiptr};
-use cgmath::matrix::{Matrix, Mat4, Mat3, ToMat4};
-use cgmath::vector::{Vec2, Vec3};
+use cgmath::matrix::{Matrix, Matrix4, Matrix3, ToMatrix4};
+use cgmath::vector::{Vector2, Vector3};
 use cgmath::angle;
 use core::misc::deg_to_rad;
 use core::types::{Size2, MInt};
@@ -26,23 +26,23 @@ impl MeshRenderMode {
     }
 }
 
-pub fn tr(m: Mat4<MFloat>, v: Vec3<MFloat>) -> Mat4<MFloat> {
-    let mut t = Mat4::<MFloat>::identity();
+pub fn tr(m: Matrix4<MFloat>, v: Vector3<MFloat>) -> Matrix4<MFloat> {
+    let mut t = Matrix4::<MFloat>::identity();
     *t.mut_cr(3, 0) = v.x;
     *t.mut_cr(3, 1) = v.y;
     *t.mut_cr(3, 2) = v.z;
     m.mul_m(&t)
 }
 
-pub fn rot_x(m: Mat4<MFloat>, angle: MFloat) -> Mat4<MFloat> {
+pub fn rot_x(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
     let rad = angle::rad(deg_to_rad(angle));
-    let r = Mat3::from_angle_x(rad).to_mat4();
+    let r = Matrix3::from_angle_x(rad).to_matrix4();
     m.mul_m(&r)
 }
 
-pub fn rot_z(m: Mat4<MFloat>, angle: MFloat) -> Mat4<MFloat> {
+pub fn rot_z(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
     let rad = angle::rad(deg_to_rad(angle));
-    let r = Mat3::from_angle_z(rad).to_mat4();
+    let r = Matrix3::from_angle_z(rad).to_matrix4();
     m.mul_m(&r)
 }
 
@@ -151,7 +151,7 @@ impl Drop for Vbo {
 
 pub fn read_pixel_bytes(
     win_size: Size2<MInt>,
-    mouse_pos: Vec2<MInt>,
+    mouse_pos: Vector2<MInt>,
 ) -> (MInt, MInt, MInt, MInt) {
     let height = win_size.h;
     let reverted_h = height - mouse_pos.y;

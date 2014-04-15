@@ -2,7 +2,7 @@
 
 use std::str::Words;
 use std::io::{BufferedReader, File};
-use cgmath::vector::{Vec3, Vec2};
+use cgmath::vector::{Vector3, Vector2};
 use core::types::{MBool, MInt};
 use visualizer::types::{VertexCoord, TextureCoord, Normal};
 
@@ -33,7 +33,7 @@ impl Model {
     }
 
     fn read_v_or_vn(words: &mut Words) -> VertexCoord {
-        Vec3 {
+        Vector3 {
             x: from_str(words.next().unwrap()).unwrap(),
             y: from_str(words.next().unwrap()).unwrap(),
             z: from_str(words.next().unwrap()).unwrap(),
@@ -41,7 +41,7 @@ impl Model {
     }
 
     fn read_vt(words: &mut Words) -> TextureCoord {
-        Vec2 {
+        Vector2 {
             x: from_str(words.next().unwrap()).unwrap(),
             y: 1.0 - from_str(words.next().unwrap()).unwrap(), // flip
         }

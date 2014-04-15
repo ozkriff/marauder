@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use collections::hashmap::HashMap;
-use cgmath::vector::Vec2;
+use cgmath::vector::Vector2;
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::conf::Config;
 
@@ -57,10 +57,10 @@ impl Core {
             event_lists: get_event_lists(),
             map_size: map_size,
         };
-        core.add_unit(Vec2{x: 0, y: 0}, PlayerId(0));
-        core.add_unit(Vec2{x: 0, y: 1}, PlayerId(0));
-        core.add_unit(Vec2{x: 2, y: 0}, PlayerId(1));
-        core.add_unit(Vec2{x: 2, y: 2}, PlayerId(1));
+        core.add_unit(Vector2{x: 0, y: 0}, PlayerId(0));
+        core.add_unit(Vector2{x: 0, y: 1}, PlayerId(0));
+        core.add_unit(Vector2{x: 2, y: 0}, PlayerId(1));
+        core.add_unit(Vector2{x: 2, y: 2}, PlayerId(1));
         core
     }
 

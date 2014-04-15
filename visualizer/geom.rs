@@ -2,7 +2,7 @@
 
 use std::f32::consts::{PI, FRAC_PI_2};
 use std::num::{pow, abs};
-use cgmath::vector::{Vec2, Vec3, Vector};
+use cgmath::vector::{Vector2, Vector3, Vector};
 use core::types::{MInt, MapPos};
 use core::misc::{rad_to_deg};
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
@@ -24,12 +24,12 @@ impl Geom {
     }
 
     pub fn map_pos_to_world_pos(&self, i: MapPos) -> WorldPos {
-        let v = Vec2 {
+        let v = Vector2 {
             x: (i.x as MFloat) * self.hex_in_radius * 2.0,
             y: (i.y as MFloat) * self.hex_ex_radius * 1.5,
         };
         if i.y % 2 == 0 {
-            Vec3{x: v.x + self.hex_in_radius, y: v.y, z: 0.0}
+            Vector3{x: v.x + self.hex_in_radius, y: v.y, z: 0.0}
         } else {
             v.extend(0.0)
         }
@@ -41,7 +41,7 @@ impl Geom {
         i: MInt
     ) -> VertexCoord {
         let n = FRAC_PI_2 + 2.0 * PI * (i as MFloat) / (count as MFloat);
-        Vec3{x: n.cos(), y: n.sin(), z: 0.0}.mul_s(self.hex_ex_radius)
+        Vector3{x: n.cos(), y: n.sin(), z: 0.0}.mul_s(self.hex_ex_radius)
     }
 
     pub fn index_to_hex_vertex(&self, i: MInt) -> VertexCoord {

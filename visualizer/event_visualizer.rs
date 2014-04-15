@@ -2,7 +2,7 @@
 
 use rand;
 use rand::Rng;
-use cgmath::vector::{Vec3, Vector, EuclideanVector};
+use cgmath::vector::{Vector3, Vector, EuclideanVector};
 use visualizer::geom::Geom;
 use core::types::{MBool, MInt, MapPos, UnitId};
 use core::game_state::GameState;
@@ -205,7 +205,7 @@ pub struct MoveHelper {
     current: WorldPos,
     dist: MFloat,
     current_dist: MFloat,
-    dir: Vec3<MFloat>,
+    dir: Vector3<MFloat>,
 }
 
 impl MoveHelper {
@@ -240,8 +240,8 @@ impl MoveHelper {
     }
 }
 
-fn vec3_z(z: MFloat) -> Vec3<MFloat> {
-    Vec3{x: 0.0, y: 0.0, z: z}
+fn vec3_z(z: MFloat) -> Vector3<MFloat> {
+    Vector3{x: 0.0, y: 0.0, z: z}
 }
 
 pub struct EventAttackUnitVisualizer {

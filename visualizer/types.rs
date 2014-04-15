@@ -2,7 +2,7 @@
 
 use collections::hashmap::HashMap;
 use gl::types::{GLfloat, GLuint};
-use cgmath::vector::{Vec3, Vec2};
+use cgmath::vector::{Vector3, Vector2};
 use core::types::MInt;
 
 pub struct Color3 {
@@ -12,10 +12,10 @@ pub struct Color3 {
 }
 
 pub type MFloat = GLfloat;
-pub type WorldPos = Vec3<MFloat>;
-pub type VertexCoord = Vec3<MFloat>;
-pub type Normal = Vec3<MFloat>;
-pub type TextureCoord = Vec2<MFloat>;
+pub type WorldPos = Vector3<MFloat>;
+pub type VertexCoord = Vector3<MFloat>;
+pub type Normal = Vector3<MFloat>;
+pub type TextureCoord = Vector2<MFloat>;
 pub type Time = u64;
 
 pub struct MatId(pub GLuint);

@@ -5,7 +5,7 @@ use std;
 use collections::hashmap::HashMap;
 use gl;
 use stb_tt;
-use cgmath::vector::{Vec3, Vec2};
+use cgmath::vector::{Vector3, Vector2};
 use core::types::{Size2, Point2, MInt};
 use core::misc::add_quad_to_vec;
 use visualizer::texture::Texture;
@@ -14,7 +14,7 @@ use visualizer::mesh::Mesh;
 use visualizer::shader::Shader;
 
 struct Glyph {
-    pos: Vec2<MInt>,
+    pos: Vector2<MInt>,
     size: Size2<MInt>,
     index: MInt,
     xoff: MInt,
@@ -45,7 +45,7 @@ impl FontStash {
             font: font,
             texture: texture,
             texture_size: texture_size,
-            pos: Vec2{x: 0, y: 0},
+            pos: Vector2{x: 0, y: 0},
             glyphs: HashMap::new(),
             mesh: mesh,
         }
@@ -74,18 +74,18 @@ impl FontStash {
             let y2 = y1 + h;
             add_quad_to_vec(
                 &mut tex_data,
-                Vec2{x: x1, y: y1},
-                Vec2{x: x1, y: y2},
-                Vec2{x: x2, y: y2},
-                Vec2{x: x2, y: y1},
+                Vector2{x: x1, y: y1},
+                Vector2{x: x1, y: y2},
+                Vector2{x: x2, y: y2},
+                Vector2{x: x2, y: y1},
             );
             let yoff = glyph.yoff as MFloat / s;
             add_quad_to_vec(
                 &mut vertex_data,
-                Vec3{x: i, y: yoff, z: -0.01},
-                Vec3{x: i, y: yoff + h, z: -0.01},
-                Vec3{x: w + i, y: yoff + h, z: -0.01},
-                Vec3{x: w + i, y: yoff, z: -0.01},
+                Vector3{x: i, y: yoff, z: -0.01},
+                Vector3{x: i, y: yoff + h, z: -0.01},
+                Vector3{x: w + i, y: yoff + h, z: -0.01},
+                Vector3{x: w + i, y: yoff, z: -0.01},
             );
             i += w;
         }

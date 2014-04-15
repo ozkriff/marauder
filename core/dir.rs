@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::Vec2;
+use cgmath::vector::Vector2;
 use core::types::{MInt, MapPos};
 
 pub enum Dir {
@@ -14,20 +14,20 @@ pub enum Dir {
 
 static DIR_TO_POS_DIFF: [[MapPos, ..6], ..2] = [
     [
-        Vec2{x: 1, y: -1},
-        Vec2{x: 1, y: 0},
-        Vec2{x: 1, y: 1},
-        Vec2{x: 0, y: 1},
-        Vec2{x: -1, y: 0},
-        Vec2{x: 0, y: -1},
+        Vector2{x: 1, y: -1},
+        Vector2{x: 1, y: 0},
+        Vector2{x: 1, y: 1},
+        Vector2{x: 0, y: 1},
+        Vector2{x: -1, y: 0},
+        Vector2{x: 0, y: -1},
     ],
     [
-        Vec2{x: 0, y: -1},
-        Vec2{x: 1, y: 0},
-        Vec2{x: 0, y: 1},
-        Vec2{x: -1, y: 1},
-        Vec2{x: -1, y: 0},
-        Vec2{x: -1, y: -1},
+        Vector2{x: 0, y: -1},
+        Vector2{x: 1, y: 0},
+        Vector2{x: 0, y: 1},
+        Vector2{x: -1, y: 1},
+        Vector2{x: -1, y: 0},
+        Vector2{x: -1, y: -1},
     ]
 ];
 

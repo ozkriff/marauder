@@ -3,7 +3,7 @@
 use std;
 use gl;
 use gl::types::{GLint, GLchar, GLuint, GLenum};
-use cgmath::matrix::{Matrix, Mat4};
+use cgmath::matrix::{Matrix, Matrix4};
 use core::types::MInt;
 use core::misc::read_file;
 use visualizer::types::{MatId, MFloat};
@@ -46,7 +46,7 @@ impl Shader {
         }
     }
 
-    pub fn uniform_mat4f(&self, mat_id: MatId, mat: &Mat4<MFloat>) {
+    pub fn uniform_mat4f(&self, mat_id: MatId, mat: &Matrix4<MFloat>) {
         unsafe {
             let MatId(id) = mat_id;
             gl::UniformMatrix4fv(id as MInt, 1, gl::FALSE, mat.cr(0, 0));
