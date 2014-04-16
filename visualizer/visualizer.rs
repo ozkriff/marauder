@@ -5,6 +5,8 @@ use time::precise_time_ns;
 use glfw;
 use glfw::Context;
 use cgmath::vector::{Vector3, Vector2};
+use cgmath::projection;
+use cgmath::matrix::Matrix4;
 use core::map::MapPosIter;
 use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos, Point2};
 use core::game_state::GameState;
@@ -18,7 +20,9 @@ use visualizer::gl_helpers::{
     load_gl_funcs_with,
     set_viewport,
     tr,
+    scale,
     rot_z,
+    rot_x,
 };
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
@@ -206,7 +210,8 @@ impl<'a> Visualizer<'a> {
             &mut meshes, get_marker(&shader, ~"data/flag1.png"));
         let marker_2_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, ~"data/flag2.png"));
-        let /*mut*/ font_stash = FontStash::new("data/DroidSerif-Regular.ttf", 100.0);
+        let font_size = 30.0;
+        let font_stash = FontStash::new("data/DroidSerif-Regular.ttf", font_size);
         let vis = ~Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
@@ -262,6 +267,34 @@ impl<'a> Visualizer<'a> {
         self.meshes.get(self.map_mesh_id as uint).draw(&self.shader);
     }
 
+    fn get_2d_screen_matrix(&self) -> Matrix4<MFloat> {
+        let left = 0.0;
+        let right = self.win_size.w as MFloat;
+        let bottom = 0.0;
+        let top = self.win_size.h as MFloat;
+        let near = -1.0;
+        let far = 1.0;
+        projection::ortho(left, right, bottom, top, near, far)
+    }
+
+    fn draw_2d_text(&mut self) {
+        let m = self.get_2d_screen_matrix();
+        let text_offset = Vector3{x: 10.0, y: 10.0, z: 0.0};
+        let m = tr(m, text_offset);
+        self.shader.uniform_mat4f(self.mvp_mat_id, &m);
+        let text_mesh = self.font_stash.get_mesh("kill_them_all", &self.shader);
+        text_mesh.draw(&self.shader);
+    }
+
+    fn draw_3d_text(&mut self) {
+        let m = self.camera.mat();
+        let m = scale(m, 1.0 / self.font_stash.get_size());
+        let m = rot_x(m, 90.0);
+        self.shader.uniform_mat4f(self.mvp_mat_id, &m);
+        let text_mesh = self.font_stash.get_mesh("kill!", &self.shader);
+        text_mesh.draw(&self.shader);
+    }
+
     fn draw(&mut self) {
         set_clear_color(0.3, 0.3, 0.3);
         clear_screen();
@@ -273,10 +306,8 @@ impl<'a> Visualizer<'a> {
             self.event_visualizer.get_mut_ref().draw(
                 &self.geom, scene, self.dtime);
         }
-        {
-            let m = self.font_stash.get_mesh("kill_them_all", &self.shader);
-            m.draw(&self.shader);
-        }
+        self.draw_3d_text();
+        self.draw_2d_text();
         self.win().swap_buffers();
     }
 

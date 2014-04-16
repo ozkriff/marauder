@@ -58,6 +58,10 @@ impl FontStash {
         }
     }
 
+    pub fn get_size(&mut self) -> MFloat {
+        self.size
+    }
+
     pub fn get_mesh(&mut self, text: &str, shader: &Shader) -> Mesh {
         // TODO: create mesh in c-tor, update mesh vertices data here
         let mut vertex_data = Vec::new();
@@ -66,12 +70,12 @@ impl FontStash {
         let mut i = 0.0;
         for c in text.chars() {
             let glyph = self.get_glyph(c);
+            let w = glyph.size.w as MFloat;
+            let h = glyph.size.h as MFloat;
             let x1 = glyph.pos.x as MFloat / s;
             let y1 = glyph.pos.y as MFloat / s;
-            let w = glyph.size.w as MFloat / s;
-            let h = glyph.size.h as MFloat / s;
-            let x2 = x1 + w;
-            let y2 = y1 + h;
+            let x2 = x1 + w / s;
+            let y2 = y1 + h / s;
             add_quad_to_vec(
                 &mut tex_data,
                 Vector2{x: x1, y: y1},
@@ -79,13 +83,13 @@ impl FontStash {
                 Vector2{x: x2, y: y2},
                 Vector2{x: x2, y: y1},
             );
-            let yoff = glyph.yoff as MFloat / s;
+            let yoff = -glyph.yoff as MFloat;
             add_quad_to_vec(
                 &mut vertex_data,
-                Vector3{x: i, y: yoff, z: -0.01},
-                Vector3{x: i, y: yoff + h, z: -0.01},
-                Vector3{x: w + i, y: yoff + h, z: -0.01},
-                Vector3{x: w + i, y: yoff, z: -0.01},
+                Vector3{x: i, y: yoff, z: 0.0},
+                Vector3{x: i, y: yoff - h, z: 0.0},
+                Vector3{x: w + i, y: yoff - h, z: 0.0},
+                Vector3{x: w + i, y: yoff, z: 0.0},
             );
             i += w;
         }

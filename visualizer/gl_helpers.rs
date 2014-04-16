@@ -34,6 +34,14 @@ pub fn tr(m: Matrix4<MFloat>, v: Vector3<MFloat>) -> Matrix4<MFloat> {
     m.mul_m(&t)
 }
 
+pub fn scale(m: Matrix4<MFloat>, scale: MFloat) -> Matrix4<MFloat> {
+    let mut t = Matrix4::<MFloat>::identity();
+    *t.mut_cr(0, 0) = scale;
+    *t.mut_cr(1, 1) = scale;
+    *t.mut_cr(2, 2) = scale;
+    m.mul_m(&t)
+}
+
 pub fn rot_x(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
     let rad = angle::rad(deg_to_rad(angle));
     let r = Matrix3::from_angle_x(rad).to_matrix4();
