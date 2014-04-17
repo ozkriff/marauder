@@ -14,9 +14,8 @@ fn decode<A: Decodable<json::Decoder, json::Error>>(json_obj: json::Json) -> A {
 }
 
 impl Config {
-    pub fn new(path: &str) -> Config {
-        let path = Path::new(path);
-        let json = match json::from_str(read_file(&path)) {
+    pub fn new(path: &Path) -> Config {
+        let json = match json::from_str(read_file(path)) {
             Ok(json::Object(obj)) => obj,
             _ => fail!("Config error"),
         };

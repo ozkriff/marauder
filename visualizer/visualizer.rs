@@ -88,7 +88,7 @@ fn get_marker_pre_mesh() -> (Vec<VertexCoord>, Vec<TextureCoord>) {
     (vertex_data, tex_data)
 }
 
-fn get_marker(shader: &Shader, tex_path: ~str) -> Mesh {
+fn get_marker(shader: &Shader, tex_path: &Path) -> Mesh {
     let (vertex_data, tex_data) = get_marker_pre_mesh();
     let mut mesh = Mesh::new(vertex_data.as_slice());
     let tex = Texture::new(tex_path);
@@ -125,7 +125,7 @@ fn get_pathfinders(
 }
 
 fn get_map_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
-    let tex = Texture::new(~"data/floor.png");
+    let tex = Texture::new(&Path::new("data/floor.png"));
     let mut mesh = Mesh::new(build_hex_mesh(geom, map_size).as_slice());
     mesh.set_texture(tex, build_hex_tex_coord(map_size).as_slice());
     mesh.prepare(shader);
@@ -133,8 +133,8 @@ fn get_map_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
 }
 
 fn load_unit_mesh(shader: &Shader) -> Mesh {
-    let tex = Texture::new(~"data/tank.png");
-    let obj = obj::Model::new("data/tank.obj");
+    let tex = Texture::new(&Path::new("data/tank.png"));
+    let obj = obj::Model::new(&Path::new("data/tank.obj"));
     let mut mesh = Mesh::new(obj.build().as_slice());
     mesh.set_texture(tex, obj.build_tex_coord().as_slice());
     mesh.prepare(shader);
@@ -180,7 +180,7 @@ pub struct Visualizer<'a> {
 impl<'a> Visualizer<'a> {
     pub fn new() -> ~Visualizer {
         let players_count = 2;
-        let config = Config::new("conf_visualizer.json");
+        let config = Config::new(&Path::new("conf_visualizer.json"));
         let win_size = config.get::<Size2<MInt>>("screen_size");
         let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         let (win, events) = glfw.create_window(
@@ -198,20 +198,24 @@ impl<'a> Visualizer<'a> {
         let map_size = core.map_size();
         let picker = picker::TilePicker::new(
             win_size, &geom, core.map_size());
-        let shader = Shader::new("normal.vs.glsl", "normal.fs.glsl");
+        let shader = Shader::new(
+            &Path::new("normal.vs.glsl"),
+            &Path::new("normal.fs.glsl"),
+        );
         let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(&geom, map_size, &shader));
         let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
         let shell_mesh_id = add_mesh(
-            &mut meshes, get_marker(&shader, ~"data/shell.png"));
+            &mut meshes, get_marker(&shader, &Path::new("data/shell.png")));
         let marker_1_mesh_id = add_mesh(
-            &mut meshes, get_marker(&shader, ~"data/flag1.png"));
+            &mut meshes, get_marker(&shader, &Path::new("data/flag1.png")));
         let marker_2_mesh_id = add_mesh(
-            &mut meshes, get_marker(&shader, ~"data/flag2.png"));
+            &mut meshes, get_marker(&shader, &Path::new("data/flag2.png")));
         let font_size = 30.0;
-        let font_stash = FontStash::new("data/DroidSerif-Regular.ttf", font_size);
+        let font_stash = FontStash::new(
+            &Path::new("data/DroidSerif-Regular.ttf"), font_size);
         let vis = ~Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,

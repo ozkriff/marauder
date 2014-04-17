@@ -13,10 +13,10 @@ pub struct Shader {
 }
 
 impl Shader {
-    pub fn new(vs: &str, fs: &str) -> Shader {
+    pub fn new(vs_path: &Path, fs_path: &Path) -> Shader {
         compile_program(
-            read_file(&Path::new(vs)),
-            read_file(&Path::new(fs)),
+            read_file(vs_path),
+            read_file(fs_path),
         )
     }
 

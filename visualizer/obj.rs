@@ -21,14 +21,14 @@ pub struct Model {
 
 // TODO: unwrap() -> ...
 impl Model {
-    pub fn new(filename: &str) -> Model {
+    pub fn new(path: &Path) -> Model {
         let mut obj = Model {
             coords: Vec::new(),
             normals: Vec::new(),
             texture_coords: Vec::new(),
             faces: Vec::new(),
         };
-        obj.read(filename);
+        obj.read(path);
         obj
     }
 
@@ -84,9 +84,8 @@ impl Model {
         };
     }
 
-    fn read(&mut self, filename: &str) {
-        let path = Path::new(filename);
-        let mut file = BufferedReader::new(File::open(&path));
+    fn read(&mut self, path: &Path) {
+        let mut file = BufferedReader::new(File::open(path));
         for line in file.lines() {
             self.read_line(line.unwrap());
         }

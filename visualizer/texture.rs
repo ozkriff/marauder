@@ -13,7 +13,7 @@ pub struct Texture {
 }
 
 impl Texture {
-    pub fn new(path: ~str) -> Texture {
+    pub fn new(path: &Path) -> Texture {
         load_texture(path)
     }
 
@@ -59,8 +59,12 @@ impl Texture {
     }
 }
 
-fn load_image(path: ~str) -> image::Image<u8> {
-    let load_result = image::load(path);
+fn load_image(path: &Path) -> image::Image<u8> {
+    let str_path = match path.as_str() {
+        Some(s) => s,
+        None => fail!("Bad image path: {}", path.display()),
+    };
+    let load_result = image::load(str_path.to_owned());
     match load_result {
         image::ImageU8(image) => image,
         image::Error(message) => fail!("{}", message),
@@ -101,7 +105,7 @@ fn get_empty_texture(size: Size2<MInt>) -> Texture {
     Texture{id: id}
 }
 
-fn load_texture(path: ~str) -> Texture {
+fn load_texture(path: &Path) -> Texture {
     let image = load_image(path);
     let mut id = 0;
     unsafe {
