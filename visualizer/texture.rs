@@ -4,6 +4,7 @@ use std;
 use gl;
 use gl::types::{GLint, GLuint, GLsizei};
 use stb_image::image;
+use cgmath::vector::{Vector2};
 use visualizer::shader::Shader;
 use core::types::{Size2, MInt};
 
@@ -29,6 +30,32 @@ impl Texture {
     pub fn bind(&self) {
         verify!(gl::ActiveTexture(gl::TEXTURE0));
         verify!(gl::BindTexture(gl::TEXTURE_2D, self.id));
+    }
+
+    pub fn set_sub_image(
+        &self,
+        pos: Vector2<MInt>,
+        size: Size2<MInt>,
+        data: &Vec<u8>
+    ) {
+        let bytes_per_pixel = 4;
+        let expected_data_length = size.w * size.h * bytes_per_pixel;
+        assert_eq!(data.len(), expected_data_length as uint);
+        let format = gl::RGBA;
+        let level = 0;
+        unsafe {
+            verify!(gl::TexSubImage2D(
+                gl::TEXTURE_2D,
+                level,
+                pos.x,
+                pos.y,
+                size.w,
+                size.h,
+                format,
+                gl::UNSIGNED_BYTE,
+                std::cast::transmute(data.get(0)),
+            ));
+        }
     }
 }
 

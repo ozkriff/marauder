@@ -1,9 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::cmp;
-use std;
 use collections::hashmap::HashMap;
-use gl;
 use stb_tt;
 use cgmath::vector::{Vector3, Vector2};
 use core::types::{Size2, Point2, MInt};
@@ -122,22 +120,7 @@ impl FontStash {
                 }
             }
             self.texture.bind();
-            let format = gl::RGBA;
-            unsafe {
-                let level = 0;
-                // TODO: use some texure::Texture method
-                verify!(gl::TexSubImage2D(
-                    gl::TEXTURE_2D,
-                    level,
-                    pos.x,
-                    pos.y,
-                    size.w,
-                    size.h,
-                    format,
-                    gl::UNSIGNED_BYTE,
-                    std::cast::transmute(data.get(0)),
-                ));
-            }
+            self.texture.set_sub_image(pos, size, &data);
         }
         let xoff = if c == ' ' {
             xoff + (self.size / 3.0) as MInt // TODO: get from ttf
