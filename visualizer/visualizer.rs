@@ -282,7 +282,7 @@ impl<'a> Visualizer<'a> {
         let text_offset = Vector3{x: 10.0, y: 10.0, z: 0.0};
         let m = tr(m, text_offset);
         self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-        let text_mesh = self.font_stash.get_mesh("kill_them_all", &self.shader);
+        let text_mesh = self.font_stash.get_mesh("Kill them all!!!", &self.shader);
         text_mesh.draw(&self.shader);
     }
 
@@ -291,7 +291,7 @@ impl<'a> Visualizer<'a> {
         let m = scale(m, 1.0 / self.font_stash.get_size());
         let m = rot_x(m, 90.0);
         self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-        let text_mesh = self.font_stash.get_mesh("kill!", &self.shader);
+        let text_mesh = self.font_stash.get_mesh("kill! Kill! kill!!!", &self.shader);
         text_mesh.draw(&self.shader);
     }
 

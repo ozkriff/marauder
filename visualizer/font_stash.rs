@@ -91,7 +91,7 @@ impl FontStash {
                 Vector3{x: w + i, y: yoff - h, z: 0.0},
                 Vector3{x: w + i, y: yoff, z: 0.0},
             );
-            i += w;
+            i += w + glyph.xoff as MFloat;
         }
         let mut mesh = Mesh::new(vertex_data.as_slice());
         mesh.set_texture(self.texture, tex_data.as_slice());
@@ -103,38 +103,44 @@ impl FontStash {
         assert!(self.glyphs.find(&c).is_none());
         let index = self.font.find_glyph_index(c);
         let (bitmap, w, h, xoff, yoff) = self.font.get_glyph(index);
-        assert!(w != 0 && h != 0);
         assert!(self.pos.x + w < self.texture_size); // TODO: rows
-        let mut data = Vec::from_elem((w * h) as uint * 4, 0 as u8);
-        for y in range(0, h) {
-            for x in range(0, w) {
-                let n = (x + y * w) as uint * 4;
-                *data.get_mut(n + 0) = 0;
-                *data.get_mut(n + 1) = 0;
-                *data.get_mut(n + 2) = 0;
-                *data.get_mut(n + 3) = bitmap[(x + y * w) as uint];
-            }
-        }
-        self.texture.bind();
-        let format = gl::RGBA;
         self.pos.y = cmp::max(h, self.pos.y);
         let pos = self.pos;
         let size = Size2{w: w, h: h};
-        unsafe {
-            let level = 0;
-            // TODO: use some texure::Texture method
-            verify!(gl::TexSubImage2D(
-                gl::TEXTURE_2D,
-                level,
-                pos.x,
-                pos.y,
-                size.w,
-                size.h,
-                format,
-                gl::UNSIGNED_BYTE,
-                std::cast::transmute(data.get(0)),
-            ));
+        if w * h != 0 {
+            let mut data = Vec::from_elem((w * h) as uint * 4, 0 as u8);
+            for y in range(0, h) {
+                for x in range(0, w) {
+                    let n = (x + y * w) as uint * 4;
+                    *data.get_mut(n + 0) = 0;
+                    *data.get_mut(n + 1) = 0;
+                    *data.get_mut(n + 2) = 0;
+                    *data.get_mut(n + 3) = bitmap[(x + y * w) as uint];
+                }
+            }
+            self.texture.bind();
+            let format = gl::RGBA;
+            unsafe {
+                let level = 0;
+                // TODO: use some texure::Texture method
+                verify!(gl::TexSubImage2D(
+                    gl::TEXTURE_2D,
+                    level,
+                    pos.x,
+                    pos.y,
+                    size.w,
+                    size.h,
+                    format,
+                    gl::UNSIGNED_BYTE,
+                    std::cast::transmute(data.get(0)),
+                ));
+            }
         }
+        let xoff = if c == ' ' {
+            xoff + (self.size / 3.0) as MInt // TODO: get from ttf
+        } else {
+            xoff
+        };
         self.pos.x += w;
         let glyph = Glyph {
             pos: pos,
