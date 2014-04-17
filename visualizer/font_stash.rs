@@ -95,32 +95,45 @@ impl FontStash {
         mesh
     }
 
+    fn insert_image_to_cache(
+        &mut self,
+        pos: Vector2<MInt>,
+        size: Size2<MInt>,
+        bitmap: ~[u8]
+    ) {
+        let mut data = Vec::from_elem((size.w * size.h) as uint * 4, 0 as u8);
+        for y in range(0, size.h) {
+            for x in range(0, size.w) {
+                let n = (x + y * size.w) as uint * 4;
+                *data.get_mut(n + 0) = 0;
+                *data.get_mut(n + 1) = 0;
+                *data.get_mut(n + 2) = 0;
+                *data.get_mut(n + 3) = bitmap[(x + y * size.w) as uint];
+            }
+        }
+        self.texture.bind();
+        self.texture.set_sub_image(pos, size, &data);
+    }
+
+    fn start_new_row(&mut self) {
+        self.pos.y += self.max_h;
+        self.pos.x = 0;
+        self.max_h = 0;
+        assert!(self.pos.y < self.texture_size);
+    }
+
     fn add_glyph(&mut self, c: char) -> Glyph {
         assert!(self.glyphs.find(&c).is_none());
         let index = self.font.find_glyph_index(c);
         let (bitmap, w, h, xoff, yoff) = self.font.get_glyph(index);
         if self.pos.x + w > self.texture_size {
-            self.pos.y += self.max_h;
-            self.pos.x = 0;
-            self.max_h = 0;
-            assert!(self.pos.y < self.texture_size);
+            self.start_new_row();
         }
         self.pos.y = cmp::max(h, self.pos.y);
         let pos = self.pos;
         let size = Size2{w: w, h: h};
         if w * h != 0 {
-            let mut data = Vec::from_elem((w * h) as uint * 4, 0 as u8);
-            for y in range(0, h) {
-                for x in range(0, w) {
-                    let n = (x + y * w) as uint * 4;
-                    *data.get_mut(n + 0) = 0;
-                    *data.get_mut(n + 1) = 0;
-                    *data.get_mut(n + 2) = 0;
-                    *data.get_mut(n + 3) = bitmap[(x + y * w) as uint];
-                }
-            }
-            self.texture.bind();
-            self.texture.set_sub_image(pos, size, &data);
+            self.insert_image_to_cache(pos, size, bitmap);
         }
         let xoff = if c == ' ' {
             let space_width = (self.size / 3.0) as MInt; // TODO: get from ttf
