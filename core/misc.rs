@@ -1,8 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use std::f32::consts::PI;
-use std::io::File;
-use std::str::from_utf8_owned;
 use visualizer::types::MFloat;
 
 pub fn deg_to_rad(n: MFloat) -> MFloat {
@@ -13,21 +11,20 @@ pub fn rad_to_deg(n: MFloat) -> MFloat {
     (n * 180.0) / PI
 }
 
-// TODO: Simplify this
 pub fn read_file(path: &Path) -> ~str {
+    use std::str::from_utf8_owned;
+    use std::io::File;
+
     if !path.exists() {
         fail!("Path does not exists: {}", path.display());
     }
-    let shader = match File::open(path).map(|mut v| v.read_to_end()) {
-        Ok(txt) => from_utf8_owned(match txt {
-            Ok(txt) => txt.as_slice().to_owned(),
-            Err(_) => fail!("Can not read file {}", path.display()),
-        }),
-        Err(_) => fail!("Can not read file {}", path.display()),
+    let bytes = match File::open(path).read_to_end() {
+        Ok(bytes) => bytes.as_slice().to_owned(),
+        Err(msg) => fail!("Can not read from file {}: {}", path.display(), msg),
     };
-    match shader {
-        Some(shader) => shader,
-        None => fail!("Can not read file {}", path.display()),
+    match from_utf8_owned(bytes) {
+        Some(s) => s,
+        None => fail!("Not valid utf8 in file {}", path.display()),
     }
 }
 
