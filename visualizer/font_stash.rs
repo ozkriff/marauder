@@ -29,6 +29,7 @@ pub struct FontStash {
     pos: Point2<MInt>,
     glyphs: HashMap<char, Glyph>,
     mesh: Mesh,
+    max_h: MInt,
 }
 
 impl FontStash {
@@ -48,6 +49,7 @@ impl FontStash {
             pos: Vector2{x: 0, y: 0},
             glyphs: HashMap::new(),
             mesh: mesh,
+            max_h: 0,
         }
     }
 
@@ -103,7 +105,12 @@ impl FontStash {
         assert!(self.glyphs.find(&c).is_none());
         let index = self.font.find_glyph_index(c);
         let (bitmap, w, h, xoff, yoff) = self.font.get_glyph(index);
-        assert!(self.pos.x + w < self.texture_size); // TODO: rows
+        if self.pos.x + w > self.texture_size {
+            self.pos.y += self.max_h;
+            self.pos.x = 0;
+            self.max_h = 0;
+            assert!(self.pos.y < self.texture_size);
+        }
         self.pos.y = cmp::max(h, self.pos.y);
         let pos = self.pos;
         let size = Size2{w: w, h: h};
@@ -149,6 +156,9 @@ impl FontStash {
             xoff: xoff,
             yoff: yoff,
         };
+        if self.max_h < h - yoff {
+            self.max_h = h - yoff;
+        }
         self.glyphs.insert(c, glyph);
         glyph
     }
