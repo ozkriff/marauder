@@ -123,7 +123,8 @@ impl FontStash {
             self.texture.set_sub_image(pos, size, &data);
         }
         let xoff = if c == ' ' {
-            xoff + (self.size / 3.0) as MInt // TODO: get from ttf
+            let space_width = (self.size / 3.0) as MInt; // TODO: get from ttf
+            xoff + space_width
         } else {
             xoff
         };
