@@ -5,6 +5,9 @@
 #![deny(unnecessary_qualification)]
 #![deny(unnecessary_typecast)]
 
+#![feature(macro_rules)]
+#![feature(phase)]
+
 extern crate native;
 extern crate serialize;
 extern crate collections;

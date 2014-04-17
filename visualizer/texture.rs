@@ -22,13 +22,13 @@ impl Texture {
 
     pub fn enable(&self, shader: &Shader) {
         let basic_texture_loc = shader.get_uniform("basic_texture") as GLint;
-        gl::Uniform1ui(basic_texture_loc, 0);
+        verify!(gl::Uniform1i(basic_texture_loc, 0));
         self.bind();
     }
 
     pub fn bind(&self) {
-        gl::ActiveTexture(gl::TEXTURE0);
-        gl::BindTexture(gl::TEXTURE_2D, self.id);
+        verify!(gl::ActiveTexture(gl::TEXTURE0));
+        verify!(gl::BindTexture(gl::TEXTURE_2D, self.id));
     }
 }
 
@@ -47,15 +47,15 @@ fn get_empty_texture(size: Size2<MInt>) -> Texture {
     let data = Vec::from_elem((s * s) as uint * 4, 0 as u8);
     let mut id = 0;
     unsafe {
-        gl::GenTextures(1, &mut id)
+        verify!(gl::GenTextures(1, &mut id))
     };
-    gl::ActiveTexture(gl::TEXTURE0);
-    gl::BindTexture(gl::TEXTURE_2D, id);
+    verify!(gl::ActiveTexture(gl::TEXTURE0));
+    verify!(gl::BindTexture(gl::TEXTURE_2D, id));
     let format = gl::RGBA;
     unsafe {
         let level = 0;
         let border = 0;
-        gl::TexImage2D(
+        verify!(gl::TexImage2D(
             gl::TEXTURE_2D,
             level,
             format as GLint,
@@ -65,12 +65,12 @@ fn get_empty_texture(size: Size2<MInt>) -> Texture {
             format,
             gl::UNSIGNED_BYTE,
             std::cast::transmute(data.get(0)),
-        );
+        ));
     }
-    gl::TexParameteri(gl::TEXTURE_2D,
-        gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
-    gl::TexParameteri(gl::TEXTURE_2D,
-        gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
+    verify!(gl::TexParameteri(gl::TEXTURE_2D,
+        gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint));
+    verify!(gl::TexParameteri(gl::TEXTURE_2D,
+        gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint));
     Texture{id: id}
 }
 
@@ -78,10 +78,10 @@ fn load_texture(path: ~str) -> Texture {
     let image = load_image(path);
     let mut id = 0;
     unsafe {
-        gl::GenTextures(1, &mut id)
+        verify!(gl::GenTextures(1, &mut id))
     };
-    gl::ActiveTexture(gl::TEXTURE0);
-    gl::BindTexture(gl::TEXTURE_2D, id);
+    verify!(gl::ActiveTexture(gl::TEXTURE0));
+    verify!(gl::BindTexture(gl::TEXTURE_2D, id));
     let format = match image.depth {
         4 => gl::RGBA,
         3 => gl::RGB,
@@ -90,7 +90,7 @@ fn load_texture(path: ~str) -> Texture {
     unsafe {
         let level = 0;
         let border = 0;
-        gl::TexImage2D(
+        verify!(gl::TexImage2D(
             gl::TEXTURE_2D,
             level,
             format as GLint,
@@ -100,16 +100,16 @@ fn load_texture(path: ~str) -> Texture {
             format,
             gl::UNSIGNED_BYTE,
             std::cast::transmute(&image.data[0]),
-        );
+        ));
     }
-    gl::TexParameteri(gl::TEXTURE_2D,
-        gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as GLint);
-    gl::TexParameteri(gl::TEXTURE_2D,
-        gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as GLint);
-    gl::TexParameteri(gl::TEXTURE_2D,
-        gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint);
-    gl::TexParameteri(gl::TEXTURE_2D,
-        gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint);
+    verify!(gl::TexParameteri(gl::TEXTURE_2D,
+        gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as GLint));
+    verify!(gl::TexParameteri(gl::TEXTURE_2D,
+        gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as GLint));
+    verify!(gl::TexParameteri(gl::TEXTURE_2D,
+        gl::TEXTURE_MIN_FILTER, gl::LINEAR as GLint));
+    verify!(gl::TexParameteri(gl::TEXTURE_2D,
+        gl::TEXTURE_MAG_FILTER, gl::LINEAR as GLint));
     Texture{id: id}
 }
 

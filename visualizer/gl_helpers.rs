@@ -1,5 +1,7 @@
 // See LICENSE file for copyright and license details.
 
+#![macro_escape]
+
 use std;
 use gl;
 use gl::types::{GLuint, GLsizeiptr};
@@ -11,6 +13,26 @@ use core::types::{Size2, MInt};
 use visualizer::types::{MFloat};
 
 pub use load_gl_funcs_with = gl::load_with;
+
+macro_rules! verify(
+    ($e: expr) => ({
+        let result = $e;
+        let error_code = gl::GetError();
+        if error_code != 0 {
+            let description = match error_code {
+                gl::INVALID_ENUM =>                  "GL_INVALID_ENUM",
+                gl::INVALID_FRAMEBUFFER_OPERATION => "GL_INVALID_FRAMEBUFFER_OPERATION",
+                gl::INVALID_OPERATION =>             "GL_INVALID_OPERATION",
+                gl::INVALID_VALUE =>                 "GL_INVALID_VALUE",
+                gl::NO_ERROR =>                      "GL_NO_ERROR",
+                gl::OUT_OF_MEMORY =>                 "GL_OUT_OF_MEMORY",
+                _ => fail!("Bad gl error code: {}", error_code),
+            };
+            fail!("gl error: {}({})", description, error_code);
+        }
+        result
+    })
+)
 
 pub enum MeshRenderMode {
     Triangles,
@@ -55,21 +77,21 @@ pub fn rot_z(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
 }
 
 pub fn init_opengl() {
-    gl::Enable(gl::DEPTH_TEST);
-    gl::Enable(gl::BLEND);
-    gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+    verify!(gl::Enable(gl::DEPTH_TEST));
+    verify!(gl::Enable(gl::BLEND));
+    verify!(gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA));
 }
 
 pub fn set_clear_color(r: MFloat, g: MFloat, b: MFloat) {
-    gl::ClearColor(r, g, b, 1.0);
+    verify!(gl::ClearColor(r, g, b, 1.0));
 }
 
 pub fn clear_screen() {
-    gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+    verify!(gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT));
 }
 
 pub fn set_viewport(size: Size2<MInt>) {
-    gl::Viewport(0, 0, size.w, size.h);
+    verify!(gl::Viewport(0, 0, size.w, size.h));
 }
 
 pub struct Vao {
@@ -80,34 +102,33 @@ impl Vao {
     pub fn new() -> Vao {
         let mut id = 0;
         unsafe {
-            gl::GenVertexArrays(1, &mut id);
+            verify!(gl::GenVertexArrays(1, &mut id));
         }
         let vao = Vao{id: id};
         vao.bind();
-        gl::EnableVertexAttribArray(id);
         vao
     }
 
     pub fn bind(&self) {
-        gl::BindVertexArray(self.id);
+        verify!(gl::BindVertexArray(self.id));
     }
 
     pub fn unbind(&self) {
-        gl::BindVertexArray(0);
+        verify!(gl::BindVertexArray(0));
     }
 
     pub fn draw_array(&self, mesh_mode: MeshRenderMode, faces_count: MInt) {
         let starting_index = 0;
         let vertices_count = faces_count * 3;
         let mode = mesh_mode.to_gl_type();
-        gl::DrawArrays(mode, starting_index, vertices_count);
+        verify!(gl::DrawArrays(mode, starting_index, vertices_count));
     }
 }
 
 impl Drop for Vao {
     fn drop(&mut self) {
         unsafe {
-            gl::DeleteVertexArrays(1, &self.id);
+            verify!(gl::DeleteVertexArrays(1, &self.id));
         }
     }
 }
@@ -119,7 +140,7 @@ pub struct Vbo {
 fn get_new_vbo_id() -> GLuint {
     let mut id = 0;
     unsafe {
-        gl::GenBuffers(1, &mut id);
+        verify!(gl::GenBuffers(1, &mut id));
     }
     id
 }
@@ -133,26 +154,26 @@ impl Vbo {
         if data.len() != 0 {
             unsafe {
                 let data_ptr = std::cast::transmute(&data[0]);
-                gl::BufferData(
+                verify!(gl::BufferData(
                     gl::ARRAY_BUFFER,
                     buf_size,
                     data_ptr,
                     gl::STATIC_DRAW,
-                );
+                ));
             }
         }
         vbo
     }
 
     pub fn bind(&self) {
-        gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
+        verify!(gl::BindBuffer(gl::ARRAY_BUFFER, self.id));
     }
 }
 
 impl Drop for Vbo {
     fn drop(&mut self) {
         unsafe {
-            gl::DeleteBuffers(1, &self.id);
+            verify!(gl::DeleteBuffers(1, &self.id));
         }
     }
 }
@@ -166,12 +187,12 @@ pub fn read_pixel_bytes(
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
     unsafe {
         let data_ptr = std::cast::transmute(&data[0]);
-        gl::ReadPixels(
+        verify!(gl::ReadPixels(
             mouse_pos.x, reverted_h, 1, 1,
             gl::RGBA,
             gl::UNSIGNED_BYTE,
             data_ptr
-        );
+        ));
     }
     (data[0] as MInt, data[1] as MInt, data[2] as MInt, data[3] as MInt)
 }

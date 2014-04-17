@@ -123,7 +123,7 @@ impl FontStash {
         unsafe {
             let level = 0;
             // TODO: use some texure::Texture method
-            gl::TexSubImage2D(
+            verify!(gl::TexSubImage2D(
                 gl::TEXTURE_2D,
                 level,
                 pos.x,
@@ -133,7 +133,7 @@ impl FontStash {
                 format,
                 gl::UNSIGNED_BYTE,
                 std::cast::transmute(data.get(0)),
-            );
+            ));
         }
         self.pos.x += w;
         let glyph = Glyph {
