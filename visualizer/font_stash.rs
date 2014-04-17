@@ -28,7 +28,6 @@ pub struct FontStash {
     texture_size: MInt,
     pos: Point2<MInt>,
     glyphs: HashMap<char, Glyph>,
-    mesh: Mesh,
     max_h: MInt,
 }
 
@@ -39,8 +38,6 @@ impl FontStash {
         let font = stb_tt::Font::new(font_path, size);
         let texture = Texture::new_empty(
             Size2{w: texture_size, h: texture_size});
-        let vertex_data = Vec::new();
-        let mesh = Mesh::new(vertex_data.as_slice());
         FontStash {
             size: size,
             font: font,
@@ -48,7 +45,6 @@ impl FontStash {
             texture_size: texture_size,
             pos: Vector2{x: 0, y: 0},
             glyphs: HashMap::new(),
-            mesh: mesh,
             max_h: 0,
         }
     }
