@@ -108,8 +108,10 @@ impl TilePicker {
                 c_data.push(color);
             }
         }
+        // draw unit markers slightly above the floor
+        let unit_marker_height = 0.01;
         for v in v_data.mut_iter() {
-            v.z += 0.01; // TODO
+            v.z = unit_marker_height;
         }
         let mut mesh = Mesh::new(v_data.as_slice());
         mesh.set_color(c_data.as_slice());
