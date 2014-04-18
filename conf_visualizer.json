@@ -2,5 +2,6 @@
     "screen_size": {
         "w": 640,
         "h": 480
-    }
+    },
+    "font_size": 30.0
 }

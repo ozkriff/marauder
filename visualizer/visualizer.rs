@@ -219,7 +219,7 @@ impl<'a> Visualizer<'a> {
             &mut meshes, get_marker(&shader, &Path::new("data/flag1.png")));
         let marker_2_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, &Path::new("data/flag2.png")));
-        let font_size = 30.0;
+        let font_size = config.get("font_size");
         let font_stash = FontStash::new(
             &Path::new("data/DroidSerif-Regular.ttf"), font_size);
         let mut camera = Camera::new(win_size);
