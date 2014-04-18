@@ -146,6 +146,12 @@ fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MInt {
     (meshes.len() as MInt) - 1
 }
 
+fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> Vector3<MFloat> {
+    let pos = geom.map_pos_to_world_pos(
+        Vector2{x: map_size.w, y: map_size.h});
+    Vector3{x: -pos.x / 2.0, y: -pos.y / 2.0, z: 0.0}
+}
+
 pub struct Visualizer<'a> {
     shader: Shader,
     map_mesh_id: MInt,
@@ -216,6 +222,8 @@ impl<'a> Visualizer<'a> {
         let font_size = 30.0;
         let font_stash = FontStash::new(
             &Path::new("data/DroidSerif-Regular.ttf"), font_size);
+        let mut camera = Camera::new(win_size);
+        camera.pos = get_initial_camera_pos(&geom, &map_size);
         let vis = ~Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
@@ -227,7 +235,7 @@ impl<'a> Visualizer<'a> {
             shader: shader,
             win: win,
             mouse_pos: Vector2::zero(),
-            camera: Camera::new(win_size),
+            camera: camera,
             picker: picker,
             map_pos_under_cursor: None,
             selected_unit_id: None,
