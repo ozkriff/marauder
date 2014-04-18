@@ -17,7 +17,8 @@ impl Config {
     pub fn new(path: &Path) -> Config {
         let json = match json::from_str(read_file(path)) {
             Ok(json::Object(obj)) => obj,
-            _ => fail!("Config error"),
+            Err(msg) => fail!("Config parsing error: {}", msg),
+            _ => fail!("Unknown config parsing error"),
         };
         Config {
             json: json,
