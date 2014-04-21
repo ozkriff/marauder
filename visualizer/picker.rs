@@ -138,7 +138,7 @@ impl TilePicker {
             0 => PickedNothing,
             1 => PickedMapPos(Vector2{x: r, y: g}),
             2 => PickedUnitId(UnitId(r)),
-            _ => fail!(),
+            n => fail!("Picker: bad color tag: {}", n),
         }
     }
 }
