@@ -105,9 +105,9 @@ impl FontStash {
         for y in range(0, size.h) {
             for x in range(0, size.w) {
                 let n = (x + y * size.w) as uint * 4;
-                *data.get_mut(n + 0) = 0;
-                *data.get_mut(n + 1) = 0;
-                *data.get_mut(n + 2) = 0;
+                *data.get_mut(n + 0) = 255;
+                *data.get_mut(n + 1) = 255;
+                *data.get_mut(n + 2) = 255;
                 *data.get_mut(n + 3) = bitmap[(x + y * size.w) as uint];
             }
         }

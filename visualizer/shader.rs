@@ -6,7 +6,7 @@ use gl::types::{GLint, GLchar, GLuint, GLenum};
 use cgmath::matrix::{Matrix, Matrix4};
 use core::types::MInt;
 use core::misc::read_file;
-use visualizer::types::{MatId, MFloat};
+use visualizer::types::{MatId, MFloat, ColorId, Color4};
 
 pub struct Shader {
     id: GLuint,
@@ -51,6 +51,13 @@ impl Shader {
             let MatId(id) = mat_id;
             verify!(gl::UniformMatrix4fv(
                 id as MInt, 1, gl::FALSE, mat.cr(0, 0)));
+        }
+    }
+
+    pub fn uniform_color(&self, color_id: ColorId, color: Color4) {
+        unsafe {
+            let data_ptr = std::cast::transmute(&color);
+            verify!(gl::Uniform4fv(color_id.id as MInt, 1, data_ptr));
         }
     }
 

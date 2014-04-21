@@ -11,6 +11,13 @@ pub struct Color3 {
     pub b: MFloat,
 }
 
+pub struct Color4 {
+    pub r: MFloat,
+    pub g: MFloat,
+    pub b: MFloat,
+    pub a: MFloat,
+}
+
 pub type MFloat = GLfloat;
 pub type WorldPos = Vector3<MFloat>;
 pub type VertexCoord = Vector3<MFloat>;
@@ -19,6 +26,8 @@ pub type TextureCoord = Vector2<MFloat>;
 pub type Time = u64;
 
 pub struct MatId(pub GLuint);
+
+pub struct ColorId{pub id: GLuint}
 
 pub struct SceneNode {
     pub pos: WorldPos,

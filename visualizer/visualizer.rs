@@ -35,7 +35,9 @@ use visualizer::types::{
     TextureCoord,
     MFloat,
     MatId,
+    ColorId,
     Time,
+    Color4,
 };
 use visualizer::event_visualizer::{
     EventVisualizer,
@@ -161,6 +163,7 @@ pub struct Visualizer<'a> {
     marker_2_mesh_id: MInt,
     meshes: Vec<Mesh>,
     mvp_mat_id: MatId,
+    basic_color_id: ColorId,
     win: glfw::Window,
     mouse_pos: Point2<MFloat>,
     camera: Camera,
@@ -209,6 +212,7 @@ impl<'a> Visualizer<'a> {
             &Path::new("normal.fs.glsl"),
         );
         let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
+        let basic_color_id = ColorId{id: shader.get_uniform("basic_color")};
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(&geom, map_size, &shader));
@@ -232,6 +236,7 @@ impl<'a> Visualizer<'a> {
             marker_2_mesh_id: marker_2_mesh_id,
             meshes: meshes,
             mvp_mat_id: mvp_mat_id,
+            basic_color_id: basic_color_id,
             shader: shader,
             win: win,
             mouse_pos: Vector2::zero(),
@@ -311,6 +316,10 @@ impl<'a> Visualizer<'a> {
         set_clear_color(0.3, 0.3, 0.3);
         clear_screen();
         self.shader.activate();
+        self.shader.uniform_color(
+            self.basic_color_id,
+            Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0}
+        );
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {
@@ -318,6 +327,10 @@ impl<'a> Visualizer<'a> {
             self.event_visualizer.get_mut_ref().draw(
                 &self.geom, scene, self.dtime);
         }
+        self.shader.uniform_color(
+            self.basic_color_id,
+            Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0}
+        );
         self.draw_3d_text();
         self.draw_2d_text();
         self.win().swap_buffers();
