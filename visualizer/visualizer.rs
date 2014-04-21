@@ -211,7 +211,7 @@ impl<'a> Visualizer<'a> {
             &Path::new("normal.vs.glsl"),
             &Path::new("normal.fs.glsl"),
         );
-        let mvp_mat_id = MatId(shader.get_uniform("mvp_mat"));
+        let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
         let basic_color_id = ColorId{id: shader.get_uniform("basic_color")};
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(

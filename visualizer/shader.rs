@@ -48,9 +48,8 @@ impl Shader {
 
     pub fn uniform_mat4f(&self, mat_id: MatId, mat: &Matrix4<MFloat>) {
         unsafe {
-            let MatId(id) = mat_id;
             verify!(gl::UniformMatrix4fv(
-                id as MInt, 1, gl::FALSE, mat.cr(0, 0)));
+                mat_id.id as MInt, 1, gl::FALSE, mat.cr(0, 0)));
         }
     }
 

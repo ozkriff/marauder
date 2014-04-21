@@ -25,7 +25,7 @@ pub type Normal = Vector3<MFloat>;
 pub type TextureCoord = Vector2<MFloat>;
 pub type Time = u64;
 
-pub struct MatId(pub GLuint);
+pub struct MatId{pub id: GLuint}
 
 pub struct ColorId{pub id: GLuint}
 
