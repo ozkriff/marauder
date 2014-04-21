@@ -37,6 +37,7 @@ use visualizer::types::{
     MatId,
     ColorId,
     Time,
+    Color3,
     Color4,
 };
 use visualizer::event_visualizer::{
@@ -313,7 +314,7 @@ impl<'a> Visualizer<'a> {
     }
 
     fn draw(&mut self) {
-        set_clear_color(0.3, 0.3, 0.3);
+        set_clear_color(Color3{r: 0.3, g: 0.3, b: 0.3});
         clear_screen();
         self.shader.activate();
         self.shader.uniform_color(

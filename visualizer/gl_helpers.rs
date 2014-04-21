@@ -10,7 +10,7 @@ use cgmath::vector::{Vector2, Vector3};
 use cgmath::angle;
 use core::misc::deg_to_rad;
 use core::types::{Size2, MInt};
-use visualizer::types::{MFloat};
+use visualizer::types::{MFloat, Color3};
 
 pub use load_gl_funcs_with = gl::load_with;
 
@@ -82,8 +82,8 @@ pub fn init_opengl() {
     verify!(gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA));
 }
 
-pub fn set_clear_color(r: MFloat, g: MFloat, b: MFloat) {
-    verify!(gl::ClearColor(r, g, b, 1.0));
+pub fn set_clear_color(color: Color3) {
+    verify!(gl::ClearColor(color.r, color.g, color.b, 1.0));
 }
 
 pub fn clear_screen() {

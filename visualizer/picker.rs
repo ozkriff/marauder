@@ -126,7 +126,7 @@ impl TilePicker {
     ) -> PickResult {
         self.shader.activate();
         self.shader.uniform_mat4f(self.mvp_mat_id, &camera.mat());
-        set_clear_color(0.0, 0.0, 0.0);
+        set_clear_color(Color3{r: 0.0, g: 0.0, b: 0.0});
         clear_screen();
         self.map_mesh.draw(&self.shader);
         match self.units_mesh {
