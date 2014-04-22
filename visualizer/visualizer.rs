@@ -51,6 +51,10 @@ use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
 
+static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
+static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
+static BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
+
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> Vec<VertexCoord> {
     let mut vertex_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
@@ -314,13 +318,10 @@ impl<'a> Visualizer<'a> {
     }
 
     fn draw(&mut self) {
-        set_clear_color(Color3{r: 0.3, g: 0.3, b: 0.3});
+        set_clear_color(GREY_03);
         clear_screen();
         self.shader.activate();
-        self.shader.uniform_color(
-            self.basic_color_id,
-            Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0}
-        );
+        self.shader.uniform_color(self.basic_color_id, WHITE);
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {
@@ -328,10 +329,7 @@ impl<'a> Visualizer<'a> {
             self.event_visualizer.get_mut_ref().draw(
                 &self.geom, scene, self.dtime);
         }
-        self.shader.uniform_color(
-            self.basic_color_id,
-            Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0}
-        );
+        self.shader.uniform_color(self.basic_color_id, BLACK);
         self.draw_3d_text();
         self.draw_2d_text();
         self.win().swap_buffers();
