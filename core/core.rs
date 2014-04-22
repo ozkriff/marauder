@@ -40,8 +40,8 @@ pub struct Core {
 
 fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
     let mut map = HashMap::new();
-    map.insert(PlayerId(0), Vec::new());
-    map.insert(PlayerId(1), Vec::new());
+    map.insert(PlayerId{id: 0}, Vec::new());
+    map.insert(PlayerId{id: 1}, Vec::new());
     map
 }
 
@@ -51,16 +51,19 @@ impl Core {
         let map_size = config.get("map_size");
         let mut core = ~Core {
             units: HashMap::new(),
-            players: vec!(Player{id: PlayerId(0)}, Player{id: PlayerId(1)}),
-            current_player_id: PlayerId(0),
+            players: vec!(
+                Player{id: PlayerId{id: 0}},
+                Player{id: PlayerId{id: 1}},
+            ),
+            current_player_id: PlayerId{id: 0},
             core_event_list: Vec::new(),
             event_lists: get_event_lists(),
             map_size: map_size,
         };
-        core.add_unit(Vector2{x: 0, y: 0}, PlayerId(0));
-        core.add_unit(Vector2{x: 0, y: 1}, PlayerId(0));
-        core.add_unit(Vector2{x: 2, y: 0}, PlayerId(1));
-        core.add_unit(Vector2{x: 2, y: 2}, PlayerId(1));
+        core.add_unit(Vector2{x: 0, y: 0}, PlayerId{id: 0});
+        core.add_unit(Vector2{x: 0, y: 1}, PlayerId{id: 0});
+        core.add_unit(Vector2{x: 2, y: 0}, PlayerId{id: 1});
+        core.add_unit(Vector2{x: 2, y: 2}, PlayerId{id: 1});
         core
     }
 
@@ -168,10 +171,13 @@ struct CoreEventEndTurn {
 
 impl CoreEventEndTurn {
     fn new(core: &Core) -> ~CoreEventEndTurn {
-        let PlayerId(old_id) = core.current_player_id;
+        let old_id = core.current_player_id.id;
         let max_id = core.players.len() as MInt;
         let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
-        ~CoreEventEndTurn{old_id: PlayerId(old_id), new_id: PlayerId(new_id)}
+        ~CoreEventEndTurn {
+            old_id: PlayerId{id: old_id},
+            new_id: PlayerId{id: new_id},
+        }
     }
 }
 
@@ -206,14 +212,11 @@ impl CoreEventCreateUnit {
         player_id: PlayerId
     ) -> ~CoreEventCreateUnit {
         let new_id = match core.units.keys().max_by(|&n| n) {
-            Some(n) => {
-                let UnitId(id) = *n;
-                id + 1
-            },
+            Some(n) => n.id + 1,
             None => 0,
         };
         ~CoreEventCreateUnit {
-            id: UnitId(new_id),
+            id: UnitId{id: new_id},
             pos: pos,
             player_id: player_id,
         }

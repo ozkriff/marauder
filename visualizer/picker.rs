@@ -11,7 +11,7 @@ use visualizer::gl_helpers::{
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
-use visualizer::types::{Color3, MFloat, MatId, Scene, NodeId, WorldPos};
+use visualizer::types::{Color3, MFloat, MatId, Scene, WorldPos};
 use visualizer::shader::Shader;
 
 fn i_to_f(n: MInt) -> f32 {
@@ -94,7 +94,7 @@ impl TilePicker {
         let mut c_data = Vec::new();
         let mut v_data = Vec::new();
         for (node_id, node) in scene.iter() {
-            let NodeId(id) = *node_id;
+            let id = node_id.id;
             if id >= last_unit_node_id {
                 continue;
             }
@@ -137,7 +137,7 @@ impl TilePicker {
         match b {
             0 => PickedNothing,
             1 => PickedMapPos(Vector2{x: r, y: g}),
-            2 => PickedUnitId(UnitId(r)),
+            2 => PickedUnitId(UnitId{id: r}),
             n => fail!("Picker: bad color tag: {}", n),
         }
     }

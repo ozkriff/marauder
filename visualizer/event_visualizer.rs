@@ -9,13 +9,11 @@ use core::game_state::GameState;
 use visualizer::types::{Scene, SceneNode, MFloat, WorldPos, NodeId};
 
 fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
-    let UnitId(id) = unit_id;
-    NodeId(id)
+    NodeId{id: unit_id.id}
 }
 
 fn marker_id(unit_id: UnitId) -> NodeId {
-    let UnitId(id) = unit_id;
-    NodeId(id + 1000)
+    NodeId{id: unit_id.id + 1000}
 }
 
 pub trait EventVisualizer {
@@ -265,7 +263,7 @@ impl EventAttackUnitVisualizer {
         let from = scene.get(&node_id).pos;
         let to = from.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
         let move = MoveHelper::new(geom, from, to, 1.0);
-        let shell_node_id = NodeId(666); // TODO
+        let shell_node_id = NodeId{id: 666}; // TODO
         let shell_move = {
             let from = scene.get(&unit_id_to_node_id(attacker_id)).pos;
             let to = scene.get(&unit_id_to_node_id(defender_id)).pos;

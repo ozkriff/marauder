@@ -36,7 +36,7 @@ pub struct SceneNode {
 }
 
 #[deriving(Ord, Eq, TotalEq, Hash)]
-pub struct NodeId(pub MInt);
+pub struct NodeId{pub id: MInt}
 
 pub type Scene = HashMap<NodeId, SceneNode>;
 

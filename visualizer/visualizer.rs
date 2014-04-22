@@ -103,7 +103,7 @@ fn get_marker(shader: &Shader, tex_path: &Path) -> Mesh {
 fn get_scenes(players_count: MInt) -> HashMap<PlayerId, Scene> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
-        m.insert(PlayerId(i), HashMap::new());
+        m.insert(PlayerId{id: i}, HashMap::new());
     }
     m
 }
@@ -111,7 +111,7 @@ fn get_scenes(players_count: MInt) -> HashMap<PlayerId, Scene> {
 fn get_game_states(players_count: MInt) -> HashMap<PlayerId, GameState> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
-        m.insert(PlayerId(i), GameState::new());
+        m.insert(PlayerId{id: i}, GameState::new());
     }
     m
 }
@@ -122,7 +122,7 @@ fn get_pathfinders(
 ) -> HashMap<PlayerId, Pathfinder> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
-        m.insert(PlayerId(i), Pathfinder::new(map_size));
+        m.insert(PlayerId{id: i}, Pathfinder::new(map_size));
     }
     m
 }
@@ -539,10 +539,10 @@ impl<'a> Visualizer<'a> {
                 EventEndTurnVisualizer::new()
             },
             core::EventCreateUnit(id, ref pos, player_id) => {
-                let marker_mesh = match player_id {
-                    PlayerId(0) => self.marker_1_mesh_id,
-                    PlayerId(1) => self.marker_2_mesh_id,
-                    PlayerId(n) => fail!("Wrong player id: {}", n),
+                let marker_mesh = match player_id.id {
+                    0 => self.marker_1_mesh_id,
+                    1 => self.marker_2_mesh_id,
+                    n => fail!("Wrong player id: {}", n),
                 };
                 EventCreateUnitVisualizer::new(
                     geom,

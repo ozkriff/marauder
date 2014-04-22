@@ -15,10 +15,10 @@ pub type MBool = bool;
 pub type MInt = i32;
 
 #[deriving(Ord, Eq, TotalEq, Hash)]
-pub struct PlayerId(pub MInt);
+pub struct PlayerId{pub id: MInt}
 
 #[deriving(Ord, TotalOrd, Eq, TotalEq, Hash)]
-pub struct UnitId(pub MInt);
+pub struct UnitId{pub id: MInt}
 
 pub type MapPos = Vector2<MInt>;
 
