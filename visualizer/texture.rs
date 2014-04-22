@@ -60,12 +60,7 @@ impl Texture {
 }
 
 fn load_image(path: &Path) -> image::Image<u8> {
-    let str_path = match path.as_str() {
-        Some(s) => s,
-        None => fail!("Bad image path: {}", path.display()),
-    };
-    let load_result = image::load(str_path.to_owned());
-    match load_result {
+    match image::load(path) {
         image::ImageU8(image) => image,
         image::Error(message) => fail!("{}", message),
         _ => fail!("Unknown image format"),
