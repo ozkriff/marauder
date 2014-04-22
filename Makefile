@@ -33,7 +33,6 @@ SRC = \
   visualizer/visualizer.rs \
   visualizer/font_stash.rs \
 
-
 marauder: Makefile ${SRC}
 	${RUSTC} main.rs -o marauder
 
