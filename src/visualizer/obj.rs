@@ -5,7 +5,7 @@ use std::str::CharSplits;
 use std::from_str::FromStr;
 use std::io::{BufferedReader, File};
 use cgmath::vector::{Vector3, Vector2};
-use core::types::{MBool, MInt};
+use core::types::{MInt};
 use visualizer::types::{VertexCoord, TextureCoord, Normal};
 
 struct Face {
@@ -77,7 +77,7 @@ impl Model {
 
     fn read_line(&mut self, line: &str) {
         let mut words = line.words();
-        fn is_correct_tag(tag: &str) -> MBool {
+        fn is_correct_tag(tag: &str) -> bool {
             tag.len() != 0 && tag[0] != ('#' as u8)
         }
         match words.next() {

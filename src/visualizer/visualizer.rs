@@ -8,7 +8,7 @@ use cgmath::vector::{Vector3, Vector2};
 use cgmath::projection;
 use cgmath::matrix::Matrix4;
 use core::map::MapPosIter;
-use core::types::{Size2, MInt, MBool, UnitId, PlayerId, MapPos, Point2};
+use core::types::{Size2, MInt, UnitId, PlayerId, MapPos, Point2};
 use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
 use core::conf::Config;
@@ -335,7 +335,7 @@ impl<'a> Visualizer<'a> {
         self.win().swap_buffers();
     }
 
-    pub fn is_running(&self) -> MBool {
+    pub fn is_running(&self) -> bool {
         return !self.win().should_close()
     }
 
@@ -344,7 +344,7 @@ impl<'a> Visualizer<'a> {
         self.selected_unit_id = None;
     }
 
-    fn is_full_tile(&self, pos: MapPos) -> MBool {
+    fn is_full_tile(&self, pos: MapPos) -> bool {
         let state = self.game_state.get(&self.core.player_id());
         let max_units_per_tile = 6;
         state.units_at(pos).len() >= max_units_per_tile

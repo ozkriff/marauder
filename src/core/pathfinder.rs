@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use core::types::{MBool, MInt, MapPos, Size2};
+use core::types::{MInt, MapPos, Size2};
 use core::core::Unit;
 use core::game_state::GameState;
 use core::dir::Dir;
@@ -28,7 +28,7 @@ impl<'a> Map {
         self.tiles.get((pos.x + pos.y * self.size.w) as uint)
     }
 
-    fn is_inboard(&self, pos: MapPos) -> MBool {
+    fn is_inboard(&self, pos: MapPos) -> bool {
         let x = pos.x;
         let y = pos.y;
         x >= 0 && y >= 0 && x < self.size.w && y < self.size.h

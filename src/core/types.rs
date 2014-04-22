@@ -11,7 +11,6 @@ pub struct Size2<T>{
 
 pub type Point2<T> = Vector2<T>;
 
-pub type MBool = bool;
 pub type MInt = i32;
 
 #[deriving(Ord, Eq, TotalEq, Hash)]

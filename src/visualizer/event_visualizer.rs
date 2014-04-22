@@ -4,7 +4,7 @@ use rand;
 use rand::Rng;
 use cgmath::vector::{Vector3, Vector, EuclideanVector};
 use visualizer::geom::Geom;
-use core::types::{MBool, MInt, MapPos, UnitId};
+use core::types::{MInt, MapPos, UnitId};
 use core::game_state::GameState;
 use visualizer::types::{Scene, SceneNode, MFloat, WorldPos, NodeId};
 
@@ -17,7 +17,7 @@ fn marker_id(unit_id: UnitId) -> NodeId {
 }
 
 pub trait EventVisualizer {
-    fn is_finished(&self) -> MBool;
+    fn is_finished(&self) -> bool;
     fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: MInt);
     fn end(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
 }
@@ -43,7 +43,7 @@ pub struct EventMoveVisualizer {
 }
 
 impl EventVisualizer for EventMoveVisualizer {
-    fn is_finished(&self) -> MBool {
+    fn is_finished(&self) -> bool {
         self.path.len() == 1
     }
 
@@ -136,7 +136,7 @@ impl EventEndTurnVisualizer {
 }
 
 impl EventVisualizer for EventEndTurnVisualizer {
-    fn is_finished(&self) -> MBool {
+    fn is_finished(&self) -> bool {
         true
     }
 
@@ -184,7 +184,7 @@ impl EventCreateUnitVisualizer {
 }
 
 impl EventVisualizer for EventCreateUnitVisualizer {
-    fn is_finished(&self) -> MBool {
+    fn is_finished(&self) -> bool {
         self.move.is_finished()
     }
 
@@ -225,7 +225,7 @@ impl MoveHelper {
         }
     }
 
-    pub fn is_finished(&self) -> MBool {
+    pub fn is_finished(&self) -> bool {
         self.current_dist >= self.dist
     }
 
@@ -285,7 +285,7 @@ impl EventAttackUnitVisualizer {
 }
 
 impl EventVisualizer for EventAttackUnitVisualizer {
-    fn is_finished(&self) -> MBool {
+    fn is_finished(&self) -> bool {
         self.move.is_finished() && self.shell_move.is_finished()
     }
 
