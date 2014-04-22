@@ -1,6 +1,8 @@
 // See LICENSE file for copyright and license details.
 
 use std::str::Words;
+use std::str::CharSplits;
+use std::from_str::FromStr;
 use std::io::{BufferedReader, File};
 use cgmath::vector::{Vector3, Vector2};
 use core::types::{MBool, MInt};
@@ -19,7 +21,16 @@ pub struct Model {
     faces: Vec<Face>,
 }
 
-// TODO: unwrap() -> ...
+fn parse_word<T: FromStr>(words: &mut Words) -> T {
+    let str = words.next().expect("Can not read next word");
+    from_str(str).expect("Can not convert from string")
+}
+
+fn parse_charsplit<T: FromStr>(words: &mut CharSplits<char>) -> T {
+    let str = words.next().expect("Can not read next word");
+    from_str(str).expect("Can not convert from string")
+}
+
 impl Model {
     pub fn new(path: &Path) -> Model {
         let mut obj = Model {
@@ -34,16 +45,16 @@ impl Model {
 
     fn read_v_or_vn(words: &mut Words) -> VertexCoord {
         Vector3 {
-            x: from_str(words.next().unwrap()).unwrap(),
-            y: from_str(words.next().unwrap()).unwrap(),
-            z: from_str(words.next().unwrap()).unwrap(),
+            x: parse_word(words),
+            y: parse_word(words),
+            z: parse_word(words),
         }
     }
 
     fn read_vt(words: &mut Words) -> TextureCoord {
         Vector2 {
-            x: from_str(words.next().unwrap()).unwrap(),
-            y: 1.0 - from_str(words.next().unwrap()).unwrap(), // flip
+            x: parse_word(words),
+            y: 1.0 - parse_word(words), // flip
         }
     }
 
@@ -56,9 +67,9 @@ impl Model {
         let mut i = 0;
         for group in *words {
             let mut w = group.split('/');
-            face.vertex[i] = from_str(w.next().unwrap()).unwrap();
-            face.texture[i] = from_str(w.next().unwrap()).unwrap();
-            face.normal[i] = from_str(w.next().unwrap()).unwrap();
+            face.vertex[i] = parse_charsplit(&mut w);
+            face.texture[i] = parse_charsplit(&mut w);
+            face.normal[i] = parse_charsplit(&mut w);
             i += 1;
         }
         face
@@ -87,7 +98,10 @@ impl Model {
     fn read(&mut self, path: &Path) {
         let mut file = BufferedReader::new(File::open(path));
         for line in file.lines() {
-            self.read_line(line.unwrap());
+            match line {
+                Ok(line) => self.read_line(line),
+                Err(msg) => fail!("Obj: read error: {}", msg),
+            }
         }
     }
 
