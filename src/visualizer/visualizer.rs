@@ -172,7 +172,7 @@ pub struct Visualizer<'a> {
     win: glfw::Window,
     mouse_pos: Point2<MFloat>,
     camera: Camera,
-    picker: ~picker::TilePicker,
+    picker: picker::TilePicker,
     map_pos_under_cursor: Option<MapPos>,
     selected_unit_id: Option<UnitId>,
     unit_under_cursor_id: Option<UnitId>,

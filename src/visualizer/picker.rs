@@ -63,14 +63,14 @@ impl TilePicker {
         win_size: Size2<MInt>,
         geom: &Geom,
         map_size: Size2<MInt>
-    ) -> ~TilePicker {
+    ) -> TilePicker {
         let shader = Shader::new(
             &Path::new("pick.vs.glsl"),
             &Path::new("pick.fs.glsl"),
         );
         let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
         let map_mesh = get_mesh(geom, map_size, &shader);
-        let tile_picker = ~TilePicker {
+        let tile_picker = TilePicker {
             map_mesh: map_mesh,
             units_mesh: None,
             shader: shader,
