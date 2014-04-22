@@ -54,7 +54,7 @@ Run Marauder::
 How to Play
 ===========
 
-- Use arrows to move camera and '-'\'+' to zoom;
+- Use arrows to move camera and '-'/'+' to zoom;
 - Hold RMB to rotate camera;
 - Press 'u' to create new unit in current tile;
 - Click on friendly unit to select it;
