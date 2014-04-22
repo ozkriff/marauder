@@ -44,11 +44,11 @@ Marauder expects them in 'data' directory.
 
 Download to 'data' directory::
 
-    git clone --depth=1 https://github.com/ozkriff/marauder-data data
+    git clone --depth=1 https://github.com/ozkriff/marauder-data bin/data
 
 Run Marauder::
 
-    ./marauder
+    cd bin && ./marauder
 
 
 How to Play

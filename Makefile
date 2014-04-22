@@ -34,7 +34,7 @@ SRC = \
   src/visualizer/font_stash.rs \
 
 marauder: Makefile ${SRC}
-	${RUSTC} src/main.rs -o marauder
+	${RUSTC} src/main.rs -o bin/marauder
 
 clean:
 	rm -f marauder
