@@ -9,32 +9,32 @@ RUSTC = rustc ${RUSTC_FLAGS}
 all: marauder
 
 SRC = \
-  main.rs \
-  core/mod.rs \
-  core/misc.rs \
-  core/conf.rs \
-  core/map.rs \
-  core/dir.rs \
-  core/core.rs \
-  core/game_state.rs \
-  core/pathfinder.rs \
-  core/types.rs \
-  visualizer/mod.rs \
-  visualizer/camera.rs \
-  visualizer/geom.rs \
-  visualizer/gl_helpers.rs \
-  visualizer/mesh.rs \
-  visualizer/shader.rs \
-  visualizer/texture.rs \
-  visualizer/event_visualizer.rs \
-  visualizer/obj.rs \
-  visualizer/picker.rs \
-  visualizer/types.rs \
-  visualizer/visualizer.rs \
-  visualizer/font_stash.rs \
+  src/main.rs \
+  src/core/mod.rs \
+  src/core/misc.rs \
+  src/core/conf.rs \
+  src/core/map.rs \
+  src/core/dir.rs \
+  src/core/core.rs \
+  src/core/game_state.rs \
+  src/core/pathfinder.rs \
+  src/core/types.rs \
+  src/visualizer/mod.rs \
+  src/visualizer/camera.rs \
+  src/visualizer/geom.rs \
+  src/visualizer/gl_helpers.rs \
+  src/visualizer/mesh.rs \
+  src/visualizer/shader.rs \
+  src/visualizer/texture.rs \
+  src/visualizer/event_visualizer.rs \
+  src/visualizer/obj.rs \
+  src/visualizer/picker.rs \
+  src/visualizer/types.rs \
+  src/visualizer/visualizer.rs \
+  src/visualizer/font_stash.rs \
 
 marauder: Makefile ${SRC}
-	${RUSTC} main.rs -o marauder
+	${RUSTC} src/main.rs -o marauder
 
 clean:
 	rm -f marauder
