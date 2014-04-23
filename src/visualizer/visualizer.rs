@@ -82,7 +82,7 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> Vec<TextureCoord> {
     vertex_data
 }
 
-fn get_marker_pre_mesh() -> (Vec<VertexCoord>, Vec<TextureCoord>) {
+fn get_marker(shader: &Shader, tex_path: &Path) -> Mesh {
     let n = 0.2;
     let mut vertex_data = Vec::new();
     vertex_data.push(Vector3{x: -n, y: 0.0, z: 0.1});
@@ -92,11 +92,6 @@ fn get_marker_pre_mesh() -> (Vec<VertexCoord>, Vec<TextureCoord>) {
     tex_data.push(Vector2{x: 0.0, y: 0.0});
     tex_data.push(Vector2{x: 1.0, y: 0.0});
     tex_data.push(Vector2{x: 0.5, y: 0.5});
-    (vertex_data, tex_data)
-}
-
-fn get_marker(shader: &Shader, tex_path: &Path) -> Mesh {
-    let (vertex_data, tex_data) = get_marker_pre_mesh();
     let mut mesh = Mesh::new(vertex_data.as_slice());
     let tex = Texture::new(tex_path);
     mesh.set_texture(tex, tex_data.as_slice());
