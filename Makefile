@@ -42,4 +42,4 @@ run: bin/marauder
 clean:
 	rm -f marauder
 
-# vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
+# vim: set tabstop=4 shiftwidth=4 softtabstop=4:
