@@ -317,10 +317,7 @@ impl<'a> Visualizer<'a> {
         text_mesh.draw(&self.shader);
     }
 
-    fn draw(&mut self) {
-        set_clear_color(GREY_03);
-        clear_screen();
-        self.shader.activate();
+    fn draw_scene(&mut self) {
         self.shader.uniform_color(self.basic_color_id, WHITE);
         self.draw_units();
         self.draw_map();
@@ -329,6 +326,13 @@ impl<'a> Visualizer<'a> {
             self.event_visualizer.get_mut_ref().draw(
                 &self.geom, scene, self.dtime);
         }
+    }
+
+    fn draw(&mut self) {
+        set_clear_color(GREY_03);
+        clear_screen();
+        self.shader.activate();
+        self.draw_scene();
         self.shader.uniform_color(self.basic_color_id, BLACK);
         self.draw_3d_text();
         self.draw_2d_text();
