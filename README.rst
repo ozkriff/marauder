@@ -48,6 +48,10 @@ Download to 'data' directory::
 
 Run Marauder::
 
+    make run
+
+or::
+
     cd bin && ./marauder
 
 
