@@ -6,8 +6,6 @@ RUSTC_FLAGS += -L deps
 
 RUSTC = rustc ${RUSTC_FLAGS}
 
-all: bin/marauder
-
 SRC = \
 	src/main.rs \
 	src/core/mod.rs \
@@ -32,6 +30,8 @@ SRC = \
 	src/visualizer/types.rs \
 	src/visualizer/visualizer.rs \
 	src/visualizer/font_stash.rs \
+
+all: bin/marauder
 
 bin/marauder: Makefile ${SRC}
 	${RUSTC} src/main.rs -o bin/marauder
