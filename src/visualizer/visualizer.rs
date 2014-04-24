@@ -84,14 +84,16 @@ fn build_hex_tex_coord(map_size: Size2<MInt>) -> Vec<TextureCoord> {
 
 fn get_marker(shader: &Shader, tex_path: &Path) -> Mesh {
     let n = 0.2;
-    let mut vertex_data = Vec::new();
-    vertex_data.push(Vector3{x: -n, y: 0.0, z: 0.1});
-    vertex_data.push(Vector3{x: 0.0, y: n * 1.4, z: 0.1});
-    vertex_data.push(Vector3{x: n, y: 0.0, z: 0.1});
-    let mut tex_data = Vec::new();
-    tex_data.push(Vector2{x: 0.0, y: 0.0});
-    tex_data.push(Vector2{x: 1.0, y: 0.0});
-    tex_data.push(Vector2{x: 0.5, y: 0.5});
+    let vertex_data = vec!(
+        Vector3{x: -n, y: 0.0, z: 0.1},
+        Vector3{x: 0.0, y: n * 1.4, z: 0.1},
+        Vector3{x: n, y: 0.0, z: 0.1},
+    );
+    let tex_data = vec!(
+        Vector2{x: 0.0, y: 0.0},
+        Vector2{x: 1.0, y: 0.0},
+        Vector2{x: 0.5, y: 0.5},
+    );
     let mut mesh = Mesh::new(vertex_data.as_slice());
     let tex = Texture::new(tex_path);
     mesh.set_texture(tex, tex_data.as_slice());
