@@ -40,6 +40,6 @@ run: bin/marauder
 	(cd bin && exec ./marauder)
 
 clean:
-	rm -f marauder
+	rm -f bin/marauder
 
 # vim: set tabstop=4 shiftwidth=4 softtabstop=4:
