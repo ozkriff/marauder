@@ -1,10 +1,10 @@
 // See LICENSE file for copyright and license details.
 
-#version 130
+#version 120
 
-in vec3 in_vertex_coordinates;
-in vec3 color;
-out vec3 pass_color;
+attribute vec3 in_vertex_coordinates;
+attribute vec3 color;
+varying vec3 pass_color;
 uniform mat4 mvp_mat;
 
 void main() {
