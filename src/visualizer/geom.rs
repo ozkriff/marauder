@@ -3,8 +3,9 @@
 use std::f32::consts::{PI, FRAC_PI_2};
 use std::num::{pow, abs};
 use cgmath::vector::{Vector2, Vector3, Vector};
-use core::types::{MInt, MapPos};
+use core::types::{MInt, MapPos, SlotId};
 use core::misc::{rad_to_deg};
+use core::core::SLOTS_COUNT;
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
 
 pub struct Geom {
@@ -48,8 +49,8 @@ impl Geom {
         self.index_to_circle_vertex(6, i)
     }
 
-    pub fn slot_pos(&self, slot_index: MInt) -> VertexCoord {
-        self.index_to_circle_vertex(6, slot_index).mul_s(0.6)
+    pub fn slot_pos(&self, slot_index: SlotId) -> VertexCoord {
+        self.index_to_circle_vertex(SLOTS_COUNT, slot_index.id).mul_s(0.6)
     }
 
     pub fn dist(&self, a: WorldPos, b: WorldPos) -> MFloat {

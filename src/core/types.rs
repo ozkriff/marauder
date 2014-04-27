@@ -19,6 +19,8 @@ pub struct PlayerId{pub id: MInt}
 #[deriving(Ord, TotalOrd, Eq, TotalEq, Hash)]
 pub struct UnitId{pub id: MInt}
 
+pub struct SlotId{pub id: MInt}
+
 pub type MapPos = Vector2<MInt>;
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

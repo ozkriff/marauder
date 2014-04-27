@@ -2,8 +2,11 @@
 
 use collections::hashmap::HashMap;
 use cgmath::vector::Vector2;
-use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
+use core::types::{Size2, MInt, UnitId, SlotId, PlayerId, MapPos};
 use core::conf::Config;
+use core::game_state::GameState;
+
+pub static SLOTS_COUNT: MInt = 4;
 
 pub enum Command {
     CommandMove(UnitId, Vec<MapPos>),
@@ -26,11 +29,12 @@ pub struct Player {
 pub struct Unit {
     pub id: UnitId,
     pub pos: MapPos,
+    pub slot_id: SlotId,
     pub player_id: PlayerId,
 }
 
 pub struct Core {
-    units: HashMap<UnitId, Unit>,
+    game_state: GameState,
     players: Vec<Player>,
     current_player_id: PlayerId,
     core_event_list: Vec<~CoreEvent>,
@@ -57,7 +61,7 @@ impl Core {
         let config = Config::new(&Path::new("conf_core.json"));
         let map_size = config.get("map_size");
         let mut core = ~Core {
-            units: HashMap::new(),
+            game_state: GameState::new(),
             players: get_players_list(),
             current_player_id: PlayerId{id: 0},
             core_event_list: Vec::new(),
@@ -163,7 +167,7 @@ impl CoreEvent for CoreEventMove {
     }
 
     fn apply(&self, core: &mut Core) {
-        let unit = core.units.get_mut(&self.unit_id);
+        let unit = core.game_state.units.get_mut(&self.unit_id);
         unit.pos = *self.path.last().unwrap();
     }
 }
@@ -215,7 +219,7 @@ impl CoreEventCreateUnit {
         pos: MapPos,
         player_id: PlayerId
     ) -> ~CoreEventCreateUnit {
-        let new_id = match core.units.keys().max_by(|&n| n) {
+        let new_id = match core.game_state.units.keys().max_by(|&n| n) {
             Some(n) => n.id + 1,
             None => 0,
         };
@@ -233,10 +237,15 @@ impl CoreEvent for CoreEventCreateUnit {
     }
 
     fn apply(&self, core: &mut Core) {
-        assert!(core.units.find(&self.id).is_none());
-        core.units.insert(self.id, Unit {
+        assert!(core.game_state.units.find(&self.id).is_none());
+        let slot_id = match core.game_state.get_free_slot(self.id, self.pos) {
+            Some(id) => id,
+            None => fail!("No free slot in {}", self.pos),
+        };
+        core.game_state.units.insert(self.id, Unit {
             id: self.id,
             pos: self.pos,
+            slot_id: slot_id,
             player_id: core.current_player_id,
         });
     }
@@ -266,8 +275,8 @@ impl CoreEvent for CoreEventAttackUnit {
     }
 
     fn apply(&self, core: &mut Core) {
-        assert!(core.units.find(&self.defender_id).is_some());
-        core.units.remove(&self.defender_id);
+        assert!(core.game_state.units.find(&self.defender_id).is_some());
+        core.game_state.units.remove(&self.defender_id);
     }
 }
 

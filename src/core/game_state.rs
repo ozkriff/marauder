@@ -8,8 +8,9 @@ use core::core::{
     EventEndTurn,
     EventCreateUnit,
     EventAttackUnit,
+    SLOTS_COUNT,
 };
-use core::types::{UnitId, MapPos, MInt};
+use core::types::{UnitId, SlotId, MapPos};
 
 pub struct GameState {
     pub units: HashMap<UnitId, Unit>,
@@ -35,15 +36,20 @@ impl<'a> GameState {
     pub fn apply_event(&mut self, event: &Event) {
         match *event {
             EventMove(id, ref path) => {
+                let pos = *path.last().unwrap();
+                let slot_id = self.get_free_slot(id, pos).unwrap();
                 let unit = self.units.get_mut(&id);
-                unit.pos = *path.last().unwrap();
+                unit.pos = pos;
+                unit.slot_id = slot_id;
             },
             EventEndTurn(_, _) => {},
             EventCreateUnit(id, pos, player_id) => {
                 assert!(self.units.find(&id).is_none());
+                let slot_id = self.get_free_slot(id, pos).unwrap();
                 self.units.insert(id, Unit {
                     id: id,
                     pos: pos,
+                    slot_id: slot_id,
                     player_id: player_id,
                 });
             },
@@ -54,15 +60,24 @@ impl<'a> GameState {
         }
     }
 
-    pub fn get_slot_index(&self, unit_id: UnitId, pos: MapPos) -> MInt {
-        let mut index = 0;
-        for unit in self.units_at(pos).iter() {
-            if unit.id == unit_id {
-                break;
+    // TODO: simplify
+    pub fn get_free_slot(&self, unit_id: UnitId, pos: MapPos) -> Option<SlotId> {
+        for id in range(0, SLOTS_COUNT) {
+            let mut index = Some(SlotId{id: id});
+            for unit in self.units_at(pos).iter() {
+                if unit.id == unit_id {
+                    return Some(unit.slot_id);
+                }
+                if unit.slot_id.id == id {
+                    index = None;
+                    break;
+                }
             }
-            index += 1;
+            if index.is_some() {
+                return index;
+            }
         }
-        index
+        None
     }
 }
 

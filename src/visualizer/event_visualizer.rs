@@ -22,17 +22,18 @@ pub trait EventVisualizer {
     fn end(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
 }
 
-// TODO: Replace with slot system
 fn unit_pos(
     unit_id: UnitId,
     map_pos: MapPos,
     geom: &Geom,
     state: &GameState,
 ) -> WorldPos {
-    let slot_id = state.get_slot_index(unit_id, map_pos);
+    let slot_id = match state.get_free_slot(unit_id, map_pos) {
+        Some(id) => id,
+        None => fail!("No free slot in {}", map_pos),
+    };
     let center_pos = geom.map_pos_to_world_pos(map_pos);
-    let slot_pos = geom.slot_pos(slot_id);
-    center_pos.add_v(&slot_pos)
+    center_pos.add_v(&geom.slot_pos(slot_id))
 }
 
 pub struct EventMoveVisualizer {
