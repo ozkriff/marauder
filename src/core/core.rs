@@ -45,16 +45,20 @@ fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
     map
 }
 
+fn get_players_list() -> Vec<Player> {
+    vec!(
+        Player{id: PlayerId{id: 0}},
+        Player{id: PlayerId{id: 1}},
+    )
+}
+
 impl Core {
     pub fn new() -> ~Core {
         let config = Config::new(&Path::new("conf_core.json"));
         let map_size = config.get("map_size");
         let mut core = ~Core {
             units: HashMap::new(),
-            players: vec!(
-                Player{id: PlayerId{id: 0}},
-                Player{id: PlayerId{id: 1}},
-            ),
+            players: get_players_list(),
             current_player_id: PlayerId{id: 0},
             core_event_list: Vec::new(),
             event_lists: get_event_lists(),
