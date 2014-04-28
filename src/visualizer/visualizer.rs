@@ -31,6 +31,7 @@ use visualizer::obj;
 use visualizer::mesh::Mesh;
 use visualizer::scene::{Scene};
 use visualizer::types::{
+    WorldPos,
     VertexCoord,
     TextureCoord,
     MFloat,
@@ -58,7 +59,7 @@ static BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
 fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> Vec<VertexCoord> {
     let mut vertex_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
-        let pos = geom.map_pos_to_world_pos(tile_pos);
+        let pos = geom.map_pos_to_world_pos(tile_pos).v;
         for num in range(0 as MInt, 6) {
             let vertex = geom.index_to_hex_vertex(num);
             let next_vertex = geom.index_to_hex_vertex(num + 1);
@@ -150,10 +151,10 @@ fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MInt {
     (meshes.len() as MInt) - 1
 }
 
-fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> Vector3<MFloat> {
+fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> WorldPos {
     let pos = geom.map_pos_to_world_pos(
         MapPos{v: Vector2{x: map_size.w, y: map_size.h}});
-    Vector3{x: -pos.x / 2.0, y: -pos.y / 2.0, z: 0.0}
+    WorldPos{v: Vector3{x: -pos.v.x / 2.0, y: -pos.v.y / 2.0, z: 0.0}}
 }
 
 pub struct Visualizer<'a> {
@@ -274,7 +275,7 @@ impl<'a> Visualizer<'a> {
 
     fn draw_units(&self) {
         for (_, node) in self.scene().nodes.iter() {
-            let mut m = tr(self.camera.mat(), node.pos);
+            let mut m = tr(self.camera.mat(), node.pos.v);
             m = rot_z(m, node.rot);
             self.shader.uniform_mat4f(self.mvp_mat_id, &m);
             self.meshes.get(node.mesh_id as uint).draw(&self.shader);

@@ -30,9 +30,13 @@ impl Geom {
             y: (i.v.y as MFloat) * self.hex_ex_radius * 1.5,
         };
         if i.v.y % 2 == 0 {
-            Vector3{x: v.x + self.hex_in_radius, y: v.y, z: 0.0}
+            WorldPos{v: Vector3{
+                x: v.x + self.hex_in_radius,
+                y: v.y,
+                z: 0.0,
+            }}
         } else {
-            v.extend(0.0)
+            WorldPos{v: v.extend(0.0)}
         }
     }
 
@@ -54,15 +58,15 @@ impl Geom {
     }
 
     pub fn dist(&self, a: WorldPos, b: WorldPos) -> MFloat {
-        let dx = abs(b.x - a.x);
-        let dy = abs(b.y - a.y);
-        let dz = abs(b.z - a.z);
+        let dx = abs(b.v.x - a.v.x);
+        let dy = abs(b.v.y - a.v.y);
+        let dz = abs(b.v.z - a.v.z);
         (pow(dx, 2) + pow(dy, 2) + pow(dz, 2)).sqrt()
     }
 
     pub fn get_rot_angle(&self, a: WorldPos, b: WorldPos) -> MFloat {
-        let mut angle = rad_to_deg(((b.x - a.x) / self.dist(a, b)).asin());
-        if b.y - a.y > 0.0 {
+        let mut angle = rad_to_deg(((b.v.x - a.v.x) / self.dist(a, b)).asin());
+        if b.v.y - a.v.y > 0.0 {
             angle = -(180.0 + angle);
         }
         angle

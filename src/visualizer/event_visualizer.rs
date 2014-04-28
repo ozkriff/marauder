@@ -34,7 +34,7 @@ fn unit_pos(
         None => fail!("No free slot in {}", map_pos),
     };
     let center_pos = geom.map_pos_to_world_pos(map_pos);
-    center_pos.add_v(&geom.slot_pos(slot_id))
+    WorldPos{v: center_pos.v.add_v(&geom.slot_pos(slot_id))}
 }
 
 pub struct EventMoveVisualizer {
@@ -53,7 +53,7 @@ impl EventVisualizer for EventMoveVisualizer {
         let pos = self.move.step(dtime);
         {
             let marker_node = scene.nodes.get_mut(&marker_id(self.unit_id));
-            marker_node.pos = pos.add_v(&vec3_z(geom.hex_ex_radius / 2.0));
+            marker_node.pos.v = pos.v.add_v(&vec3_z(geom.hex_ex_radius / 2.0));
         }
         let node_id = unit_id_to_node_id(self.unit_id);
         let node = scene.nodes.get_mut(&node_id);
@@ -165,7 +165,7 @@ impl EventCreateUnitVisualizer {
         let node_id = unit_id_to_node_id(id);
         let world_pos = unit_pos(id, pos, geom, state);
         let to = world_pos;
-        let from = to.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
+        let from = WorldPos{v: to.v.sub_v(&vec3_z(geom.hex_ex_radius / 2.0))};
         let rot = rand::task_rng().gen_range::<MFloat>(0.0, 360.0);
         scene.nodes.insert(node_id, SceneNode {
             pos: from,
@@ -173,7 +173,7 @@ impl EventCreateUnitVisualizer {
             mesh_id: mesh_id,
         });
         scene.nodes.insert(marker_id(id), SceneNode {
-            pos: to.add_v(&vec3_z(geom.hex_ex_radius / 2.0)),
+            pos: WorldPos{v: to.v.add_v(&vec3_z(geom.hex_ex_radius / 2.0))},
             rot: 0.0,
             mesh_id: marker_mesh_id,
         });
@@ -215,7 +215,7 @@ impl MoveHelper {
         to: WorldPos,
         speed: MFloat
     ) -> MoveHelper {
-        let dir = to.sub_v(&from).normalize();
+        let dir = to.v.sub_v(&from.v).normalize();
         let dist = geom.dist(from, to);
         MoveHelper {
             from: from,
@@ -235,7 +235,7 @@ impl MoveHelper {
         let dt = dtime.n as MFloat / 1000000000.0;
         let step = self.dir.mul_s(dt);
         self.current_dist += step.length();
-        self.current.add_self_v(&step);
+        self.current.v.add_self_v(&step);
         self.current
     }
 }
@@ -263,7 +263,7 @@ impl EventAttackUnitVisualizer {
     ) -> ~EventVisualizer {
         let node_id = unit_id_to_node_id(defender_id);
         let from = scene.nodes.get(&node_id).pos;
-        let to = from.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
+        let to = WorldPos{v: from.v.sub_v(&vec3_z(geom.hex_ex_radius / 2.0))};
         let move = MoveHelper::new(geom, from, to, 1.0);
         let shell_node_id = NodeId{id: 666}; // TODO
         let shell_move = {

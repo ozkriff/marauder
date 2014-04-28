@@ -11,7 +11,7 @@ use visualizer::gl_helpers::{
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
-use visualizer::types::{Color3, MFloat, MatId, WorldPos};
+use visualizer::types::{Color3, MFloat, MatId};
 use visualizer::scene::Scene;
 use visualizer::shader::Shader;
 
@@ -24,7 +24,7 @@ fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut c_data = Vec::new();
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
-        let pos3d = geom.map_pos_to_world_pos(tile_pos);
+        let pos3d = geom.map_pos_to_world_pos(tile_pos).v;
         for num in range(0 as MInt, 6) {
             let vertex = geom.index_to_hex_vertex(num);
             let next_vertex = geom.index_to_hex_vertex(num + 1);
@@ -87,7 +87,7 @@ impl TilePicker {
 
     pub fn update_units( &mut self, geom: &Geom, scene: &Scene) {
         use std::slice::Vector;
-        fn get_hex_vertex(geom: &Geom, n: MInt) -> WorldPos {
+        fn get_hex_vertex(geom: &Geom, n: MInt) -> Vector3<MFloat> {
             let scale_factor = 0.5;
             geom.index_to_hex_vertex(n).mul_s(scale_factor)
         }
@@ -101,11 +101,11 @@ impl TilePicker {
             }
             let color = Color3 {r: i_to_f(id), g: 0.0, b: i_to_f(2)};
             for num in range(0 as MInt, 6) {
-                v_data.push(node.pos + get_hex_vertex(geom, num));
+                v_data.push(node.pos.v + get_hex_vertex(geom, num));
                 c_data.push(color);
-                v_data.push(node.pos + get_hex_vertex(geom, num + 1));
+                v_data.push(node.pos.v + get_hex_vertex(geom, num + 1));
                 c_data.push(color);
-                v_data.push(node.pos + Vector3::zero());
+                v_data.push(node.pos.v + Vector3::zero());
                 c_data.push(color);
             }
         }

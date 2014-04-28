@@ -31,7 +31,7 @@ impl Camera {
         Camera {
             x_angle: 45.0,
             z_angle: 0.0,
-            pos: Vector3::zero(),
+            pos: WorldPos{v: Vector3::zero()},
             zoom: 10.0,
             projection_mat: get_projection_mat(win_size),
         }
@@ -42,7 +42,7 @@ impl Camera {
         m = tr(m, Vector3{x: 0.0, y: 0.0, z: -self.zoom});
         m = rot_x(m, -self.x_angle);
         m = rot_z(m, -self.z_angle);
-        m = tr(m, self.pos);
+        m = tr(m, self.pos.v);
         m
     }
 
@@ -50,8 +50,8 @@ impl Camera {
         let speed_in_radians = deg_to_rad(self.z_angle - angle);
         let dx = speed_in_radians.sin();
         let dy = speed_in_radians.cos();
-        self.pos.x -= dy * speed * self.zoom;
-        self.pos.y -= dx * speed * self.zoom;
+        self.pos.v.x -= dy * speed * self.zoom;
+        self.pos.v.y -= dx * speed * self.zoom;
     }
 
     pub fn set_win_size(&mut self, win_size: Size2<MInt>) {
