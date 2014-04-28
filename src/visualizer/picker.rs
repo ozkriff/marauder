@@ -11,7 +11,8 @@ use visualizer::gl_helpers::{
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
-use visualizer::types::{Color3, MFloat, MatId, Scene, WorldPos};
+use visualizer::types::{Color3, MFloat, MatId, WorldPos};
+use visualizer::scene::Scene;
 use visualizer::shader::Shader;
 
 fn i_to_f(n: MInt) -> f32 {
@@ -93,7 +94,7 @@ impl TilePicker {
         let last_unit_node_id = 1000; // TODO
         let mut c_data = Vec::new();
         let mut v_data = Vec::new();
-        for (node_id, node) in scene.iter() {
+        for (node_id, node) in scene.nodes.iter() {
             let id = node_id.id;
             if id >= last_unit_node_id {
                 continue;

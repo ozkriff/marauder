@@ -6,7 +6,8 @@ use cgmath::vector::{Vector3, Vector, EuclideanVector};
 use visualizer::geom::Geom;
 use core::types::{MInt, MapPos, UnitId};
 use core::game_state::GameState;
-use visualizer::types::{Scene, SceneNode, MFloat, WorldPos, NodeId, Time};
+use visualizer::scene::{Scene, SceneNode, NodeId};
+use visualizer::types::{MFloat, WorldPos, Time};
 
 fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
     NodeId{id: unit_id.id}
@@ -51,11 +52,11 @@ impl EventVisualizer for EventMoveVisualizer {
     fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: Time) {
         let pos = self.move.step(dtime);
         {
-            let marker_node = scene.get_mut(&marker_id(self.unit_id));
+            let marker_node = scene.nodes.get_mut(&marker_id(self.unit_id));
             marker_node.pos = pos.add_v(&vec3_z(geom.hex_ex_radius / 2.0));
         }
         let node_id = unit_id_to_node_id(self.unit_id);
-        let node = scene.get_mut(&node_id);
+        let node = scene.nodes.get_mut(&node_id);
         node.pos = pos;
         if self.move.is_finished() {
             self.path.shift();
@@ -69,7 +70,7 @@ impl EventVisualizer for EventMoveVisualizer {
     fn end(&mut self, _: &Geom, scene: &mut Scene, _: &GameState) {
         assert!(self.path.len() == 1);
         let node_id = unit_id_to_node_id(self.unit_id);
-        let node = scene.get_mut(&node_id);
+        let node = scene.nodes.get_mut(&node_id);
         node.pos = self.current_waypoint();
     }
 }
@@ -89,7 +90,7 @@ impl EventMoveVisualizer {
         }
         let speed = 3.8; // TODO: Get from UnitType
         let node_id = unit_id_to_node_id(unit_id);
-        let node = scene.get_mut(&node_id);
+        let node = scene.nodes.get_mut(&node_id);
         node.rot = geom.get_rot_angle(
             *world_path.get(0), *world_path.get(1));
         let move = MoveHelper::new(
@@ -166,12 +167,12 @@ impl EventCreateUnitVisualizer {
         let to = world_pos;
         let from = to.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
         let rot = rand::task_rng().gen_range::<MFloat>(0.0, 360.0);
-        scene.insert(node_id, SceneNode {
+        scene.nodes.insert(node_id, SceneNode {
             pos: from,
             rot: rot,
             mesh_id: mesh_id,
         });
-        scene.insert(marker_id(id), SceneNode {
+        scene.nodes.insert(marker_id(id), SceneNode {
             pos: to.add_v(&vec3_z(geom.hex_ex_radius / 2.0)),
             rot: 0.0,
             mesh_id: marker_mesh_id,
@@ -191,7 +192,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
 
     fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: Time) {
         let node_id = unit_id_to_node_id(self.id);
-        let node = scene.get_mut(&node_id);
+        let node = scene.nodes.get_mut(&node_id);
         node.pos = self.move.step(dtime);
     }
 
@@ -261,14 +262,14 @@ impl EventAttackUnitVisualizer {
         shell_mesh_id: MInt
     ) -> ~EventVisualizer {
         let node_id = unit_id_to_node_id(defender_id);
-        let from = scene.get(&node_id).pos;
+        let from = scene.nodes.get(&node_id).pos;
         let to = from.sub_v(&vec3_z(geom.hex_ex_radius / 2.0));
         let move = MoveHelper::new(geom, from, to, 1.0);
         let shell_node_id = NodeId{id: 666}; // TODO
         let shell_move = {
-            let from = scene.get(&unit_id_to_node_id(attacker_id)).pos;
-            let to = scene.get(&unit_id_to_node_id(defender_id)).pos;
-            scene.insert(shell_node_id, SceneNode {
+            let from = scene.nodes.get(&unit_id_to_node_id(attacker_id)).pos;
+            let to = scene.nodes.get(&unit_id_to_node_id(defender_id)).pos;
+            scene.nodes.insert(shell_node_id, SceneNode {
                 pos: from,
                 rot: 0.0,
                 mesh_id: shell_mesh_id,
@@ -291,18 +292,18 @@ impl EventVisualizer for EventAttackUnitVisualizer {
     }
 
     fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: Time) {
-        scene.get_mut(&self.shell_node_id).pos = self.shell_move.step(dtime);
+        scene.nodes.get_mut(&self.shell_node_id).pos = self.shell_move.step(dtime);
         if self.shell_move.is_finished() {
             let node_id = unit_id_to_node_id(self.defender_id);
-            scene.get_mut(&node_id).pos = self.move.step(dtime);
+            scene.nodes.get_mut(&node_id).pos = self.move.step(dtime);
         }
     }
 
     fn end(&mut self, _: &Geom, scene: &mut Scene, _: &GameState) {
         let node_id = unit_id_to_node_id(self.defender_id);
-        scene.remove(&node_id);
-        scene.remove(&self.shell_node_id);
-        scene.remove(&marker_id(self.defender_id));
+        scene.nodes.remove(&node_id);
+        scene.nodes.remove(&self.shell_node_id);
+        scene.nodes.remove(&marker_id(self.defender_id));
     }
 }
 

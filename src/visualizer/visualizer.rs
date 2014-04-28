@@ -29,8 +29,8 @@ use visualizer::geom::Geom;
 use visualizer::picker;
 use visualizer::obj;
 use visualizer::mesh::Mesh;
+use visualizer::scene::{Scene};
 use visualizer::types::{
-    Scene,
     VertexCoord,
     TextureCoord,
     MFloat,
@@ -104,7 +104,7 @@ fn get_marker(shader: &Shader, tex_path: &Path) -> Mesh {
 fn get_scenes(players_count: MInt) -> HashMap<PlayerId, Scene> {
     let mut m = HashMap::new();
     for i in range(0, players_count) {
-        m.insert(PlayerId{id: i}, HashMap::new());
+        m.insert(PlayerId{id: i}, Scene::new());
     }
     m
 }
@@ -273,7 +273,7 @@ impl<'a> Visualizer<'a> {
     }
 
     fn draw_units(&self) {
-        for (_, node) in self.scene().iter() {
+        for (_, node) in self.scene().nodes.iter() {
             let mut m = tr(self.camera.mat(), node.pos);
             m = rot_z(m, node.rot);
             self.shader.uniform_mat4f(self.mvp_mat_id, &m);
