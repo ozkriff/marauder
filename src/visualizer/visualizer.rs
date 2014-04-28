@@ -416,13 +416,6 @@ impl<'a> Visualizer<'a> {
             self.camera.z_angle += diff.x * (360.0 / win_w);
             self.camera.x_angle += diff.y * (360.0 / win_h);
         }
-        let mmb = self.win().get_mouse_button(glfw::MouseButtonMiddle);
-        if mmb == glfw::Press {
-            // TODO: Remove 0.05
-            let diff = self.mouse_pos.v - pos.v;
-            self.camera.move(90.0, diff.y * 0.01);
-            self.camera.move(0.0, diff.x * 0.01);
-        }
         self.mouse_pos = pos;
     }
 
