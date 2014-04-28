@@ -152,7 +152,7 @@ fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MInt {
 
 fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> Vector3<MFloat> {
     let pos = geom.map_pos_to_world_pos(
-        Vector2{x: map_size.w, y: map_size.h});
+        MapPos{v: Vector2{x: map_size.w, y: map_size.h}});
     Vector3{x: -pos.x / 2.0, y: -pos.y / 2.0, z: 0.0}
 }
 
@@ -241,7 +241,7 @@ impl<'a> Visualizer<'a> {
             basic_color_id: basic_color_id,
             shader: shader,
             win: win,
-            mouse_pos: Vector2::zero(),
+            mouse_pos: Point2{v: Vector2::zero()},
             camera: camera,
             picker: picker,
             map_pos_under_cursor: None,
@@ -410,7 +410,7 @@ impl<'a> Visualizer<'a> {
     fn handle_cursor_pos_event(&mut self, pos: Point2<MFloat>) {
         let rmb = self.win().get_mouse_button(glfw::MouseButtonRight);
         if rmb == glfw::Press {
-            let diff = self.mouse_pos - pos;
+            let diff = self.mouse_pos.v - pos.v;
             let win_w = self.win_size.w as MFloat;
             let win_h = self.win_size.h as MFloat;
             self.camera.z_angle += diff.x * (360.0 / win_w);
@@ -419,7 +419,7 @@ impl<'a> Visualizer<'a> {
         let mmb = self.win().get_mouse_button(glfw::MouseButtonMiddle);
         if mmb == glfw::Press {
             // TODO: Remove 0.05
-            let diff = self.mouse_pos - pos;
+            let diff = self.mouse_pos.v - pos.v;
             self.camera.move(90.0, diff.y * 0.01);
             self.camera.move(0.0, diff.x * 0.01);
         }
@@ -480,7 +480,7 @@ impl<'a> Visualizer<'a> {
                 self.handle_key_event(key);
             },
             glfw::CursorPosEvent(x, y) => {
-                let p = Vector2{x: x as MFloat, y: y as MFloat};
+                let p = Point2{v: Vector2{x: x as MFloat, y: y as MFloat}};
                 self.handle_cursor_pos_event(p);
             },
             glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
@@ -505,8 +505,8 @@ impl<'a> Visualizer<'a> {
 
     fn pick_tile(&mut self) {
         let mouse_pos = Vector2 {
-            x: self.mouse_pos.x as MInt,
-            y: self.mouse_pos.y as MInt,
+            x: self.mouse_pos.v.x as MInt,
+            y: self.mouse_pos.v.y as MInt,
         };
         match self.picker.pick_tile(&self.camera, mouse_pos) {
             picker::PickedMapPos(pos) => {

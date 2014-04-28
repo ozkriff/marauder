@@ -12,7 +12,7 @@ pub enum Dir {
   NorthWest,
 }
 
-static DIR_TO_POS_DIFF: [[MapPos, ..6], ..2] = [
+static DIR_TO_POS_DIFF: [[Vector2<MInt>, ..6], ..2] = [
     [
         Vector2{x: 1, y: -1},
         Vector2{x: 1, y: 0},
@@ -59,9 +59,9 @@ impl Dir {
 
     pub fn get_dir_from_to(from: MapPos, to: MapPos) -> Dir {
         // assert!(from.distance(to) == 1);
-        let diff = to - from;
+        let diff = to.v - from.v;
         for i in range(0 as MInt, 6) {
-            if diff == DIR_TO_POS_DIFF[(from.y % 2) as uint][i as uint] {
+            if diff == DIR_TO_POS_DIFF[(from.v.y % 2) as uint][i as uint] {
                 return Dir::from_int(i);
             }
         }
@@ -69,12 +69,12 @@ impl Dir {
     }
 
     pub fn get_neighbour_pos(pos: MapPos, dir: Dir) -> MapPos {
-        let is_odd_row = pos.y % 2 == 1;
+        let is_odd_row = pos.v.y % 2 == 1;
         let subtable_index = if is_odd_row { 1 } else { 0 };
         let direction_index = dir.to_int();
         assert!(direction_index >= 0 && direction_index < 6);
         let difference = DIR_TO_POS_DIFF[subtable_index as uint][direction_index as uint];
-        pos + difference
+        MapPos{v: pos.v + difference}
     }
 }
 

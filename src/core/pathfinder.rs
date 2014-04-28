@@ -21,16 +21,16 @@ fn max_cost() -> MInt {
 
 impl<'a> Map {
     fn tile_mut(&'a mut self, pos: MapPos) -> &'a mut Tile {
-        self.tiles.get_mut((pos.x + pos.y * self.size.w) as uint)
+        self.tiles.get_mut((pos.v.x + pos.v.y * self.size.w) as uint)
     }
 
     fn tile(&'a self, pos: MapPos) -> &'a Tile {
-        self.tiles.get((pos.x + pos.y * self.size.w) as uint)
+        self.tiles.get((pos.v.x + pos.v.y * self.size.w) as uint)
     }
 
     fn is_inboard(&self, pos: MapPos) -> bool {
-        let x = pos.x;
-        let y = pos.y;
+        let x = pos.v.x;
+        let y = pos.v.y;
         x >= 0 && y >= 0 && x < self.size.w && y < self.size.h
     }
 }

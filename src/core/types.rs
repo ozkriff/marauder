@@ -9,7 +9,7 @@ pub struct Size2<T>{
     pub h: T,
 }
 
-pub type Point2<T> = Vector2<T>;
+pub struct Point2<T>{pub v: Vector2<T>}
 
 pub type MInt = i32;
 
@@ -21,6 +21,7 @@ pub struct UnitId{pub id: MInt}
 
 pub struct SlotId{pub id: MInt}
 
-pub type MapPos = Vector2<MInt>;
+#[deriving(Eq, TotalEq, Clone, Show)]
+pub struct MapPos{pub v: Vector2<MInt>}
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

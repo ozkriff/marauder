@@ -68,10 +68,10 @@ impl Core {
             event_lists: get_event_lists(),
             map_size: map_size,
         };
-        core.add_unit(Vector2{x: 0, y: 0}, PlayerId{id: 0});
-        core.add_unit(Vector2{x: 0, y: 1}, PlayerId{id: 0});
-        core.add_unit(Vector2{x: 2, y: 0}, PlayerId{id: 1});
-        core.add_unit(Vector2{x: 2, y: 2}, PlayerId{id: 1});
+        core.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, PlayerId{id: 0});
+        core.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, PlayerId{id: 0});
+        core.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, PlayerId{id: 1});
+        core.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, PlayerId{id: 1});
         core
     }
 

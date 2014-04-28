@@ -11,7 +11,7 @@ pub struct MapPosIter {
 impl MapPosIter {
     pub fn new(map_size: Size2<MInt>) -> MapPosIter {
         MapPosIter {
-            cursor: Vector2::zero(),
+            cursor: MapPos{v: Vector2::zero()},
             map_size: map_size,
         }
     }
@@ -19,15 +19,15 @@ impl MapPosIter {
 
 impl Iterator<MapPos> for MapPosIter {
     fn next(&mut self) -> Option<MapPos> {
-        let current_pos = if self.cursor.y >= self.map_size.h {
+        let current_pos = if self.cursor.v.y >= self.map_size.h {
             None
         } else {
             Some(self.cursor)
         };
-        self.cursor.x += 1;
-        if self.cursor.x >= self.map_size.w {
-            self.cursor.x = 0;
-            self.cursor.y += 1;
+        self.cursor.v.x += 1;
+        if self.cursor.v.x >= self.map_size.w {
+            self.cursor.v.x = 0;
+            self.cursor.v.y += 1;
         }
         current_pos
     }

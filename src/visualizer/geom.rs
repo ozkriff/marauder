@@ -26,10 +26,10 @@ impl Geom {
 
     pub fn map_pos_to_world_pos(&self, i: MapPos) -> WorldPos {
         let v = Vector2 {
-            x: (i.x as MFloat) * self.hex_in_radius * 2.0,
-            y: (i.y as MFloat) * self.hex_ex_radius * 1.5,
+            x: (i.v.x as MFloat) * self.hex_in_radius * 2.0,
+            y: (i.v.y as MFloat) * self.hex_ex_radius * 1.5,
         };
-        if i.y % 2 == 0 {
+        if i.v.y % 2 == 0 {
             Vector3{x: v.x + self.hex_in_radius, y: v.y, z: 0.0}
         } else {
             v.extend(0.0)

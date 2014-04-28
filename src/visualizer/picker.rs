@@ -27,8 +27,8 @@ fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
         for num in range(0 as MInt, 6) {
             let vertex = geom.index_to_hex_vertex(num);
             let next_vertex = geom.index_to_hex_vertex(num + 1);
-            let col_x = i_to_f(tile_pos.x);
-            let col_y = i_to_f(tile_pos.y);
+            let col_x = i_to_f(tile_pos.v.x);
+            let col_y = i_to_f(tile_pos.v.y);
             let color = Color3{r: col_x, g: col_y, b: i_to_f(1)};
             v_data.push(pos3d + vertex);
             c_data.push(color);
@@ -136,7 +136,7 @@ impl TilePicker {
         let (r, g, b, _) = read_pixel_bytes(self.win_size, mouse_pos);
         match b {
             0 => PickedNothing,
-            1 => PickedMapPos(Vector2{x: r, y: g}),
+            1 => PickedMapPos(MapPos{v: Vector2{x: r, y: g}}),
             2 => PickedUnitId(UnitId{id: r}),
             n => fail!("Picker: bad color tag: {}", n),
         }
