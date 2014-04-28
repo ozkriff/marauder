@@ -19,11 +19,13 @@ pub struct Color4 {
 }
 
 pub type MFloat = GLfloat;
+
 pub type WorldPos = Vector3<MFloat>;
 pub type VertexCoord = Vector3<MFloat>;
 pub type Normal = Vector3<MFloat>;
 pub type TextureCoord = Vector2<MFloat>;
-pub type Time = u64;
+
+pub struct Time{pub n: u64}
 
 pub struct MatId{pub id: GLuint}
 

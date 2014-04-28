@@ -6,7 +6,7 @@ use cgmath::vector::{Vector3, Vector, EuclideanVector};
 use visualizer::geom::Geom;
 use core::types::{MInt, MapPos, UnitId};
 use core::game_state::GameState;
-use visualizer::types::{Scene, SceneNode, MFloat, WorldPos, NodeId};
+use visualizer::types::{Scene, SceneNode, MFloat, WorldPos, NodeId, Time};
 
 fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
     NodeId{id: unit_id.id}
@@ -18,7 +18,7 @@ fn marker_id(unit_id: UnitId) -> NodeId {
 
 pub trait EventVisualizer {
     fn is_finished(&self) -> bool;
-    fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: MInt);
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: Time);
     fn end(&mut self, geom: &Geom, scene: &mut Scene, state: &GameState);
 }
 
@@ -48,7 +48,7 @@ impl EventVisualizer for EventMoveVisualizer {
         self.path.len() == 1
     }
 
-    fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: MInt) {
+    fn draw(&mut self, geom: &Geom, scene: &mut Scene, dtime: Time) {
         let pos = self.move.step(dtime);
         {
             let marker_node = scene.get_mut(&marker_id(self.unit_id));
@@ -141,7 +141,7 @@ impl EventVisualizer for EventEndTurnVisualizer {
         true
     }
 
-    fn draw(&mut self, _: &Geom, _: &mut Scene, _: MInt) {}
+    fn draw(&mut self, _: &Geom, _: &mut Scene, _: Time) {}
 
     fn end(&mut self, _: &Geom, _: &mut Scene, _: &GameState) {}
 }
@@ -189,7 +189,7 @@ impl EventVisualizer for EventCreateUnitVisualizer {
         self.move.is_finished()
     }
 
-    fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: MInt) {
+    fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: Time) {
         let node_id = unit_id_to_node_id(self.id);
         let node = scene.get_mut(&node_id);
         node.pos = self.move.step(dtime);
@@ -230,8 +230,8 @@ impl MoveHelper {
         self.current_dist >= self.dist
     }
 
-    pub fn step(&mut self, dtime: MInt) -> WorldPos {
-        let dt = dtime as MFloat / 1000000000.0;
+    pub fn step(&mut self, dtime: Time) -> WorldPos {
+        let dt = dtime.n as MFloat / 1000000000.0;
         let step = self.dir.mul_s(dt);
         self.current_dist += step.length();
         self.current.add_self_v(&step);
@@ -290,7 +290,7 @@ impl EventVisualizer for EventAttackUnitVisualizer {
         self.move.is_finished() && self.shell_move.is_finished()
     }
 
-    fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: MInt) {
+    fn draw(&mut self, _: &Geom, scene: &mut Scene, dtime: Time) {
         scene.get_mut(&self.shell_node_id).pos = self.shell_move.step(dtime);
         if self.shell_move.is_finished() {
             let node_id = unit_id_to_node_id(self.defender_id);

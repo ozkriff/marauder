@@ -181,7 +181,7 @@ pub struct Visualizer<'a> {
     game_state: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
     last_time: Time,
-    dtime: MInt,
+    dtime: Time,
     win_size: Size2<MInt>,
     glfw: glfw::Glfw,
     events: Receiver<(f64, glfw::WindowEvent)>,
@@ -254,8 +254,8 @@ impl<'a> Visualizer<'a> {
             scenes: get_scenes(players_count),
             game_state: get_game_states(players_count),
             pathfinders: get_pathfinders(players_count, map_size),
-            last_time: precise_time_ns(),
-            dtime: 0,
+            last_time: Time{n: precise_time_ns()},
+            dtime: Time{n: 0},
             win_size: win_size,
             glfw: glfw,
             events: events,
@@ -600,8 +600,8 @@ impl<'a> Visualizer<'a> {
 
     pub fn update_time(&mut self) {
         let time = precise_time_ns();
-        self.dtime = (time - self.last_time) as MInt;
-        self.last_time = time;
+        self.dtime.n = time - self.last_time.n;
+        self.last_time.n = time;
     }
 
     pub fn tick(&mut self) {
