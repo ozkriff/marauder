@@ -236,6 +236,9 @@ impl MoveHelper {
         let step = self.dir.mul_s(dt);
         self.current_dist += step.length();
         self.current.v.add_self_v(&step);
+        if self.is_finished() {
+            self.current = self.to;
+        }
         self.current
     }
 }
