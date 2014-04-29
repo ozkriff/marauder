@@ -13,6 +13,7 @@ use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
 use core::conf::Config;
 use core::core;
+use core::core::SLOTS_COUNT;
 use visualizer::gl_helpers::{
     set_clear_color,
     clear_screen,
@@ -348,8 +349,8 @@ impl<'a> Visualizer<'a> {
 
     fn is_full_tile(&self, pos: MapPos) -> bool {
         let state = self.game_state.get(&self.core.player_id());
-        let max_units_per_tile = 6;
-        state.units_at(pos).len() >= max_units_per_tile
+        let max_units_per_tile = SLOTS_COUNT;
+        state.units_at(pos).len() as MInt >= max_units_per_tile
     }
 
     fn create_unit(&mut self) {
