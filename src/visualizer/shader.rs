@@ -26,11 +26,11 @@ impl Shader {
 
     pub fn enable_attr(&self, name: &str, components_count: MInt) {
         let mut attr_id = 0;
-        unsafe {
-            name.with_c_str(|name| {
+        name.with_c_str(|name| {
+            unsafe {
                 attr_id = verify!(gl::GetAttribLocation(self.id, name));
-            });
-        }
+            }
+        });
         verify!(gl::EnableVertexAttribArray(attr_id as GLuint));
         let normalized = gl::FALSE;
         let stride = 0;
@@ -61,11 +61,11 @@ impl Shader {
     }
 
     pub fn get_uniform(&self, name: &str) -> GLuint {
-        unsafe {
-            name.with_c_str(|name| {
+        name.with_c_str(|name| {
+            unsafe {
                 verify!(gl::GetUniformLocation(self.id, name) as GLuint)
-            })
-        }
+            }
+        })
     }
 }
 
