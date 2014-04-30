@@ -33,8 +33,6 @@ use visualizer::mesh::Mesh;
 use visualizer::scene::{Scene};
 use visualizer::types::{
     WorldPos,
-    VertexCoord,
-    TextureCoord,
     MFloat,
     MatId,
     ColorId,
@@ -56,33 +54,6 @@ use visualizer::font_stash::FontStash;
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
 static BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
-
-fn build_hex_mesh(&geom: &Geom, map_size: Size2<MInt>) -> Vec<VertexCoord> {
-    let mut vertex_data = Vec::new();
-    for tile_pos in MapPosIter::new(map_size) {
-        let pos = geom.map_pos_to_world_pos(tile_pos).v;
-        for num in range(0 as MInt, 6) {
-            let vertex = geom.index_to_hex_vertex(num);
-            let next_vertex = geom.index_to_hex_vertex(num + 1);
-            vertex_data.push(pos + vertex);
-            vertex_data.push(pos + next_vertex);
-            vertex_data.push(pos + Vector3::zero());
-        }
-    }
-    vertex_data
-}
-
-fn build_hex_tex_coord(map_size: Size2<MInt>) -> Vec<TextureCoord> {
-    let mut vertex_data = Vec::new();
-    for _ in MapPosIter::new(map_size) {
-        for _ in range(0, 6) {
-            vertex_data.push(Vector2{x: 0.0, y: 0.0});
-            vertex_data.push(Vector2{x: 1.0, y: 0.0});
-            vertex_data.push(Vector2{x: 0.5, y: 0.5});
-        }
-    }
-    vertex_data
-}
 
 fn get_marker(shader: &Shader, tex_path: &Path) -> Mesh {
     let n = 0.2;
@@ -131,9 +102,24 @@ fn get_pathfinders(
 }
 
 fn get_map_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
+    let mut vertex_data = Vec::new();
+    let mut tex_data = Vec::new();
+    for tile_pos in MapPosIter::new(map_size) {
+        let pos = geom.map_pos_to_world_pos(tile_pos).v;
+        for num in range(0 as MInt, 6) {
+            let vertex = geom.index_to_hex_vertex(num);
+            let next_vertex = geom.index_to_hex_vertex(num + 1);
+            vertex_data.push(pos + vertex);
+            vertex_data.push(pos + next_vertex);
+            vertex_data.push(pos + Vector3::zero());
+            tex_data.push(Vector2{x: 0.0, y: 0.0});
+            tex_data.push(Vector2{x: 1.0, y: 0.0});
+            tex_data.push(Vector2{x: 0.5, y: 0.5});
+        }
+    }
     let tex = Texture::new(&Path::new("data/floor.png"));
-    let mut mesh = Mesh::new(build_hex_mesh(geom, map_size).as_slice());
-    mesh.set_texture(tex, build_hex_tex_coord(map_size).as_slice());
+    let mut mesh = Mesh::new(vertex_data.as_slice());
+    mesh.set_texture(tex, tex_data.as_slice());
     mesh.prepare(shader);
     mesh
 }
