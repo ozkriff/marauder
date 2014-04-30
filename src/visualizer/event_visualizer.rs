@@ -34,7 +34,7 @@ fn unit_pos(
         None => fail!("No free slot in {}", map_pos),
     };
     let center_pos = geom.map_pos_to_world_pos(map_pos);
-    WorldPos{v: center_pos.v.add_v(&geom.slot_pos(slot_id))}
+    WorldPos{v: center_pos.v + geom.slot_pos(slot_id).v}
 }
 
 pub struct EventMoveVisualizer {

@@ -18,10 +18,16 @@ pub struct Color4 {
 
 pub type MFloat = GLfloat;
 
-pub type VertexCoord = Vector3<MFloat>;
-pub type Normal = Vector3<MFloat>;
-pub type TextureCoord = Vector2<MFloat>;
+#[deriving(Clone)]
+pub struct VertexCoord{pub v: Vector3<MFloat>}
 
+#[deriving(Clone)]
+pub struct Normal{pub v: Vector3<MFloat>}
+
+#[deriving(Clone)]
+pub struct TextureCoord{pub v: Vector2<MFloat>}
+
+#[deriving(Clone)]
 pub struct WorldPos{pub v: Vector3<MFloat>}
 
 pub struct Time{pub n: u64}

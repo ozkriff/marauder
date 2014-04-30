@@ -7,7 +7,7 @@ use cgmath::vector::{Vector3, Vector2};
 use core::types::{Size2, Point2, MInt};
 use core::misc::add_quad_to_vec;
 use visualizer::texture::Texture;
-use visualizer::types::MFloat;
+use visualizer::types::{VertexCoord, TextureCoord, MFloat};
 use visualizer::mesh::Mesh;
 use visualizer::shader::Shader;
 
@@ -74,18 +74,18 @@ impl FontStash {
             let y2 = y1 + h / s;
             add_quad_to_vec(
                 &mut tex_data,
-                Vector2{x: x1, y: y1},
-                Vector2{x: x1, y: y2},
-                Vector2{x: x2, y: y2},
-                Vector2{x: x2, y: y1},
+                TextureCoord{v: Vector2{x: x1, y: y1}},
+                TextureCoord{v: Vector2{x: x1, y: y2}},
+                TextureCoord{v: Vector2{x: x2, y: y2}},
+                TextureCoord{v: Vector2{x: x2, y: y1}},
             );
             let yoff = -glyph.yoff as MFloat;
             add_quad_to_vec(
                 &mut vertex_data,
-                Vector3{x: i, y: yoff, z: 0.0},
-                Vector3{x: i, y: yoff - h, z: 0.0},
-                Vector3{x: w + i, y: yoff - h, z: 0.0},
-                Vector3{x: w + i, y: yoff, z: 0.0},
+                VertexCoord{v: Vector3{x: i, y: yoff, z: 0.0}},
+                VertexCoord{v: Vector3{x: i, y: yoff - h, z: 0.0}},
+                VertexCoord{v: Vector3{x: w + i, y: yoff - h, z: 0.0}},
+                VertexCoord{v: Vector3{x: w + i, y: yoff, z: 0.0}},
             );
             i += w + glyph.xoff as MFloat;
         }

@@ -46,7 +46,13 @@ impl Geom {
         i: MInt
     ) -> VertexCoord {
         let n = FRAC_PI_2 + 2.0 * PI * (i as MFloat) / (count as MFloat);
-        Vector3{x: n.cos(), y: n.sin(), z: 0.0}.mul_s(self.hex_ex_radius)
+        VertexCoord{
+            v: Vector3{
+                x: n.cos(),
+                y: n.sin(),
+                z: 0.0
+            }.mul_s(self.hex_ex_radius)
+        }
     }
 
     pub fn index_to_hex_vertex(&self, i: MInt) -> VertexCoord {
@@ -54,7 +60,10 @@ impl Geom {
     }
 
     pub fn slot_pos(&self, slot_index: SlotId) -> VertexCoord {
-        self.index_to_circle_vertex(SLOTS_COUNT, slot_index.id).mul_s(0.6)
+        VertexCoord{
+            v: self.index_to_circle_vertex(
+                SLOTS_COUNT, slot_index.id).v.mul_s(0.6)
+        }
     }
 
     pub fn dist(&self, a: WorldPos, b: WorldPos) -> MFloat {

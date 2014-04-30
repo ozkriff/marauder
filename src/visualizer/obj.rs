@@ -43,19 +43,27 @@ impl Model {
         obj
     }
 
-    fn read_v_or_vn(words: &mut Words) -> VertexCoord {
-        Vector3 {
+    fn read_v(words: &mut Words) -> VertexCoord {
+        VertexCoord{v: Vector3 {
             x: parse_word(words),
             y: parse_word(words),
             z: parse_word(words),
-        }
+        }}
+    }
+
+    fn read_vn(words: &mut Words) -> Normal {
+        Normal{v: Vector3 {
+            x: parse_word(words),
+            y: parse_word(words),
+            z: parse_word(words),
+        }}
     }
 
     fn read_vt(words: &mut Words) -> TextureCoord {
-        Vector2 {
+        TextureCoord{v: Vector2 {
             x: parse_word(words),
             y: 1.0 - parse_word(words), // flip
-        }
+        }}
     }
 
     fn read_f(words: &mut Words) -> Face {
@@ -84,8 +92,8 @@ impl Model {
             Some(tag) if is_correct_tag(tag) => {
                 let w = &mut words;
                 match tag {
-                    &"v" => self.coords.push(Model::read_v_or_vn(w)),
-                    &"vn" => self.normals.push(Model::read_v_or_vn(w)),
+                    &"v" => self.coords.push(Model::read_v(w)),
+                    &"vn" => self.normals.push(Model::read_vn(w)),
                     &"vt" => self.texture_coords.push(Model::read_vt(w)),
                     &"f" => self.faces.push(Model::read_f(w)),
                     _ => {},

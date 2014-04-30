@@ -11,7 +11,7 @@ use visualizer::gl_helpers::{
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
-use visualizer::types::{Color3, MFloat, MatId};
+use visualizer::types::{Color3, MFloat, MatId, VertexCoord};
 use visualizer::scene::Scene;
 use visualizer::shader::Shader;
 
@@ -24,18 +24,18 @@ fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut c_data = Vec::new();
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
-        let pos3d = geom.map_pos_to_world_pos(tile_pos).v;
+        let pos3d = geom.map_pos_to_world_pos(tile_pos);
         for num in range(0 as MInt, 6) {
             let vertex = geom.index_to_hex_vertex(num);
             let next_vertex = geom.index_to_hex_vertex(num + 1);
             let col_x = i_to_f(tile_pos.v.x);
             let col_y = i_to_f(tile_pos.v.y);
             let color = Color3{r: col_x, g: col_y, b: i_to_f(1)};
-            v_data.push(pos3d + vertex);
+            v_data.push(VertexCoord{v: pos3d.v + vertex.v});
             c_data.push(color);
-            v_data.push(pos3d + next_vertex);
+            v_data.push(VertexCoord{v: pos3d.v + next_vertex.v});
             c_data.push(color);
-            v_data.push(pos3d + Vector3::zero());
+            v_data.push(VertexCoord{v: pos3d.v});
             c_data.push(color);
         }
     }
@@ -89,7 +89,7 @@ impl TilePicker {
         use std::slice::Vector;
         fn get_hex_vertex(geom: &Geom, n: MInt) -> Vector3<MFloat> {
             let scale_factor = 0.5;
-            geom.index_to_hex_vertex(n).mul_s(scale_factor)
+            geom.index_to_hex_vertex(n).v.mul_s(scale_factor)
         }
         let last_unit_node_id = 1000; // TODO
         let mut c_data = Vec::new();
@@ -101,18 +101,18 @@ impl TilePicker {
             }
             let color = Color3 {r: i_to_f(id), g: 0.0, b: i_to_f(2)};
             for num in range(0 as MInt, 6) {
-                v_data.push(node.pos.v + get_hex_vertex(geom, num));
+                v_data.push(VertexCoord{v: node.pos.v + get_hex_vertex(geom, num)});
                 c_data.push(color);
-                v_data.push(node.pos.v + get_hex_vertex(geom, num + 1));
+                v_data.push(VertexCoord{v: node.pos.v + get_hex_vertex(geom, num + 1)});
                 c_data.push(color);
-                v_data.push(node.pos.v + Vector3::zero());
+                v_data.push(VertexCoord{v: node.pos.v});
                 c_data.push(color);
             }
         }
         // draw unit markers slightly above the floor
         let unit_marker_height = 0.01;
-        for v in v_data.mut_iter() {
-            v.z = unit_marker_height;
+        for vertex_coord in v_data.mut_iter() {
+            vertex_coord.v.z = unit_marker_height;
         }
         let mut mesh = Mesh::new(v_data.as_slice());
         mesh.set_color(c_data.as_slice());
