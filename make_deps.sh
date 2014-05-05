@@ -58,6 +58,15 @@ get_stb_tt_rs() {
     cd ..
 }
 
+get_error_context() {
+    echo === error-context ===
+    git clone --depth=1 https://github.com/ozkriff/error-context
+    cd error-context
+    make
+    mv liberror_context* ..
+    cd ..
+}
+
 get_deps() {
     echo Creating 'deps' dir...
     mkdir deps
@@ -67,6 +76,7 @@ get_deps() {
     get_cgmath_rs
     get_stb_image
     get_stb_tt_rs
+    get_error_context
     cd ..
 }
 
