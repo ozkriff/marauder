@@ -92,10 +92,10 @@ impl Model {
             Some(tag) if is_correct_tag(tag) => {
                 let w = &mut words;
                 match tag {
-                    &"v" => self.coords.push(Model::read_v(w)),
-                    &"vn" => self.normals.push(Model::read_vn(w)),
-                    &"vt" => self.texture_coords.push(Model::read_vt(w)),
-                    &"f" => self.faces.push(Model::read_f(w)),
+                    "v" => self.coords.push(Model::read_v(w)),
+                    "vn" => self.normals.push(Model::read_vn(w)),
+                    "vt" => self.texture_coords.push(Model::read_vt(w)),
+                    "f" => self.faces.push(Model::read_f(w)),
                     _ => {},
                 }
             }

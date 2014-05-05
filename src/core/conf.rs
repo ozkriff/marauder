@@ -7,7 +7,7 @@ pub struct Config {
     json: ~json::Object,
 }
 
-fn decode<A: Decodable<json::Decoder, json::Error>>(json_obj: json::Json) -> A {
+fn decode<A: Decodable<json::Decoder, json::DecoderError>>(json_obj: json::Json) -> A {
     let mut decoder = json::Decoder::new(json_obj);
     let decoded: A = Decodable::decode(&mut decoder).unwrap();
     decoded
@@ -25,7 +25,7 @@ impl Config {
         }
     }
 
-    pub fn get<A: Decodable<json::Decoder, json::Error>>(&self, name: &str) -> A {
+    pub fn get<A: Decodable<json::Decoder, json::DecoderError>>(&self, name: &str) -> A {
         let owned_name_str = name.into_owned();
         decode(match self.json.find(&owned_name_str) {
             Some(val) => val.clone(),
