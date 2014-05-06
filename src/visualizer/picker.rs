@@ -13,7 +13,7 @@ use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
 use visualizer::types::{Color3, MFloat, MatId, VertexCoord};
-use visualizer::scene::Scene;
+use visualizer::scene::{Scene, NodeId};
 use visualizer::shader::Shader;
 
 fn i_to_f(n: MInt) -> f32 {
@@ -92,15 +92,14 @@ impl TilePicker {
             let scale_factor = 0.5;
             geom.index_to_hex_vertex(n).v.mul_s(scale_factor)
         }
-        let last_unit_node_id = 1000; // TODO
+        let last_unit_node_id = NodeId{id: 1000}; // TODO
         let mut c_data = Vec::new();
         let mut v_data = Vec::new();
         for (node_id, node) in scene.nodes.iter() {
-            let id = node_id.id;
-            if id >= last_unit_node_id {
+            if node_id.id >= last_unit_node_id.id {
                 continue;
             }
-            let color = Color3 {r: i_to_f(id), g: 0.0, b: i_to_f(2)};
+            let color = Color3 {r: i_to_f(node_id.id), g: 0.0, b: i_to_f(2)};
             for num in range(0 as MInt, 6) {
                 v_data.push(VertexCoord{v: node.pos.v + get_hex_vertex(geom, num)});
                 c_data.push(color);
