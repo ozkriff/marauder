@@ -6,6 +6,8 @@ use visualizer::types::{Color3, VertexCoord, TextureCoord};
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 
+pub struct MeshId{pub id: MInt}
+
 pub struct Mesh {
     vertex_coords_vbo: Vbo,
     color_vbo: Option<Vbo>,

@@ -2,6 +2,7 @@
 
 use core::types::{MInt};
 use visualizer::types::{WorldPos, MFloat};
+use visualizer::mesh::MeshId;
 use collections::hashmap::HashMap;
 
 #[deriving(Ord, Eq, TotalEq, Hash)]
@@ -10,7 +11,7 @@ pub struct NodeId{pub id: MInt}
 pub struct SceneNode {
     pub pos: WorldPos,
     pub rot: MFloat,
-    pub mesh_id: MInt,
+    pub mesh_id: MeshId,
 }
 
 pub struct Scene {

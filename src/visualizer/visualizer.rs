@@ -29,7 +29,7 @@ use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::picker;
 use visualizer::obj;
-use visualizer::mesh::Mesh;
+use visualizer::mesh::{Mesh, MeshId};
 use visualizer::scene::{Scene};
 use visualizer::types::{
     WorldPos,
@@ -137,9 +137,9 @@ fn load_unit_mesh(shader: &Shader) -> Mesh {
     mesh
 }
 
-fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MInt {
+fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MeshId {
     meshes.push(mesh);
-    (meshes.len() as MInt) - 1
+    MeshId{id: (meshes.len() as MInt) - 1}
 }
 
 fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> WorldPos {
@@ -150,11 +150,11 @@ fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> WorldPos {
 
 pub struct Visualizer<'a> {
     shader: Shader,
-    map_mesh_id: MInt,
-    unit_mesh_id: MInt,
-    shell_mesh_id: MInt,
-    marker_1_mesh_id: MInt,
-    marker_2_mesh_id: MInt,
+    map_mesh_id: MeshId,
+    unit_mesh_id: MeshId,
+    shell_mesh_id: MeshId,
+    marker_1_mesh_id: MeshId,
+    marker_2_mesh_id: MeshId,
     meshes: Vec<Mesh>,
     mvp_mat_id: MatId,
     basic_color_id: ColorId,
@@ -267,16 +267,16 @@ impl<'a> Visualizer<'a> {
 
     fn draw_units(&self) {
         for (_, node) in self.scene().nodes.iter() {
-            let mut m = tr(self.camera.mat(), node.pos.v);
-            m = rot_z(m, node.rot);
+            let m = tr(self.camera.mat(), node.pos.v);
+            let m = rot_z(m, node.rot);
             self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-            self.meshes.get(node.mesh_id as uint).draw(&self.shader);
+            self.meshes.get(node.mesh_id.id as uint).draw(&self.shader);
         }
     }
 
     fn draw_map(&mut self) {
         self.shader.uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
-        self.meshes.get(self.map_mesh_id as uint).draw(&self.shader);
+        self.meshes.get(self.map_mesh_id.id as uint).draw(&self.shader);
     }
 
     fn get_2d_screen_matrix(&self) -> Matrix4<MFloat> {

@@ -5,8 +5,9 @@ use rand::Rng;
 use cgmath::vector::{Vector3, Vector, EuclideanVector};
 use error_context;
 use visualizer::geom::Geom;
-use core::types::{MInt, MapPos, UnitId};
+use core::types::{MapPos, UnitId};
 use core::game_state::GameState;
+use visualizer::mesh::{MeshId};
 use visualizer::scene::{Scene, SceneNode, NodeId};
 use visualizer::types::{MFloat, WorldPos, Time};
 
@@ -160,8 +161,8 @@ impl EventCreateUnitVisualizer {
         state: &GameState,
         id: UnitId,
         pos: MapPos,
-        mesh_id: MInt,
-        marker_mesh_id: MInt
+        mesh_id: MeshId,
+        marker_mesh_id: MeshId
     ) -> ~EventVisualizer {
         let node_id = unit_id_to_node_id(id);
         let world_pos = unit_pos(id, pos, geom, state);
@@ -263,7 +264,7 @@ impl EventAttackUnitVisualizer {
         _: &GameState,
         attacker_id: UnitId,
         defender_id: UnitId,
-        shell_mesh_id: MInt
+        shell_mesh_id: MeshId
     ) -> ~EventVisualizer {
         let node_id = unit_id_to_node_id(defender_id);
         let from = scene.nodes.get(&node_id).pos;
