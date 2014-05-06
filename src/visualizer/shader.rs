@@ -4,6 +4,7 @@ use std;
 use gl;
 use gl::types::{GLint, GLchar, GLuint, GLenum};
 use cgmath::matrix::{Matrix, Matrix4};
+use error_context;
 use core::types::MInt;
 use core::misc::read_file;
 use visualizer::types::{MatId, MFloat, ColorId, Color4};
@@ -14,6 +15,7 @@ pub struct Shader {
 
 impl Shader {
     pub fn new(vs_path: &Path, fs_path: &Path) -> Shader {
+        set_context!("loading shader", vs_path.as_str().unwrap()); // TODO
         compile_program(
             read_file(vs_path),
             read_file(fs_path),
@@ -91,8 +93,10 @@ fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             verify!(gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar));
-            fail!("compile_shader(): "
-                + std::str::raw::from_utf8(buf.as_slice()));
+            context_fail!(
+                "compile_shader: {}",
+                std::str::raw::from_utf8(buf.as_slice())
+            );
         }
     }
     shader
@@ -113,8 +117,10 @@ fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             verify!(gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar));
-            fail!("link_program(): "
-                + std::str::raw::from_utf8(buf.as_slice()));
+            context_fail!(
+                "link_program: {}",
+                std::str::raw::from_utf8(buf.as_slice())
+            );
         }
     }
     program

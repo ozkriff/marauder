@@ -5,6 +5,7 @@ use std::str::CharSplits;
 use std::from_str::FromStr;
 use std::io::{BufferedReader, File};
 use cgmath::vector::{Vector3, Vector2};
+use error_context;
 use core::types::{MInt};
 use visualizer::types::{VertexCoord, TextureCoord, Normal};
 
@@ -33,6 +34,7 @@ fn parse_charsplit<T: FromStr>(words: &mut CharSplits<char>) -> T {
 
 impl Model {
     pub fn new(path: &Path) -> Model {
+        set_context!("loading obj", path.as_str().unwrap());
         let mut obj = Model {
             coords: Vec::new(),
             normals: Vec::new(),
@@ -108,7 +110,7 @@ impl Model {
         for line in file.lines() {
             match line {
                 Ok(line) => self.read_line(line),
-                Err(msg) => fail!("Obj: read error: {}", msg),
+                Err(msg) => context_fail!("Obj: read error: {}", msg),
             }
         }
     }

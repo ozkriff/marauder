@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::f32::consts::PI;
+use error_context;
 use visualizer::types::MFloat;
 
 pub fn deg_to_rad(n: MFloat) -> MFloat {
@@ -16,15 +17,15 @@ pub fn read_file(path: &Path) -> ~str {
     use std::io::File;
 
     if !path.exists() {
-        fail!("Path does not exists: {}", path.display());
+        context_fail!("Path does not exists: {}", path.display());
     }
     let bytes = match File::open(path).read_to_end() {
         Ok(bytes) => bytes.as_slice().to_owned(),
-        Err(msg) => fail!("Can not read from file {}: {}", path.display(), msg),
+        Err(msg) => context_fail!("Can not read from file {}: {}", path.display(), msg),
     };
     match from_utf8_owned(bytes) {
         Some(s) => s,
-        None => fail!("Not valid utf8 in file {}", path.display()),
+        None => context_fail!("Not valid utf8 in file {}", path.display()),
     }
 }
 

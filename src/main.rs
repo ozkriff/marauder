@@ -19,12 +19,16 @@ extern crate gl;
 extern crate stb_image;
 extern crate stb_tt;
 
+#[phase(syntax, link)]
+extern crate error_context;
+
 use visualizer::visualizer::Visualizer;
 
 mod core;
 mod visualizer;
 
 fn main() {
+    error_context::ErrorContext::init();
     let mut visualizer = Visualizer::new();
     while visualizer.is_running() {
         visualizer.tick();

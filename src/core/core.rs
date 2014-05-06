@@ -2,6 +2,7 @@
 
 use collections::hashmap::HashMap;
 use cgmath::vector::Vector2;
+use error_context;
 use core::types::{Size2, MInt, UnitId, SlotId, PlayerId, MapPos};
 use core::conf::Config;
 use core::game_state::GameState;
@@ -58,6 +59,7 @@ fn get_players_list() -> Vec<Player> {
 
 impl Core {
     pub fn new() -> ~Core {
+        set_context!("constructing Core", "-");
         let config = Config::new(&Path::new("conf_core.json"));
         let map_size = config.get("map_size");
         let mut core = ~Core {
@@ -240,7 +242,7 @@ impl CoreEvent for CoreEventCreateUnit {
         assert!(core.game_state.units.find(&self.id).is_none());
         let slot_id = match core.game_state.get_free_slot(self.id, self.pos) {
             Some(id) => id,
-            None => fail!("No free slot in {}", self.pos),
+            None => context_fail!("No free slot in {}", self.pos),
         };
         core.game_state.units.insert(self.id, Unit {
             id: self.id,

@@ -5,6 +5,7 @@ use gl;
 use gl::types::{GLint, GLuint, GLsizei};
 use stb_image::image;
 use cgmath::vector::{Vector2};
+use error_context;
 use visualizer::shader::Shader;
 use core::types::{Size2, MInt};
 
@@ -14,6 +15,7 @@ pub struct Texture {
 
 impl Texture {
     pub fn new(path: &Path) -> Texture {
+        set_context!("loading texture", path.as_str().unwrap());
         load_texture(path)
     }
 
@@ -62,8 +64,8 @@ impl Texture {
 fn load_image(path: &Path) -> image::Image<u8> {
     match image::load(path) {
         image::ImageU8(image) => image,
-        image::Error(message) => fail!("{}", message),
-        _ => fail!("Unknown image format"),
+        image::Error(message) => context_fail!("{}", message),
+        _ => context_fail!("Unknown image format"),
     }
 }
 
@@ -111,7 +113,7 @@ fn load_texture(path: &Path) -> Texture {
     let format = match image.depth {
         4 => gl::RGBA,
         3 => gl::RGB,
-        _ => fail!("wrong depth"),
+        n => context_fail!("wrong depth: {}", n),
     };
     unsafe {
         let level = 0;

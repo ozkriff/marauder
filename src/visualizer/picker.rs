@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::{Vector, Vector3, Vector2};
+use error_context;
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
 use visualizer::gl_helpers::{
@@ -139,7 +140,7 @@ impl TilePicker {
             0 => PickedNothing,
             1 => PickedMapPos(MapPos{v: Vector2{x: r, y: g}}),
             2 => PickedUnitId(UnitId{id: r}),
-            n => fail!("Picker: bad color tag: {}", n),
+            n => context_fail!("Picker: bad color tag: {}", n),
         }
     }
 }

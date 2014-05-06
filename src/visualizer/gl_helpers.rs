@@ -16,6 +16,7 @@ pub use load_gl_funcs_with = gl::load_with;
 
 macro_rules! verify(
     ($e: expr) => ({
+        use error_context;
         let result = $e;
         let error_code = gl::GetError();
         if error_code != 0 {
@@ -26,9 +27,9 @@ macro_rules! verify(
                 gl::INVALID_VALUE =>                 "GL_INVALID_VALUE",
                 gl::NO_ERROR =>                      "GL_NO_ERROR",
                 gl::OUT_OF_MEMORY =>                 "GL_OUT_OF_MEMORY",
-                _ => fail!("Bad gl error code: {}", error_code),
+                _ => context_fail!("Bad gl error code: {}", error_code),
             };
-            fail!("gl error: {}({})", description, error_code);
+            context_fail!("gl error: {}({})", description, error_code);
         }
         result
     })

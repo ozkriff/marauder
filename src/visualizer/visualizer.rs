@@ -53,6 +53,8 @@ use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
 
+use error_context;
+
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
 static BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
@@ -180,6 +182,7 @@ pub struct Visualizer<'a> {
 
 impl<'a> Visualizer<'a> {
     pub fn new() -> ~Visualizer {
+        set_context!("constructing Visualizer", "-");
         let players_count = 2;
         let config = Config::new(&Path::new("conf_visualizer.json"));
         let win_size = config.get::<Size2<MInt>>("screen_size");
@@ -524,7 +527,7 @@ impl<'a> Visualizer<'a> {
                 let marker_mesh = match player_id.id {
                     0 => self.marker_1_mesh_id,
                     1 => self.marker_2_mesh_id,
-                    n => fail!("Wrong player id: {}", n),
+                    n => context_fail!("Wrong player id: {}", n),
                 };
                 EventCreateUnitVisualizer::new(
                     geom,
