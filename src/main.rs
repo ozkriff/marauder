@@ -28,7 +28,6 @@ mod core;
 mod visualizer;
 
 fn main() {
-    error_context::ErrorContext::init();
     let mut visualizer = Visualizer::new();
     while visualizer.is_running() {
         visualizer.tick();

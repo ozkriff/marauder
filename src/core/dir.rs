@@ -1,7 +1,6 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vector2;
-use error_context;
 use core::types::{MInt, MapPos};
 
 pub enum Dir {
@@ -66,7 +65,7 @@ impl Dir {
                 return Dir::from_int(i);
             }
         }
-        context_fail!("impossible positions: {}, {}", from, to);
+        fail!("impossible positions: {}, {}", from, to);
     }
 
     pub fn get_neighbour_pos(pos: MapPos, dir: Dir) -> MapPos {

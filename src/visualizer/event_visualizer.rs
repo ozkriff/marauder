@@ -3,7 +3,6 @@
 use rand;
 use rand::Rng;
 use cgmath::vector::{Vector3, Vector, EuclideanVector};
-use error_context;
 use visualizer::geom::Geom;
 use core::types::{MapPos, UnitId};
 use core::game_state::GameState;
@@ -33,7 +32,7 @@ fn unit_pos(
 ) -> WorldPos {
     let slot_id = match state.get_free_slot(unit_id, map_pos) {
         Some(id) => id,
-        None => context_fail!("No free slot in {}", map_pos),
+        None => fail!("No free slot in {}", map_pos),
     };
     let center_pos = geom.map_pos_to_world_pos(map_pos);
     WorldPos{v: center_pos.v + geom.slot_pos(slot_id).v}

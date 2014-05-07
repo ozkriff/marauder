@@ -34,7 +34,7 @@ fn parse_charsplit<T: FromStr>(words: &mut CharSplits<char>) -> T {
 
 impl Model {
     pub fn new(path: &Path) -> Model {
-        set_context!("loading obj", path.as_str().unwrap());
+        set_error_context!("loading obj", path.as_str().unwrap());
         let mut obj = Model {
             coords: Vec::new(),
             normals: Vec::new(),
@@ -110,7 +110,7 @@ impl Model {
         for line in file.lines() {
             match line {
                 Ok(line) => self.read_line(line),
-                Err(msg) => context_fail!("Obj: read error: {}", msg),
+                Err(msg) => fail!("Obj: read error: {}", msg),
             }
         }
     }

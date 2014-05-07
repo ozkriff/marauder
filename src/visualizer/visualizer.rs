@@ -182,7 +182,7 @@ pub struct Visualizer<'a> {
 
 impl<'a> Visualizer<'a> {
     pub fn new() -> ~Visualizer {
-        set_context!("constructing Visualizer", "-");
+        set_error_context!("constructing Visualizer", "-");
         let players_count = 2;
         let config = Config::new(&Path::new("conf_visualizer.json"));
         let win_size = config.get::<Size2<MInt>>("screen_size");
@@ -527,7 +527,7 @@ impl<'a> Visualizer<'a> {
                 let marker_mesh = match player_id.id {
                     0 => self.marker_1_mesh_id,
                     1 => self.marker_2_mesh_id,
-                    n => context_fail!("Wrong player id: {}", n),
+                    n => fail!("Wrong player id: {}", n),
                 };
                 EventCreateUnitVisualizer::new(
                     geom,

@@ -16,11 +16,11 @@ fn decode<A: Decodable<json::Decoder, json::DecoderError>>(json_obj: json::Json)
 
 impl Config {
     pub fn new(path: &Path) -> Config {
-        set_context!("parsing config", path.as_str().unwrap());
+        set_error_context!("parsing config", path.as_str().unwrap());
         let json = match json::from_str(read_file(path)) {
             Ok(json::Object(obj)) => obj,
-            Err(msg) => context_fail!("Config parsing error: {}", msg),
-            some_error => context_fail!("Unknown config parsing error: {}", some_error),
+            Err(msg) => fail!("Config parsing error: {}", msg),
+            some_error => fail!("Unknown config parsing error: {}", some_error),
         };
         Config {
             json: json,
@@ -31,7 +31,7 @@ impl Config {
         let owned_name_str = name.into_owned();
         decode(match self.json.find(&owned_name_str) {
             Some(val) => val.clone(),
-            None => context_fail!("No field '{}", name),
+            None => fail!("No field '{}", name),
         })
     }
 }

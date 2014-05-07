@@ -15,7 +15,7 @@ pub struct Texture {
 
 impl Texture {
     pub fn new(path: &Path) -> Texture {
-        set_context!("loading texture", path.as_str().unwrap());
+        set_error_context!("loading texture", path.as_str().unwrap());
         load_texture(path)
     }
 
@@ -64,8 +64,8 @@ impl Texture {
 fn load_image(path: &Path) -> image::Image<u8> {
     match image::load(path) {
         image::ImageU8(image) => image,
-        image::Error(message) => context_fail!("{}", message),
-        _ => context_fail!("Unknown image format"),
+        image::Error(message) => fail!("{}", message),
+        _ => fail!("Unknown image format"),
     }
 }
 
@@ -113,7 +113,7 @@ fn load_texture(path: &Path) -> Texture {
     let format = match image.depth {
         4 => gl::RGBA,
         3 => gl::RGB,
-        n => context_fail!("wrong depth: {}", n),
+        n => fail!("wrong depth: {}", n),
     };
     unsafe {
         let level = 0;

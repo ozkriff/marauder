@@ -15,7 +15,7 @@ pub struct Shader {
 
 impl Shader {
     pub fn new(vs_path: &Path, fs_path: &Path) -> Shader {
-        set_context!("loading shader", vs_path.as_str().unwrap()); // TODO
+        set_error_context!("loading shader", vs_path.as_str().unwrap()); // TODO
         compile_program(
             read_file(vs_path),
             read_file(fs_path),
@@ -93,7 +93,7 @@ fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             verify!(gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar));
-            context_fail!(
+            fail!(
                 "compile_shader: {}",
                 std::str::raw::from_utf8(buf.as_slice())
             );
@@ -117,7 +117,7 @@ fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             verify!(gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
                 buf.as_mut_ptr() as *mut GLchar));
-            context_fail!(
+            fail!(
                 "link_program: {}",
                 std::str::raw::from_utf8(buf.as_slice())
             );
