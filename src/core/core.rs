@@ -58,11 +58,11 @@ fn get_players_list() -> Vec<Player> {
 }
 
 impl Core {
-    pub fn new() -> ~Core {
+    pub fn new() -> Core {
         set_error_context!("constructing Core", "-");
         let config = Config::new(&Path::new("conf_core.json"));
         let map_size = config.get("map_size");
-        let mut core = ~Core {
+        let mut core = Core {
             game_state: GameState::new(),
             players: get_players_list(),
             current_player_id: PlayerId{id: 0},

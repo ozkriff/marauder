@@ -167,7 +167,7 @@ pub struct Visualizer<'a> {
     unit_under_cursor_id: Option<UnitId>,
     geom: Geom,
     scenes: HashMap<PlayerId, Scene>,
-    core: ~core::Core,
+    core: core::Core,
     event: Option<core::Event>,
     event_visualizer: Option<~EventVisualizer>,
     game_state: HashMap<PlayerId, GameState>,
@@ -181,7 +181,7 @@ pub struct Visualizer<'a> {
 }
 
 impl<'a> Visualizer<'a> {
-    pub fn new() -> ~Visualizer {
+    pub fn new() -> Visualizer {
         set_error_context!("constructing Visualizer", "-");
         let players_count = 2;
         let config = Config::new(&Path::new("conf_visualizer.json"));
@@ -223,7 +223,7 @@ impl<'a> Visualizer<'a> {
             &Path::new("data/DroidSerif-Regular.ttf"), font_size);
         let mut camera = Camera::new(win_size);
         camera.pos = get_initial_camera_pos(&geom, &map_size);
-        let vis = ~Visualizer {
+        let vis = Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
             shell_mesh_id: shell_mesh_id,
