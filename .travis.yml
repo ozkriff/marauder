@@ -1,12 +1,18 @@
 # See LICENSE file for copyright and license details.
 
 before_install:
-    - sudo add-apt-repository -y ppa:hansjorg/rust
+    # - sudo add-apt-repository -y ppa:hansjorg/rust # TODO
     - sudo apt-get update
 
 install:
-    - sudo apt-get install rust-nightly
+    # - sudo apt-get install rust-nightly # TODO
     - sudo apt-get install libXxf86vm-dev
+
+    # Download rust-nightly from rust-lang.org
+    - wget http://static.rust-lang.org/dist/rust-nightly-x86_64-unknown-linux-gnu.tar.gz
+    - tar xzf rust-nightly-x86_64-unknown-linux-gnu.tar.gz
+    - export PATH=$PATH:$(pwd)/rust-nightly-x86_64-unknown-linux-gnu/bin
+    - rustc -v
 
     # Download, build and install dependencies
     - ./make_deps.sh
