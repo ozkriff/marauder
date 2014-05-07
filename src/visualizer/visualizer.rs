@@ -52,7 +52,6 @@ use visualizer::event_visualizer::{
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
-
 use error_context;
 
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
