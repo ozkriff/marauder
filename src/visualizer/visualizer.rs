@@ -54,6 +54,56 @@ use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
 use error_context;
 
+#[deriving(Eq, TotalEq, Hash)]
+pub struct ButtonId {pub id: MInt}
+
+pub struct Button {
+    pos: Point2<MInt>, // TODO: ScreenPos
+    size: Size2<MInt>,
+    label: StrBuf,
+}
+
+impl Button {
+    pub fn new(
+        label: &str,
+        font_stash: &mut FontStash,
+        pos: Point2<MInt>
+    ) -> Button {
+        let (_, size) = font_stash.get_text_size(label);
+        Button {
+            pos: pos,
+            size: size,
+            label: StrBuf::from_str(label),
+        }
+    }
+
+    pub fn draw(&self, font_stash: &mut FontStash, shader: &Shader) {
+        let text_mesh = font_stash.get_mesh(self.label.as_slice(), shader);
+        text_mesh.draw(shader);
+    }
+}
+
+pub struct ButtonManager {
+    pub buttons: HashMap<ButtonId, Button>, // TODO: make 'priv'
+    last_id: ButtonId,
+}
+
+impl ButtonManager {
+    pub fn new() -> ButtonManager {
+        ButtonManager {
+            buttons: HashMap::new(),
+            last_id: ButtonId{id: 0},
+        }
+    }
+
+    pub fn add_button(&mut self, button: Button) -> ButtonId {
+        let id = self.last_id;
+        self.buttons.insert(id, button);
+        self.last_id.id += 1;
+        id
+    }
+}
+
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
 static BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
@@ -177,6 +227,7 @@ pub struct Visualizer<'a> {
     glfw: glfw::Glfw,
     events: Receiver<(f64, glfw::WindowEvent)>,
     font_stash: FontStash,
+    button_manager: ButtonManager,
 }
 
 impl<'a> Visualizer<'a> {
@@ -218,10 +269,22 @@ impl<'a> Visualizer<'a> {
         let marker_2_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, &Path::new("data/flag2.png")));
         let font_size = config.get("font_size");
-        let font_stash = FontStash::new(
+        let mut font_stash = FontStash::new(
             &Path::new("data/DroidSerif-Regular.ttf"), font_size);
         let mut camera = Camera::new(win_size);
         camera.pos = get_initial_camera_pos(&geom, &map_size);
+        // TODO: rewrite buttons
+        let mut button_manager = ButtonManager::new();
+        let _button_01_id = button_manager.add_button(Button::new(
+            "button_1",
+            &mut font_stash,
+            Point2{v: Vector2{x: 10, y: 10}})
+        );
+        let _button_02_id = button_manager.add_button(Button::new(
+            "button_2",
+            &mut font_stash,
+            Point2{v: Vector2{x: 10, y: 50}})
+        );
         let vis = Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
@@ -252,6 +315,7 @@ impl<'a> Visualizer<'a> {
             glfw: glfw,
             events: events,
             font_stash: font_stash,
+            button_manager: button_manager,
         };
         vis
     }
@@ -290,11 +354,15 @@ impl<'a> Visualizer<'a> {
 
     fn draw_2d_text(&mut self) {
         let m = self.get_2d_screen_matrix();
-        let text_offset = Vector3{x: 10.0, y: 10.0, z: 0.0};
-        let m = tr(m, text_offset);
-        self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-        let text_mesh = self.font_stash.get_mesh("Kill them all!!!", &self.shader);
-        text_mesh.draw(&self.shader);
+        for (_, button) in self.button_manager.buttons.iter() {
+            let text_offset = Vector3 {
+                x: button.pos.v.x as MFloat,
+                y: button.pos.v.y as MFloat,
+                z: 0.0,
+            };
+            self.shader.uniform_mat4f(self.mvp_mat_id, &tr(m, text_offset));
+            button.draw(&mut self.font_stash, &self.shader);
+        }
     }
 
     fn draw_3d_text(&mut self) {
@@ -429,6 +497,21 @@ impl<'a> Visualizer<'a> {
     }
 
     fn handle_mouse_button_event(&mut self) {
+        {
+            let pos = self.mouse_pos;
+            let x = pos.v.x as MInt;
+            let y = self.win_size.h - pos.v.y as MInt;
+            for (id, button) in self.button_manager.buttons.iter() {
+                if x >= button.pos.v.x
+                    && x <= button.pos.v.x + button.size.w
+                    && y >= button.pos.v.y
+                    && y <= button.pos.v.y + button.size.h
+                {
+                    print!("Clicked on {} at {}\n", id.id, precise_time_ns());
+                    return;
+                }
+            }
+        }
         if self.event_visualizer.is_some() {
             return;
         }

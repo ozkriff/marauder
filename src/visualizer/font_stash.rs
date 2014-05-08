@@ -58,6 +58,26 @@ impl FontStash {
         self.size
     }
 
+    // TODO: Rect type
+    pub fn get_text_size(&mut self, text: &str) -> (Point2<MInt>, Size2<MInt>) {
+        let mut size = Size2{w: 0, h: 0};
+        let mut pos = Point2{v: Vector2{x: 0, y: 0}};
+        for c in text.chars() {
+            let glyph = self.get_glyph(c);
+            let w = glyph.size.w;
+            let h = glyph.size.h;
+            let yoff = -glyph.yoff;
+            if pos.v.y > yoff - h {
+                pos.v.y = yoff - h;
+            }
+            if size.h < yoff {
+                size.h = yoff;
+            }
+            size.w += w + glyph.xoff;
+        }
+        (pos, size)
+    }
+
     pub fn get_mesh(&mut self, text: &str, shader: &Shader) -> Mesh {
         // TODO: create mesh in c-tor, update mesh vertices data here
         let mut vertex_data = Vec::new();
