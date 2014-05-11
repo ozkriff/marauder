@@ -127,7 +127,7 @@ fn load_texture(path: &Path) -> Texture {
             border,
             format,
             gl::UNSIGNED_BYTE,
-            std::cast::transmute(&image.data[0]),
+            std::cast::transmute(image.data.get(0)),
         ));
     }
     verify!(gl::TexParameteri(gl::TEXTURE_2D,

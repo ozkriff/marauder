@@ -5,7 +5,7 @@ use error_context;
 use core::misc::read_file;
 
 pub struct Config {
-    json: ~json::Object,
+    json: json::Object,
 }
 
 fn decode<A: Decodable<json::Decoder, json::DecoderError>>(json_obj: json::Json) -> A {
@@ -23,7 +23,7 @@ impl Config {
             some_error => fail!("Unknown config parsing error: {}", some_error),
         };
         Config {
-            json: json,
+            json: *json,
         }
     }
 

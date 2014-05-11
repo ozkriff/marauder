@@ -218,7 +218,7 @@ pub struct Visualizer<'a> {
     scenes: HashMap<PlayerId, Scene>,
     core: core::Core,
     event: Option<core::Event>,
-    event_visualizer: Option<~EventVisualizer>,
+    event_visualizer: Option<Box<EventVisualizer>>,
     game_state: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
     last_time: Time,
@@ -592,7 +592,7 @@ impl<'a> Visualizer<'a> {
     fn make_event_visualizer(
         &mut self,
         event: &core::Event
-    ) -> ~EventVisualizer {
+    ) -> Box<EventVisualizer> {
         let player_id = self.core.player_id();
         let scene = self.scenes.get_mut(&player_id);
         let state = self.game_state.get(&player_id);

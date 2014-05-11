@@ -83,7 +83,7 @@ impl EventMoveVisualizer {
         state: &GameState,
         unit_id: UnitId,
         path: Vec<MapPos>
-    ) -> ~EventVisualizer {
+    ) -> Box<EventVisualizer> {
         let mut world_path = Vec::new();
         for map_pos in path.iter() {
             let world_pos = unit_pos(unit_id, *map_pos, geom, state);
@@ -96,14 +96,14 @@ impl EventMoveVisualizer {
             *world_path.get(0), *world_path.get(1));
         let move = MoveHelper::new(
             geom, *world_path.get(0), *world_path.get(1), speed);
-        let mut vis = ~EventMoveVisualizer {
+        let mut vis = box EventMoveVisualizer {
             unit_id: unit_id,
             path: world_path,
             move: move,
             speed: speed,
         };
         vis.update_waypoint(geom, node);
-        vis as ~EventVisualizer
+        vis as Box<EventVisualizer>
     }
 
     fn update_waypoint(&mut self, geom: &Geom, node: &mut SceneNode) {
@@ -133,8 +133,8 @@ impl EventMoveVisualizer {
 pub struct EventEndTurnVisualizer;
 
 impl EventEndTurnVisualizer {
-    pub fn new() -> ~EventVisualizer {
-        ~EventEndTurnVisualizer as ~EventVisualizer
+    pub fn new() -> Box<EventVisualizer> {
+        box EventEndTurnVisualizer as Box<EventVisualizer>
     }
 }
 
@@ -162,7 +162,7 @@ impl EventCreateUnitVisualizer {
         pos: MapPos,
         mesh_id: MeshId,
         marker_mesh_id: MeshId
-    ) -> ~EventVisualizer {
+    ) -> Box<EventVisualizer> {
         let node_id = unit_id_to_node_id(id);
         let world_pos = unit_pos(id, pos, geom, state);
         let to = world_pos;
@@ -179,10 +179,10 @@ impl EventCreateUnitVisualizer {
             mesh_id: marker_mesh_id,
         });
         let move = MoveHelper::new(geom, from, to, 1.0);
-        ~EventCreateUnitVisualizer {
+        box EventCreateUnitVisualizer {
             id: id,
             move: move,
-        } as ~EventVisualizer
+        } as Box<EventVisualizer>
     }
 }
 
@@ -264,7 +264,7 @@ impl EventAttackUnitVisualizer {
         attacker_id: UnitId,
         defender_id: UnitId,
         shell_mesh_id: MeshId
-    ) -> ~EventVisualizer {
+    ) -> Box<EventVisualizer> {
         let node_id = unit_id_to_node_id(defender_id);
         let from = scene.nodes.get(&node_id).pos;
         let to = WorldPos{v: from.v.sub_v(&vec3_z(geom.hex_ex_radius / 2.0))};
@@ -280,13 +280,13 @@ impl EventAttackUnitVisualizer {
             });
             MoveHelper::new(geom, from, to, 10.0)
         };
-        ~EventAttackUnitVisualizer {
+        box EventAttackUnitVisualizer {
             attacker_id: attacker_id,
             defender_id: defender_id,
             move: move,
             shell_move: shell_move,
             shell_node_id: shell_node_id,
-        } as ~EventVisualizer
+        } as Box<EventVisualizer>
     }
 }
 

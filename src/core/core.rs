@@ -38,7 +38,7 @@ pub struct Core {
     game_state: GameState,
     players: Vec<Player>,
     current_player_id: PlayerId,
-    core_event_list: Vec<~CoreEvent>,
+    core_event_list: Vec<Box<CoreEvent>>,
     event_lists: HashMap<PlayerId, Vec<Event>>,
     map_size: Size2<MInt>,
 }
@@ -96,27 +96,27 @@ impl Core {
         list.shift()
     }
 
-    fn command_to_core_event(&self, command: Command) -> ~CoreEvent {
+    fn command_to_core_event(&self, command: Command) -> Box<CoreEvent> {
         match command {
             CommandEndTurn => {
-                CoreEventEndTurn::new(self) as ~CoreEvent
+                CoreEventEndTurn::new(self) as Box<CoreEvent>
             },
             CommandCreateUnit(pos) => {
                 CoreEventCreateUnit::new(
                     self,
                     pos,
                     self.current_player_id,
-                ) as ~CoreEvent
+                ) as Box<CoreEvent>
             },
             CommandMove(unit_id, path) => {
-                CoreEventMove::new(self, unit_id, path) as ~CoreEvent
+                CoreEventMove::new(self, unit_id, path) as Box<CoreEvent>
             },
             CommandAttackUnit(attacker_id, defender_id) => {
                 CoreEventAttackUnit::new(
                     self,
                     attacker_id,
                     defender_id,
-                ) as ~CoreEvent
+                ) as Box<CoreEvent>
             },
         }
     }
@@ -126,7 +126,7 @@ impl Core {
         self.do_core_event(core_event);
     }
 
-    fn do_core_event(&mut self, core_event: ~CoreEvent) {
+    fn do_core_event(&mut self, core_event: Box<CoreEvent>) {
         self.core_event_list.push(core_event);
         self.make_events();
     }
@@ -155,8 +155,8 @@ struct CoreEventMove {
 }
 
 impl CoreEventMove {
-    fn new(_: &Core, unit_id: UnitId, path: Vec<MapPos>) -> ~CoreEventMove {
-        ~CoreEventMove {
+    fn new(_: &Core, unit_id: UnitId, path: Vec<MapPos>) -> Box<CoreEventMove> {
+        box CoreEventMove {
             path: path,
             unit_id: unit_id,
         }
@@ -180,11 +180,11 @@ struct CoreEventEndTurn {
 }
 
 impl CoreEventEndTurn {
-    fn new(core: &Core) -> ~CoreEventEndTurn {
+    fn new(core: &Core) -> Box<CoreEventEndTurn> {
         let old_id = core.current_player_id.id;
         let max_id = core.players.len() as MInt;
         let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
-        ~CoreEventEndTurn {
+        box CoreEventEndTurn {
             old_id: PlayerId{id: old_id},
             new_id: PlayerId{id: new_id},
         }
@@ -220,12 +220,12 @@ impl CoreEventCreateUnit {
         core: &Core,
         pos: MapPos,
         player_id: PlayerId
-    ) -> ~CoreEventCreateUnit {
+    ) -> Box<CoreEventCreateUnit> {
         let new_id = match core.game_state.units.keys().max_by(|&n| n) {
             Some(n) => n.id + 1,
             None => 0,
         };
-        ~CoreEventCreateUnit {
+        box CoreEventCreateUnit {
             id: UnitId{id: new_id},
             pos: pos,
             player_id: player_id,
@@ -263,8 +263,8 @@ impl CoreEventAttackUnit {
         _: &Core,
         attacker_id: UnitId,
         defender_id: UnitId
-    ) -> ~CoreEventAttackUnit {
-        ~CoreEventAttackUnit {
+    ) -> Box<CoreEventAttackUnit> {
+        box CoreEventAttackUnit {
             attacker_id: attacker_id,
             defender_id: defender_id,
         }

@@ -119,7 +119,7 @@ impl FontStash {
         &mut self,
         pos: Point2<MInt>,
         size: Size2<MInt>,
-        bitmap: ~[u8]
+        bitmap: Vec<u8>
     ) {
         let mut data = Vec::from_elem((size.w * size.h) as uint * 4, 0 as u8);
         for y in range(0, size.h) {
@@ -128,7 +128,7 @@ impl FontStash {
                 *data.get_mut(n + 0) = 255;
                 *data.get_mut(n + 1) = 255;
                 *data.get_mut(n + 2) = 255;
-                *data.get_mut(n + 3) = bitmap[(x + y * size.w) as uint];
+                *data.get_mut(n + 3) = *bitmap.get((x + y * size.w) as uint);
             }
         }
         self.texture.bind();
