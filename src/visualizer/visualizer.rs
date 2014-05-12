@@ -228,6 +228,7 @@ pub struct Visualizer<'a> {
     events: Receiver<(f64, glfw::WindowEvent)>,
     font_stash: FontStash,
     button_manager: ButtonManager,
+    button_end_turn_id: ButtonId,
 }
 
 impl<'a> Visualizer<'a> {
@@ -280,8 +281,8 @@ impl<'a> Visualizer<'a> {
             &mut font_stash,
             Point2{v: Vector2{x: 10, y: 10}})
         );
-        let _button_02_id = button_manager.add_button(Button::new(
-            "button_2",
+        let button_end_turn_id = button_manager.add_button(Button::new(
+            "end turn",
             &mut font_stash,
             Point2{v: Vector2{x: 10, y: 50}})
         );
@@ -316,6 +317,7 @@ impl<'a> Visualizer<'a> {
             events: events,
             font_stash: font_stash,
             button_manager: button_manager,
+            button_end_turn_id: button_end_turn_id,
         };
         vis
     }
@@ -514,7 +516,11 @@ impl<'a> Visualizer<'a> {
     fn handle_mouse_button_event(&mut self) {
         match self.get_clicked_button_id() {
             Some(button_id) => {
-                print!("Clicked on {} at {}\n", button_id.id, precise_time_ns());
+                if button_id == self.button_end_turn_id {
+                    self.end_turn();
+                } else {
+                    print!("Clicked on {} at {}\n", button_id.id, precise_time_ns());
+                }
                 return;
             },
             None => {},
