@@ -496,21 +496,28 @@ impl<'a> Visualizer<'a> {
         self.core.do_command(core::CommandMove(unit_id, path));
     }
 
-    fn handle_mouse_button_event(&mut self) {
-        {
-            let pos = self.mouse_pos;
-            let x = pos.v.x as MInt;
-            let y = self.win_size.h - pos.v.y as MInt;
-            for (id, button) in self.button_manager.buttons.iter() {
-                if x >= button.pos.v.x
-                    && x <= button.pos.v.x + button.size.w
-                    && y >= button.pos.v.y
-                    && y <= button.pos.v.y + button.size.h
-                {
-                    print!("Clicked on {} at {}\n", id.id, precise_time_ns());
-                    return;
-                }
+    fn get_clicked_button_id(&mut self) -> Option<ButtonId> {
+        let x = self.mouse_pos.v.x as MInt;
+        let y = self.win_size.h - self.mouse_pos.v.y as MInt;
+        for (id, button) in self.button_manager.buttons.iter() {
+            if x >= button.pos.v.x
+                && x <= button.pos.v.x + button.size.w
+                && y >= button.pos.v.y
+                && y <= button.pos.v.y + button.size.h
+            {
+                return Some(*id);
             }
+        }
+        None
+    }
+
+    fn handle_mouse_button_event(&mut self) {
+        match self.get_clicked_button_id() {
+            Some(button_id) => {
+                print!("Clicked on {} at {}\n", button_id.id, precise_time_ns());
+                return;
+            },
+            None => {},
         }
         if self.event_visualizer.is_some() {
             return;
