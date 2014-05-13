@@ -52,57 +52,8 @@ use visualizer::event_visualizer::{
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
+use visualizer::gui::{ButtonManager, Button, ButtonId};
 use error_context;
-
-#[deriving(Eq, TotalEq, Hash)]
-pub struct ButtonId {pub id: MInt}
-
-pub struct Button {
-    pos: Point2<MInt>, // TODO: ScreenPos
-    size: Size2<MInt>,
-    label: StrBuf,
-}
-
-impl Button {
-    pub fn new(
-        label: &str,
-        font_stash: &mut FontStash,
-        pos: Point2<MInt>
-    ) -> Button {
-        let (_, size) = font_stash.get_text_size(label);
-        Button {
-            pos: pos,
-            size: size,
-            label: StrBuf::from_str(label),
-        }
-    }
-
-    pub fn draw(&self, font_stash: &mut FontStash, shader: &Shader) {
-        let text_mesh = font_stash.get_mesh(self.label.as_slice(), shader);
-        text_mesh.draw(shader);
-    }
-}
-
-pub struct ButtonManager {
-    pub buttons: HashMap<ButtonId, Button>, // TODO: make 'priv'
-    last_id: ButtonId,
-}
-
-impl ButtonManager {
-    pub fn new() -> ButtonManager {
-        ButtonManager {
-            buttons: HashMap::new(),
-            last_id: ButtonId{id: 0},
-        }
-    }
-
-    pub fn add_button(&mut self, button: Button) -> ButtonId {
-        let id = self.last_id;
-        self.buttons.insert(id, button);
-        self.last_id.id += 1;
-        id
-    }
-}
 
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
@@ -274,7 +225,6 @@ impl<'a> Visualizer<'a> {
             &Path::new("data/DroidSerif-Regular.ttf"), font_size);
         let mut camera = Camera::new(win_size);
         camera.pos = get_initial_camera_pos(&geom, &map_size);
-        // TODO: rewrite buttons
         let mut button_manager = ButtonManager::new();
         let _button_01_id = button_manager.add_button(Button::new(
             "button_1",
@@ -358,8 +308,8 @@ impl<'a> Visualizer<'a> {
         let m = self.get_2d_screen_matrix();
         for (_, button) in self.button_manager.buttons.iter() {
             let text_offset = Vector3 {
-                x: button.pos.v.x as MFloat,
-                y: button.pos.v.y as MFloat,
+                x: button.pos().v.x as MFloat,
+                y: button.pos().v.y as MFloat,
                 z: 0.0,
             };
             self.shader.uniform_mat4f(self.mvp_mat_id, &tr(m, text_offset));
@@ -498,14 +448,15 @@ impl<'a> Visualizer<'a> {
         self.core.do_command(core::CommandMove(unit_id, path));
     }
 
+    // TODO: Move to gui.rs
     fn get_clicked_button_id(&mut self) -> Option<ButtonId> {
         let x = self.mouse_pos.v.x as MInt;
         let y = self.win_size.h - self.mouse_pos.v.y as MInt;
         for (id, button) in self.button_manager.buttons.iter() {
-            if x >= button.pos.v.x
-                && x <= button.pos.v.x + button.size.w
-                && y >= button.pos.v.y
-                && y <= button.pos.v.y + button.size.h
+            if x >= button.pos().v.x
+                && x <= button.pos().v.x + button.size().w
+                && y >= button.pos().v.y
+                && y <= button.pos().v.y + button.size().h
             {
                 return Some(*id);
             }

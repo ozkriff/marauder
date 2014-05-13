@@ -30,6 +30,7 @@ SRC = \
 	src/visualizer/types.rs \
 	src/visualizer/visualizer.rs \
 	src/visualizer/font_stash.rs \
+	src/visualizer/gui.rs \
 
 all: bin/marauder
 

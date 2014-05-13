@@ -13,5 +13,6 @@ pub mod shader;
 pub mod texture;
 pub mod font_stash;
 pub mod scene;
+pub mod gui;
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
