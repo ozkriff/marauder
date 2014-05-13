@@ -57,7 +57,7 @@ impl Shader {
 
     pub fn uniform_color(&self, color_id: ColorId, color: Color4) {
         unsafe {
-            let data_ptr = std::cast::transmute(&color);
+            let data_ptr = std::mem::transmute(&color);
             verify!(gl::Uniform4fv(color_id.id as MInt, 1, data_ptr));
         }
     }

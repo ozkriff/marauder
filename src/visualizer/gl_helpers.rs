@@ -153,7 +153,7 @@ impl Vbo {
         let buf_size = (data.len() * size) as GLsizeiptr;
         if data.len() != 0 {
             unsafe {
-                let data_ptr = std::cast::transmute(&data[0]);
+                let data_ptr = std::mem::transmute(&data[0]);
                 verify!(gl::BufferData(
                     gl::ARRAY_BUFFER,
                     buf_size,
@@ -186,7 +186,7 @@ pub fn read_pixel_bytes(
     let reverted_h = height - mouse_pos.y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
     unsafe {
-        let data_ptr = std::cast::transmute(&data[0]);
+        let data_ptr = std::mem::transmute(&data[0]);
         verify!(gl::ReadPixels(
             mouse_pos.x, reverted_h, 1, 1,
             gl::RGBA,
