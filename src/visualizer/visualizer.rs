@@ -465,6 +465,9 @@ impl<'a> Visualizer<'a> {
     }
 
     fn handle_mouse_button_event(&mut self) {
+        if self.event_visualizer.is_some() {
+            return;
+        }
         match self.get_clicked_button_id() {
             Some(button_id) => {
                 if button_id == self.button_end_turn_id {
@@ -475,9 +478,6 @@ impl<'a> Visualizer<'a> {
                 return;
             },
             None => {},
-        }
-        if self.event_visualizer.is_some() {
-            return;
         }
         if self.map_pos_under_cursor.is_some() {
             self.move_unit();
