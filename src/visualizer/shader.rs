@@ -17,8 +17,8 @@ impl Shader {
     pub fn new(vs_path: &Path, fs_path: &Path) -> Shader {
         set_error_context!("loading shader", vs_path.as_str().unwrap()); // TODO
         compile_program(
-            read_file(vs_path),
-            read_file(fs_path),
+            read_file(vs_path).as_slice(),
+            read_file(fs_path).as_slice(),
         )
     }
 

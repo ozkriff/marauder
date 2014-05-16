@@ -17,7 +17,7 @@ fn decode<A: Decodable<json::Decoder, json::DecoderError>>(json_obj: json::Json)
 impl Config {
     pub fn new(path: &Path) -> Config {
         set_error_context!("parsing config", path.as_str().unwrap());
-        let json = match json::from_str(read_file(path)) {
+        let json = match json::from_str(read_file(path).as_slice()) {
             Ok(json::Object(obj)) => obj,
             Err(msg) => fail!("Config parsing error: {}", msg),
             some_error => fail!("Unknown config parsing error: {}", some_error),
