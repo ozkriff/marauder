@@ -1,11 +1,15 @@
 // See LICENSE file for copyright and license details.
 
-use core::types::UnitId;
-use visualizer::scene::{NodeId, Scene, SceneNode};
+use cgmath::vector::Vector2;
+use core::types::{MInt, UnitId};
 use core::game_state::GameState;
+use core::misc::add_quad_to_vec;
+use visualizer::scene::{NodeId, Scene, SceneNode};
 use visualizer::geom::{Geom, unit_pos};
-use visualizer::mesh::MeshId;
-use visualizer::types::WorldPos;
+use visualizer::mesh::{Mesh, MeshId};
+use visualizer::texture::Texture;
+use visualizer::types::{WorldPos, TextureCoord};
+use visualizer::shader::Shader;
 
 pub struct SelectionManager {
     unit_id: Option<UnitId>,
@@ -67,6 +71,38 @@ impl SelectionManager {
         scene.nodes.remove(&self.node_id);
         self.unit_id = None;
     }
+}
+
+pub fn get_selection_mesh(geom: &Geom, shader: &Shader) -> Mesh {
+    let tex = Texture::new(&Path::new("data/shell.png"));
+    let mut vertex_data = Vec::new();
+    let mut tex_data = Vec::new();
+    let scale_1 = 0.4;
+    let scale_2 = scale_1 + 0.05;
+    for num in range(0 as MInt, 6) {
+        let vertex_1_1 = geom.index_to_hex_vertex_s(scale_1, num);
+        let vertex_1_2 = geom.index_to_hex_vertex_s(scale_2, num);
+        let vertex_2_1 = geom.index_to_hex_vertex_s(scale_1, num + 1);
+        let vertex_2_2 = geom.index_to_hex_vertex_s(scale_2, num + 1);
+        add_quad_to_vec(
+            &mut vertex_data,
+            vertex_2_1,
+            vertex_2_2,
+            vertex_1_2,
+            vertex_1_1,
+        );
+        add_quad_to_vec(
+            &mut tex_data,
+            TextureCoord{v: Vector2{x: 0.0, y: 0.0}},
+            TextureCoord{v: Vector2{x: 0.0, y: 1.0}},
+            TextureCoord{v: Vector2{x: 1.0, y: 1.0}},
+            TextureCoord{v: Vector2{x: 1.0, y: 0.0}},
+        );
+    }
+    let mut mesh = Mesh::new(vertex_data.as_slice());
+    mesh.set_texture(tex, tex_data.as_slice());
+    mesh.prepare(shader);
+    mesh
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

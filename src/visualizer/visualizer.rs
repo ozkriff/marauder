@@ -15,7 +15,6 @@ use core::pathfinder::Pathfinder;
 use core::conf::Config;
 use core::core;
 use core::core::SLOTS_COUNT;
-use core::misc::add_quad_to_vec;
 use visualizer::gl_helpers::{
     set_clear_color,
     clear_screen,
@@ -55,7 +54,7 @@ use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
 use visualizer::gui::{ButtonManager, Button, ButtonId};
-use visualizer::selection::SelectionManager;
+use visualizer::selection::{SelectionManager, get_selection_mesh};
 
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
@@ -135,38 +134,6 @@ fn load_unit_mesh(shader: &Shader) -> Mesh {
     let obj = obj::Model::new(&Path::new("data/tank.obj"));
     let mut mesh = Mesh::new(obj.build().as_slice());
     mesh.set_texture(tex, obj.build_tex_coord().as_slice());
-    mesh.prepare(shader);
-    mesh
-}
-
-fn get_selection_mesh(geom: &Geom, shader: &Shader) -> Mesh {
-    let tex = Texture::new(&Path::new("data/shell.png"));
-    let mut vertex_data = Vec::new();
-    let mut tex_data = Vec::new();
-    let scale_1 = 0.4;
-    let scale_2 = scale_1 + 0.05;
-    for num in range(0 as MInt, 6) {
-        let vertex_1_1 = geom.index_to_hex_vertex_s(scale_1, num);
-        let vertex_1_2 = geom.index_to_hex_vertex_s(scale_2, num);
-        let vertex_2_1 = geom.index_to_hex_vertex_s(scale_1, num + 1);
-        let vertex_2_2 = geom.index_to_hex_vertex_s(scale_2, num + 1);
-        add_quad_to_vec(
-            &mut vertex_data,
-            vertex_2_1,
-            vertex_2_2,
-            vertex_1_2,
-            vertex_1_1,
-        );
-        add_quad_to_vec(
-            &mut tex_data,
-            TextureCoord{v: Vector2{x: 0.0, y: 0.0}},
-            TextureCoord{v: Vector2{x: 0.0, y: 1.0}},
-            TextureCoord{v: Vector2{x: 1.0, y: 1.0}},
-            TextureCoord{v: Vector2{x: 1.0, y: 0.0}},
-        );
-    }
-    let mut mesh = Mesh::new(vertex_data.as_slice());
-    mesh.set_texture(tex, tex_data.as_slice());
     mesh.prepare(shader);
     mesh
 }
