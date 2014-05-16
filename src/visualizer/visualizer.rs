@@ -7,6 +7,7 @@ use glfw::Context;
 use cgmath::vector::{Vector3, Vector2};
 use cgmath::projection;
 use cgmath::matrix::Matrix4;
+use error_context;
 use core::map::MapPosIter;
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos, Point2};
 use core::game_state::GameState;
@@ -55,7 +56,6 @@ use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
 use visualizer::gui::{ButtonManager, Button, ButtonId};
 use visualizer::selection::SelectionManager;
-use error_context;
 
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};

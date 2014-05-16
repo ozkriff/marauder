@@ -85,7 +85,7 @@ impl TilePicker {
         self.win_size = win_size;
     }
 
-    pub fn update_units( &mut self, geom: &Geom, scene: &Scene) {
+    pub fn update_units(&mut self, geom: &Geom, scene: &Scene) {
         use std::slice::Vector;
         let last_unit_node_id = NodeId{id: 1000}; // TODO
         let mut c_data = Vec::new();
