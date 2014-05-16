@@ -14,6 +14,7 @@ use core::pathfinder::Pathfinder;
 use core::conf::Config;
 use core::core;
 use core::core::SLOTS_COUNT;
+use core::misc::add_quad_to_vec;
 use visualizer::gl_helpers::{
     set_clear_color,
     clear_screen,
@@ -30,7 +31,7 @@ use visualizer::geom::Geom;
 use visualizer::picker;
 use visualizer::obj;
 use visualizer::mesh::{Mesh, MeshId};
-use visualizer::scene::{Scene};
+use visualizer::scene::Scene;
 use visualizer::types::{
     WorldPos,
     VertexCoord,
@@ -53,6 +54,7 @@ use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
 use visualizer::gui::{ButtonManager, Button, ButtonId};
+use visualizer::selection::SelectionManager;
 use error_context;
 
 static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
@@ -137,6 +139,38 @@ fn load_unit_mesh(shader: &Shader) -> Mesh {
     mesh
 }
 
+fn get_selection_mesh(geom: &Geom, shader: &Shader) -> Mesh {
+    let tex = Texture::new(&Path::new("data/shell.png"));
+    let mut vertex_data = Vec::new();
+    let mut tex_data = Vec::new();
+    let scale_1 = 0.4;
+    let scale_2 = scale_1 + 0.05;
+    for num in range(0 as MInt, 6) {
+        let vertex_1_1 = geom.index_to_hex_vertex_s(scale_1, num);
+        let vertex_1_2 = geom.index_to_hex_vertex_s(scale_2, num);
+        let vertex_2_1 = geom.index_to_hex_vertex_s(scale_1, num + 1);
+        let vertex_2_2 = geom.index_to_hex_vertex_s(scale_2, num + 1);
+        add_quad_to_vec(
+            &mut vertex_data,
+            vertex_2_1,
+            vertex_2_2,
+            vertex_1_2,
+            vertex_1_1,
+        );
+        add_quad_to_vec(
+            &mut tex_data,
+            TextureCoord{v: Vector2{x: 0.0, y: 0.0}},
+            TextureCoord{v: Vector2{x: 0.0, y: 1.0}},
+            TextureCoord{v: Vector2{x: 1.0, y: 1.0}},
+            TextureCoord{v: Vector2{x: 1.0, y: 0.0}},
+        );
+    }
+    let mut mesh = Mesh::new(vertex_data.as_slice());
+    mesh.set_texture(tex, tex_data.as_slice());
+    mesh.prepare(shader);
+    mesh
+}
+
 fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MeshId {
     meshes.push(mesh);
     MeshId{id: (meshes.len() as MInt) - 1}
@@ -151,6 +185,7 @@ fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> WorldPos {
 pub struct Visualizer<'a> {
     shader: Shader,
     map_mesh_id: MeshId,
+    selection_maerker_mesh_id: MeshId,
     unit_mesh_id: MeshId,
     shell_mesh_id: MeshId,
     marker_1_mesh_id: MeshId,
@@ -180,6 +215,7 @@ pub struct Visualizer<'a> {
     font_stash: FontStash,
     button_manager: ButtonManager,
     button_end_turn_id: ButtonId,
+    selection_manager: SelectionManager,
 }
 
 impl<'a> Visualizer<'a> {
@@ -214,6 +250,8 @@ impl<'a> Visualizer<'a> {
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(&geom, map_size, &shader));
         let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
+        let selection_maerker_mesh_id = add_mesh(
+            &mut meshes, get_selection_mesh(&geom, &shader));
         let shell_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, &Path::new("data/shell.png")));
         let marker_1_mesh_id = add_mesh(
@@ -239,6 +277,7 @@ impl<'a> Visualizer<'a> {
         let vis = Visualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
+            selection_maerker_mesh_id: selection_maerker_mesh_id,
             shell_mesh_id: shell_mesh_id,
             marker_1_mesh_id: marker_1_mesh_id,
             marker_2_mesh_id: marker_2_mesh_id,
@@ -268,6 +307,7 @@ impl<'a> Visualizer<'a> {
             font_stash: font_stash,
             button_manager: button_manager,
             button_end_turn_id: button_end_turn_id,
+            selection_manager: SelectionManager::new(selection_maerker_mesh_id),
         };
         vis
     }
@@ -355,6 +395,8 @@ impl<'a> Visualizer<'a> {
     fn end_turn(&mut self) {
         self.core.do_command(core::CommandEndTurn);
         self.selected_unit_id = None;
+        let scene = self.scenes.get_mut(&self.core.player_id());
+        self.selection_manager.deselect(scene);
     }
 
     fn is_full_tile(&self, pos: MapPos) -> bool {
@@ -393,6 +435,9 @@ impl<'a> Visualizer<'a> {
             let state = self.game_state.get(&self.core.player_id());
             let pf = self.pathfinders.get_mut(&self.core.player_id());
             pf.fill_map(state, state.units.get(&unit_id));
+            let scene = self.scenes.get_mut(&self.core.player_id());
+            self.selection_manager.create_selection_marker(
+                &self.geom, state, scene, unit_id);
         }
     }
 
@@ -615,6 +660,7 @@ impl<'a> Visualizer<'a> {
             let unit_id = self.selected_unit_id.unwrap();
             let pf = self.pathfinders.get_mut(&self.core.player_id());
             pf.fill_map(state, state.units.get(&unit_id));
+            self.selection_manager.move_selection_marker(&self.geom, state, scene);
         }
         self.picker.update_units(&self.geom, scene);
     }

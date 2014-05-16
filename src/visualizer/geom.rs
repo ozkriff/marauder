@@ -3,7 +3,8 @@
 use std::f32::consts::{PI, FRAC_PI_2};
 use std::num::{pow, abs};
 use cgmath::vector::{Vector2, Vector3, Vector};
-use core::types::{MInt, MapPos, SlotId};
+use core::types::{MInt, MapPos, SlotId, UnitId};
+use core::game_state::GameState;
 use core::misc::{rad_to_deg};
 use core::core::SLOTS_COUNT;
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
@@ -59,6 +60,11 @@ impl Geom {
         self.index_to_circle_vertex(6, i)
     }
 
+    pub fn index_to_hex_vertex_s(&self, scale: MFloat, i: MInt) -> VertexCoord {
+        let v = self.index_to_hex_vertex(i).v.mul_s(scale);
+        VertexCoord{v: v}
+    }
+
     pub fn slot_pos(&self, slot_index: SlotId) -> VertexCoord {
         VertexCoord{
             v: self.index_to_circle_vertex(
@@ -80,6 +86,20 @@ impl Geom {
         }
         angle
     }
+}
+
+pub fn unit_pos(
+    unit_id: UnitId,
+    map_pos: MapPos,
+    geom: &Geom,
+    state: &GameState,
+) -> WorldPos {
+    let slot_id = match state.get_free_slot(unit_id, map_pos) {
+        Some(id) => id,
+        None => fail!("No free slot in {}", map_pos),
+    };
+    let center_pos = geom.map_pos_to_world_pos(map_pos);
+    WorldPos{v: center_pos.v + geom.slot_pos(slot_id).v}
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

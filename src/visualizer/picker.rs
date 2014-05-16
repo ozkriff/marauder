@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::{Vector, Vector3, Vector2};
+use cgmath::vector::{Vector2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
 use visualizer::gl_helpers::{
@@ -87,22 +87,23 @@ impl TilePicker {
 
     pub fn update_units( &mut self, geom: &Geom, scene: &Scene) {
         use std::slice::Vector;
-        fn get_hex_vertex(geom: &Geom, n: MInt) -> Vector3<MFloat> {
-            let scale_factor = 0.5;
-            geom.index_to_hex_vertex(n).v.mul_s(scale_factor)
-        }
         let last_unit_node_id = NodeId{id: 1000}; // TODO
         let mut c_data = Vec::new();
         let mut v_data = Vec::new();
+        let scale = 0.5;
         for (node_id, node) in scene.nodes.iter() {
             if node_id.id >= last_unit_node_id.id {
                 continue;
             }
             let color = Color3 {r: i_to_f(node_id.id), g: 0.0, b: i_to_f(2)};
             for num in range(0 as MInt, 6) {
-                v_data.push(VertexCoord{v: node.pos.v + get_hex_vertex(geom, num)});
+                v_data.push(VertexCoord {
+                    v: node.pos.v + geom.index_to_hex_vertex_s(scale, num).v
+                });
                 c_data.push(color);
-                v_data.push(VertexCoord{v: node.pos.v + get_hex_vertex(geom, num + 1)});
+                v_data.push(VertexCoord {
+                    v: node.pos.v + geom.index_to_hex_vertex_s(scale, num + 1).v
+                });
                 c_data.push(color);
                 v_data.push(VertexCoord{v: node.pos.v});
                 c_data.push(color);
