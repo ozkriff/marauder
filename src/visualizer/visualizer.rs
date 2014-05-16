@@ -172,7 +172,7 @@ pub struct Visualizer<'a> {
     core: core::Core,
     event: Option<core::Event>,
     event_visualizer: Option<Box<EventVisualizer>>,
-    game_state: HashMap<PlayerId, GameState>,
+    game_states: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
     last_time: Time,
     dtime: Time,
@@ -259,7 +259,7 @@ impl<'a> Visualizer<'a> {
             event_visualizer: None,
             event: None,
             scenes: get_scenes(players_count),
-            game_state: get_game_states(players_count),
+            game_states: get_game_states(players_count),
             pathfinders: get_pathfinders(players_count, map_size),
             last_time: Time{n: precise_time_ns()},
             dtime: Time{n: 0},
@@ -362,7 +362,7 @@ impl<'a> Visualizer<'a> {
     }
 
     fn is_full_tile(&self, pos: MapPos) -> bool {
-        let state = self.game_state.get(&self.core.player_id());
+        let state = self.game_states.get(&self.core.player_id());
         let max_units_per_tile = SLOTS_COUNT;
         state.units_at(pos).len() as MInt >= max_units_per_tile
     }
@@ -394,7 +394,7 @@ impl<'a> Visualizer<'a> {
         if self.unit_under_cursor_id.is_some() {
             let unit_id = self.unit_under_cursor_id.unwrap();
             self.selected_unit_id = Some(unit_id);
-            let state = self.game_state.get(&self.core.player_id());
+            let state = self.game_states.get(&self.core.player_id());
             let pf = self.pathfinders.get_mut(&self.core.player_id());
             pf.fill_map(state, state.units.get(&unit_id));
             let scene = self.scenes.get_mut(&self.core.player_id());
@@ -492,7 +492,7 @@ impl<'a> Visualizer<'a> {
         if self.unit_under_cursor_id.is_some() {
             let id = self.unit_under_cursor_id.unwrap();
             let player_id = {
-                let state = self.game_state.get(&self.core.player_id());
+                let state = self.game_states.get(&self.core.player_id());
                 let unit = state.units.get(&id);
                 unit.player_id
             };
@@ -566,7 +566,7 @@ impl<'a> Visualizer<'a> {
     ) -> Box<EventVisualizer> {
         let player_id = self.core.player_id();
         let scene = self.scenes.get_mut(&player_id);
-        let state = self.game_state.get(&player_id);
+        let state = self.game_states.get(&player_id);
         let geom = &self.geom;
         match *event {
             core::EventMove(ref unit_id, ref path) => {
@@ -613,7 +613,7 @@ impl<'a> Visualizer<'a> {
 
     fn end_event_visualization(&mut self) {
         let scene = self.scenes.get_mut(&self.core.player_id());
-        let state = self.game_state.get_mut(&self.core.player_id());
+        let state = self.game_states.get_mut(&self.core.player_id());
         self.event_visualizer.get_mut_ref().end(&self.geom, scene, state);
         state.apply_event(self.event.get_ref());
         self.event_visualizer = None;
