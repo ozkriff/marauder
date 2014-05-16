@@ -231,11 +231,6 @@ impl<'a> Visualizer<'a> {
         let mut camera = Camera::new(win_size);
         camera.pos = get_initial_camera_pos(&geom, &map_size);
         let mut button_manager = ButtonManager::new();
-        let _button_01_id = button_manager.add_button(Button::new(
-            "button_1",
-            &mut font_stash,
-            Point2{v: Vector2{x: 10, y: 10}})
-        );
         let button_end_turn_id = button_manager.add_button(Button::new(
             "end turn",
             &mut font_stash,
