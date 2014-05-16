@@ -22,8 +22,8 @@ pub fn read_file(path: &Path) -> StrBuf {
         Err(msg) => fail!("Can not read from file {}: {}", path.display(), msg),
     };
     match StrBuf::from_utf8(bytes) {
-        Some(s) => s,
-        None => fail!("Not valid utf8 in file {}", path.display()),
+        Ok(s) => s,
+        Err(msg) => fail!("Not valid utf8 in file {}: {}", path.display(), msg),
     }
 }
 
