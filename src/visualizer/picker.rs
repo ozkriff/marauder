@@ -20,7 +20,6 @@ fn i_to_f(n: MInt) -> f32 {
 }
 
 fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
-    use std::slice::Vector;
     let mut c_data = Vec::new();
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
@@ -86,7 +85,6 @@ impl TilePicker {
     }
 
     pub fn update_units(&mut self, geom: &Geom, scene: &Scene) {
-        use std::slice::Vector;
         let last_unit_node_id = NodeId{id: 1000}; // TODO
         let mut c_data = Vec::new();
         let mut v_data = Vec::new();

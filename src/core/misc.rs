@@ -1,6 +1,8 @@
 // See LICENSE file for copyright and license details.
 
 use std::f32::consts::PI;
+use std::str::from_utf8_owned;
+use std::io::File;
 use visualizer::types::MFloat;
 
 pub fn deg_to_rad(n: MFloat) -> MFloat {
@@ -12,9 +14,6 @@ pub fn rad_to_deg(n: MFloat) -> MFloat {
 }
 
 pub fn read_file(path: &Path) -> ~str {
-    use std::str::from_utf8_owned;
-    use std::io::File;
-
     if !path.exists() {
         fail!("Path does not exists: {}", path.display());
     }
