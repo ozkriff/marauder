@@ -28,7 +28,7 @@ impl Config {
     }
 
     pub fn get<A: Decodable<json::Decoder, json::DecoderError>>(&self, name: &str) -> A {
-        let owned_name_str = name.into_owned();
+        let owned_name_str = name.into_strbuf();
         decode(match self.json.find(&owned_name_str) {
             Some(val) => val.clone(),
             None => fail!("No field '{}", name),
