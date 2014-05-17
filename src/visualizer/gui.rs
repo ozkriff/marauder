@@ -43,7 +43,7 @@ impl Button {
 }
 
 pub struct ButtonManager {
-    pub buttons: HashMap<ButtonId, Button>, // TODO: make 'priv'
+    buttons: HashMap<ButtonId, Button>,
     last_id: ButtonId,
 }
 
@@ -53,6 +53,10 @@ impl ButtonManager {
             buttons: HashMap::new(),
             last_id: ButtonId{id: 0},
         }
+    }
+
+    pub fn buttons<'a>(&'a self) -> &'a HashMap<ButtonId, Button> {
+        &self.buttons
     }
 
     pub fn add_button(&mut self, button: Button) -> ButtonId {

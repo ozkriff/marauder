@@ -308,7 +308,7 @@ impl<'a> Visualizer<'a> {
 
     fn draw_2d_text(&mut self) {
         let m = self.get_2d_screen_matrix();
-        for (_, button) in self.button_manager.buttons.iter() {
+        for (_, button) in self.button_manager.buttons().iter() {
             let text_offset = Vector3 {
                 x: button.pos().v.x as MFloat,
                 y: button.pos().v.y as MFloat,
@@ -459,7 +459,7 @@ impl<'a> Visualizer<'a> {
     fn get_clicked_button_id(&mut self) -> Option<ButtonId> {
         let x = self.mouse_pos.v.x as MInt;
         let y = self.win_size.h - self.mouse_pos.v.y as MInt;
-        for (id, button) in self.button_manager.buttons.iter() {
+        for (id, button) in self.button_manager.buttons().iter() {
             if x >= button.pos().v.x
                 && x <= button.pos().v.x + button.size().w
                 && y >= button.pos().v.y
