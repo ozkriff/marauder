@@ -4,8 +4,9 @@ set -e
 
 get_glfw() {
     echo === glfw ===
-    git clone --depth=1 https://github.com/glfw/glfw.git
+    git clone https://github.com/glfw/glfw.git
     cd glfw
+    git checkout 3.0.3
     cmake -DBUILD_SHARED_LIBS=ON
     make glfw
     mv src/libglfw* ..
