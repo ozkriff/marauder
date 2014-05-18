@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 pub mod visualizer;
-pub mod gl_helpers;
+pub mod mgl;
 pub mod camera;
 pub mod types;
 pub mod geom;

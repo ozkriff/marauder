@@ -3,11 +3,7 @@
 use cgmath::vector::{Vector2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
-use visualizer::gl_helpers::{
-    set_clear_color,
-    clear_screen,
-    read_pixel_bytes,
-};
+use visualizer::mgl;
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::mesh::Mesh;
@@ -125,14 +121,14 @@ impl TilePicker {
     ) -> PickResult {
         self.shader.activate();
         self.shader.uniform_mat4f(self.mvp_mat_id, &camera.mat());
-        set_clear_color(Color3{r: 0.0, g: 0.0, b: 0.0});
-        clear_screen();
+        mgl::set_clear_color(Color3{r: 0.0, g: 0.0, b: 0.0});
+        mgl::clear_screen();
         self.map_mesh.draw(&self.shader);
         match self.units_mesh {
             Some(ref units) => units.draw(&self.shader),
             None => {},
         };
-        let (r, g, b, _) = read_pixel_bytes(self.win_size, mouse_pos);
+        let (r, g, b, _) = mgl::read_pixel_bytes(self.win_size, mouse_pos);
         match b {
             0 => PickedNothing,
             1 => PickedMapPos(MapPos{v: Vector2{x: r, y: g}}),

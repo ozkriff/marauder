@@ -6,7 +6,7 @@ use cgmath::matrix::Matrix4;
 use cgmath::vector::Vector3;
 use core::types::{MInt, Size2};
 use core::misc::deg_to_rad;
-use visualizer::gl_helpers::{tr, rot_x, rot_z};
+use visualizer::mgl;
 use visualizer::types::{MFloat, WorldPos};
 
 pub struct Camera {
@@ -39,10 +39,10 @@ impl Camera {
 
     pub fn mat(&self) -> Matrix4<MFloat> {
         let mut m = self.projection_mat;
-        m = tr(m, Vector3{x: 0.0, y: 0.0, z: -self.zoom});
-        m = rot_x(m, -self.x_angle);
-        m = rot_z(m, -self.z_angle);
-        m = tr(m, self.pos.v);
+        m = mgl::tr(m, Vector3{x: 0.0, y: 0.0, z: -self.zoom});
+        m = mgl::rot_x(m, -self.x_angle);
+        m = mgl::rot_z(m, -self.z_angle);
+        m = mgl::tr(m, self.pos.v);
         m
     }
 

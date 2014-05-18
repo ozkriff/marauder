@@ -20,7 +20,7 @@ SRC = \
 	src/visualizer/mod.rs \
 	src/visualizer/camera.rs \
 	src/visualizer/geom.rs \
-	src/visualizer/gl_helpers.rs \
+	src/visualizer/mgl.rs \
 	src/visualizer/mesh.rs \
 	src/visualizer/shader.rs \
 	src/visualizer/texture.rs \

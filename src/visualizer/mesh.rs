@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use core::types::MInt;
-use visualizer::gl_helpers::{Vbo, Vao, Triangles};
+use visualizer::mgl::{Vbo, Vao, Triangles};
 use visualizer::types::{Color3, VertexCoord, TextureCoord};
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;

@@ -15,17 +15,7 @@ use core::pathfinder::Pathfinder;
 use core::conf::Config;
 use core::core;
 use core::core::SLOTS_COUNT;
-use visualizer::gl_helpers::{
-    set_clear_color,
-    clear_screen,
-    init_opengl,
-    load_gl_funcs_with,
-    set_viewport,
-    tr,
-    scale,
-    rot_z,
-    rot_x,
-};
+use visualizer::mgl;
 use visualizer::camera::Camera;
 use visualizer::geom::Geom;
 use visualizer::picker;
@@ -200,8 +190,8 @@ impl<'a> Visualizer<'a> {
         ).unwrap();
         glfw.make_context_current(Some(&win));
         win.set_all_polling(true);
-        load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
-        init_opengl();
+        mgl::load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
+        mgl::init_opengl();
         let geom = Geom::new();
         let core = core::Core::new();
         let map_size = core.map_size();
@@ -284,8 +274,8 @@ impl<'a> Visualizer<'a> {
 
     fn draw_units(&self) {
         for (_, node) in self.scene().nodes.iter() {
-            let m = tr(self.camera.mat(), node.pos.v);
-            let m = rot_z(m, node.rot);
+            let m = mgl::tr(self.camera.mat(), node.pos.v);
+            let m = mgl::rot_z(m, node.rot);
             self.shader.uniform_mat4f(self.mvp_mat_id, &m);
             self.meshes.get(node.mesh_id.id as uint).draw(&self.shader);
         }
@@ -314,15 +304,15 @@ impl<'a> Visualizer<'a> {
                 y: button.pos().v.y as MFloat,
                 z: 0.0,
             };
-            self.shader.uniform_mat4f(self.mvp_mat_id, &tr(m, text_offset));
+            self.shader.uniform_mat4f(self.mvp_mat_id, &mgl::tr(m, text_offset));
             button.draw(&mut self.font_stash, &self.shader);
         }
     }
 
     fn draw_3d_text(&mut self) {
         let m = self.camera.mat();
-        let m = scale(m, 1.0 / self.font_stash.get_size());
-        let m = rot_x(m, 90.0);
+        let m = mgl::scale(m, 1.0 / self.font_stash.get_size());
+        let m = mgl::rot_x(m, 90.0);
         self.shader.uniform_mat4f(self.mvp_mat_id, &m);
         let text_mesh = self.font_stash.get_mesh("kill! Kill! kill!!!", &self.shader);
         text_mesh.draw(&self.shader);
@@ -340,8 +330,8 @@ impl<'a> Visualizer<'a> {
     }
 
     fn draw(&mut self) {
-        set_clear_color(GREY_03);
-        clear_screen();
+        mgl::set_clear_color(GREY_03);
+        mgl::clear_screen();
         self.shader.activate();
         self.draw_scene();
         self.shader.uniform_color(self.basic_color_id, BLACK);
@@ -527,7 +517,7 @@ impl<'a> Visualizer<'a> {
             },
             glfw::SizeEvent(w, h) => {
                 let size = Size2{w: w, h: h};
-                set_viewport(size);
+                mgl::set_viewport(size);
                 self.picker.set_win_size(size);
                 self.camera.set_win_size(size);
                 self.win_size = size;
