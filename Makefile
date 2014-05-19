@@ -39,7 +39,7 @@ bin/marauder: Makefile ${SRC}
 	${RUSTC} src/main.rs -o bin/marauder
 
 run: bin/marauder
-	(cd bin && exec ./marauder)
+	(cd bin && RUST_BACKTRACE=1 exec ./marauder)
 
 clean:
 	rm -f bin/marauder
