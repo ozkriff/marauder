@@ -9,97 +9,79 @@ use core::misc::{rad_to_deg};
 use core::core::SLOTS_COUNT;
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
 
-pub struct Geom {
-    pub hex_ex_radius: MFloat,
-    pub hex_in_radius: MFloat,
+pub static HEX_EX_RADIUS: MFloat = 1.2;
+// (pow(1.0, 2) - pow(0.5, 2)).sqrt()
+pub static HEX_IN_RADIUS: MFloat = 0.866025403784 * HEX_EX_RADIUS;
+
+pub fn map_pos_to_world_pos(i: MapPos) -> WorldPos {
+    let v = Vector2 {
+        x: (i.v.x as MFloat) * HEX_IN_RADIUS * 2.0,
+        y: (i.v.y as MFloat) * HEX_EX_RADIUS * 1.5,
+    };
+    if i.v.y % 2 == 0 {
+        WorldPos{v: Vector3{
+            x: v.x + HEX_IN_RADIUS,
+            y: v.y,
+            z: 0.0,
+        }}
+    } else {
+        WorldPos{v: v.extend(0.0)}
+    }
 }
 
-impl Geom {
-    pub fn new() -> Geom {
-        let hex_ex_radius: MFloat = 1.2;
-        let hex_in_radius =
-            (pow(hex_ex_radius, 2) - pow(hex_ex_radius / 2.0, 2)).sqrt();
-        Geom {
-            hex_ex_radius: hex_ex_radius,
-            hex_in_radius: hex_in_radius,
-        }
+pub fn index_to_circle_vertex(count: MInt, i: MInt) -> VertexCoord {
+    let n = FRAC_PI_2 + 2.0 * PI * (i as MFloat) / (count as MFloat);
+    VertexCoord{
+        v: Vector3{
+            x: n.cos(),
+            y: n.sin(),
+            z: 0.0
+        }.mul_s(HEX_EX_RADIUS)
     }
+}
 
-    pub fn map_pos_to_world_pos(&self, i: MapPos) -> WorldPos {
-        let v = Vector2 {
-            x: (i.v.x as MFloat) * self.hex_in_radius * 2.0,
-            y: (i.v.y as MFloat) * self.hex_ex_radius * 1.5,
-        };
-        if i.v.y % 2 == 0 {
-            WorldPos{v: Vector3{
-                x: v.x + self.hex_in_radius,
-                y: v.y,
-                z: 0.0,
-            }}
-        } else {
-            WorldPos{v: v.extend(0.0)}
-        }
-    }
+pub fn index_to_hex_vertex(i: MInt) -> VertexCoord {
+    index_to_circle_vertex(6, i)
+}
 
-    pub fn index_to_circle_vertex(
-        &self,
-        count: MInt,
-        i: MInt
-    ) -> VertexCoord {
-        let n = FRAC_PI_2 + 2.0 * PI * (i as MFloat) / (count as MFloat);
-        VertexCoord{
-            v: Vector3{
-                x: n.cos(),
-                y: n.sin(),
-                z: 0.0
-            }.mul_s(self.hex_ex_radius)
-        }
-    }
+pub fn index_to_hex_vertex_s(scale: MFloat, i: MInt) -> VertexCoord {
+    let v = index_to_hex_vertex(i).v.mul_s(scale);
+    VertexCoord{v: v}
+}
 
-    pub fn index_to_hex_vertex(&self, i: MInt) -> VertexCoord {
-        self.index_to_circle_vertex(6, i)
+pub fn slot_pos(slot_index: SlotId) -> VertexCoord {
+    VertexCoord{
+        v: index_to_circle_vertex(
+            SLOTS_COUNT, slot_index.id).v.mul_s(0.6)
     }
+}
 
-    pub fn index_to_hex_vertex_s(&self, scale: MFloat, i: MInt) -> VertexCoord {
-        let v = self.index_to_hex_vertex(i).v.mul_s(scale);
-        VertexCoord{v: v}
-    }
+pub fn dist(a: WorldPos, b: WorldPos) -> MFloat {
+    let dx = abs(b.v.x - a.v.x);
+    let dy = abs(b.v.y - a.v.y);
+    let dz = abs(b.v.z - a.v.z);
+    (pow(dx, 2) + pow(dy, 2) + pow(dz, 2)).sqrt()
+}
 
-    pub fn slot_pos(&self, slot_index: SlotId) -> VertexCoord {
-        VertexCoord{
-            v: self.index_to_circle_vertex(
-                SLOTS_COUNT, slot_index.id).v.mul_s(0.6)
-        }
+pub fn get_rot_angle(a: WorldPos, b: WorldPos) -> MFloat {
+    let mut angle = rad_to_deg(((b.v.x - a.v.x) / dist(a, b)).asin());
+    if b.v.y - a.v.y > 0.0 {
+        angle = -(180.0 + angle);
     }
-
-    pub fn dist(&self, a: WorldPos, b: WorldPos) -> MFloat {
-        let dx = abs(b.v.x - a.v.x);
-        let dy = abs(b.v.y - a.v.y);
-        let dz = abs(b.v.z - a.v.z);
-        (pow(dx, 2) + pow(dy, 2) + pow(dz, 2)).sqrt()
-    }
-
-    pub fn get_rot_angle(&self, a: WorldPos, b: WorldPos) -> MFloat {
-        let mut angle = rad_to_deg(((b.v.x - a.v.x) / self.dist(a, b)).asin());
-        if b.v.y - a.v.y > 0.0 {
-            angle = -(180.0 + angle);
-        }
-        angle
-    }
+    angle
 }
 
 pub fn unit_pos(
     unit_id: UnitId,
     map_pos: MapPos,
-    geom: &Geom,
     state: &GameState,
 ) -> WorldPos {
     let slot_id = match state.get_free_slot(unit_id, map_pos) {
         Some(id) => id,
         None => fail!("No free slot in {}", map_pos),
     };
-    let center_pos = geom.map_pos_to_world_pos(map_pos);
-    WorldPos{v: center_pos.v + geom.slot_pos(slot_id).v}
+    let center_pos = map_pos_to_world_pos(map_pos);
+    WorldPos{v: center_pos.v + slot_pos(slot_id).v}
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

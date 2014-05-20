@@ -5,7 +5,7 @@ use core::types::{MInt, UnitId};
 use core::game_state::GameState;
 use core::misc::add_quad_to_vec;
 use visualizer::scene::{NodeId, Scene, SceneNode};
-use visualizer::geom::{Geom, unit_pos};
+use visualizer::geom;
 use visualizer::mesh::{Mesh, MeshId};
 use visualizer::texture::Texture;
 use visualizer::types::{WorldPos, TextureCoord};
@@ -30,27 +30,25 @@ impl SelectionManager {
         self.unit_id = Some(unit_id);
     }
 
-    fn get_pos(&self, geom: &Geom, state: &GameState) -> WorldPos {
+    fn get_pos(&self, state: &GameState) -> WorldPos {
         let unit_id = self.unit_id.unwrap();
         let map_pos = state.units.get(&unit_id).pos;
-        let mut world_pos = unit_pos(unit_id, map_pos, geom, state);
+        let mut world_pos = geom::unit_pos(unit_id, map_pos, state);
         world_pos.v.z += 0.1; // TODO: replace with some constant
         world_pos
     }
 
     pub fn move_selection_marker(
         &self,
-        geom: &Geom,
         state: &GameState,
         scene: &mut Scene
     ) {
         let node = scene.nodes.get_mut(&self.node_id);
-        node.pos = self.get_pos(geom, state);
+        node.pos = self.get_pos(state);
     }
 
     pub fn create_selection_marker(
         &mut self,
-        geom: &Geom,
         state: &GameState,
         scene: &mut Scene,
         unit_id: UnitId
@@ -60,7 +58,7 @@ impl SelectionManager {
             scene.nodes.remove(&self.node_id);
         }
         let node = SceneNode {
-            pos: self.get_pos(geom, state),
+            pos: self.get_pos(state),
             rot: 0.0,
             mesh_id: self.mesh_id,
         };
@@ -73,17 +71,17 @@ impl SelectionManager {
     }
 }
 
-pub fn get_selection_mesh(geom: &Geom, shader: &Shader) -> Mesh {
+pub fn get_selection_mesh(shader: &Shader) -> Mesh {
     let tex = Texture::new(&Path::new("data/shell.png"));
     let mut vertex_data = Vec::new();
     let mut tex_data = Vec::new();
     let scale_1 = 0.4;
     let scale_2 = scale_1 + 0.05;
     for num in range(0 as MInt, 6) {
-        let vertex_1_1 = geom.index_to_hex_vertex_s(scale_1, num);
-        let vertex_1_2 = geom.index_to_hex_vertex_s(scale_2, num);
-        let vertex_2_1 = geom.index_to_hex_vertex_s(scale_1, num + 1);
-        let vertex_2_2 = geom.index_to_hex_vertex_s(scale_2, num + 1);
+        let vertex_1_1 = geom::index_to_hex_vertex_s(scale_1, num);
+        let vertex_1_2 = geom::index_to_hex_vertex_s(scale_2, num);
+        let vertex_2_1 = geom::index_to_hex_vertex_s(scale_1, num + 1);
+        let vertex_2_2 = geom::index_to_hex_vertex_s(scale_2, num + 1);
         add_quad_to_vec(
             &mut vertex_data,
             vertex_2_1,

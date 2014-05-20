@@ -17,7 +17,7 @@ use core::core;
 use core::core::SLOTS_COUNT;
 use visualizer::mgl;
 use visualizer::camera::Camera;
-use visualizer::geom::Geom;
+use visualizer::geom;
 use visualizer::picker;
 use visualizer::obj;
 use visualizer::mesh::{Mesh, MeshId};
@@ -96,14 +96,14 @@ fn get_pathfinders(
     m
 }
 
-fn get_map_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
+fn get_map_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut vertex_data = Vec::new();
     let mut tex_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
-        let pos = geom.map_pos_to_world_pos(tile_pos);
+        let pos = geom::map_pos_to_world_pos(tile_pos);
         for num in range(0 as MInt, 6) {
-            let vertex = geom.index_to_hex_vertex(num);
-            let next_vertex = geom.index_to_hex_vertex(num + 1);
+            let vertex = geom::index_to_hex_vertex(num);
+            let next_vertex = geom::index_to_hex_vertex(num + 1);
             vertex_data.push(VertexCoord{v: pos.v + vertex.v});
             vertex_data.push(VertexCoord{v: pos.v + next_vertex.v});
             vertex_data.push(VertexCoord{v: pos.v});
@@ -133,8 +133,8 @@ fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MeshId {
     MeshId{id: (meshes.len() as MInt) - 1}
 }
 
-fn get_initial_camera_pos(geom: &Geom, map_size: &Size2<MInt>) -> WorldPos {
-    let pos = geom.map_pos_to_world_pos(
+fn get_initial_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
+    let pos = geom::map_pos_to_world_pos(
         MapPos{v: Vector2{x: map_size.w, y: map_size.h}});
     WorldPos{v: Vector3{x: -pos.v.x / 2.0, y: -pos.v.y / 2.0, z: 0.0}}
 }
@@ -157,7 +157,6 @@ pub struct Visualizer<'a> {
     map_pos_under_cursor: Option<MapPos>,
     selected_unit_id: Option<UnitId>,
     unit_under_cursor_id: Option<UnitId>,
-    geom: Geom,
     scenes: HashMap<PlayerId, Scene>,
     core: core::Core,
     event: Option<core::Event>,
@@ -192,11 +191,10 @@ impl<'a> Visualizer<'a> {
         win.set_all_polling(true);
         mgl::load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
         mgl::init_opengl();
-        let geom = Geom::new();
         let core = core::Core::new();
         let map_size = core.map_size();
         let picker = picker::TilePicker::new(
-            win_size, &geom, core.map_size());
+            win_size, core.map_size());
         let shader = Shader::new(
             &Path::new("normal.vs.glsl"),
             &Path::new("normal.fs.glsl"),
@@ -205,10 +203,10 @@ impl<'a> Visualizer<'a> {
         let basic_color_id = ColorId{id: shader.get_uniform("basic_color")};
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
-            &mut meshes, get_map_mesh(&geom, map_size, &shader));
+            &mut meshes, get_map_mesh(map_size, &shader));
         let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
         let selection_maerker_mesh_id = add_mesh(
-            &mut meshes, get_selection_mesh(&geom, &shader));
+            &mut meshes, get_selection_mesh(&shader));
         let shell_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, &Path::new("data/shell.png")));
         let marker_1_mesh_id = add_mesh(
@@ -219,7 +217,7 @@ impl<'a> Visualizer<'a> {
         let mut font_stash = FontStash::new(
             &Path::new("data/DroidSerif-Regular.ttf"), font_size);
         let mut camera = Camera::new(win_size);
-        camera.pos = get_initial_camera_pos(&geom, &map_size);
+        camera.pos = get_initial_camera_pos(&map_size);
         let mut button_manager = ButtonManager::new();
         let button_end_turn_id = button_manager.add_button(Button::new(
             "end turn",
@@ -244,7 +242,6 @@ impl<'a> Visualizer<'a> {
             map_pos_under_cursor: None,
             selected_unit_id: None,
             unit_under_cursor_id: None,
-            geom: geom,
             core: core,
             event_visualizer: None,
             event: None,
@@ -324,8 +321,7 @@ impl<'a> Visualizer<'a> {
         self.draw_map();
         if !self.event_visualizer.is_none() {
             let scene = self.scenes.get_mut(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().draw(
-                &self.geom, scene, self.dtime);
+            self.event_visualizer.get_mut_ref().draw(scene, self.dtime);
         }
     }
 
@@ -389,7 +385,7 @@ impl<'a> Visualizer<'a> {
             pf.fill_map(state, state.units.get(&unit_id));
             let scene = self.scenes.get_mut(&self.core.player_id());
             self.selection_manager.create_selection_marker(
-                &self.geom, state, scene, unit_id);
+                state, scene, unit_id);
         }
     }
 
@@ -557,11 +553,10 @@ impl<'a> Visualizer<'a> {
         let player_id = self.core.player_id();
         let scene = self.scenes.get_mut(&player_id);
         let state = self.game_states.get(&player_id);
-        let geom = &self.geom;
         match *event {
             core::EventMove(ref unit_id, ref path) => {
                 EventMoveVisualizer::new(
-                    geom, scene, state, *unit_id, path.clone())
+                    scene, state, *unit_id, path.clone())
             },
             core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
@@ -573,7 +568,6 @@ impl<'a> Visualizer<'a> {
                     n => fail!("Wrong player id: {}", n),
                 };
                 EventCreateUnitVisualizer::new(
-                    geom,
                     scene,
                     state,
                     id,
@@ -584,7 +578,6 @@ impl<'a> Visualizer<'a> {
             },
             core::EventAttackUnit(attacker_id, defender_id) => {
                 EventAttackUnitVisualizer::new(
-                    geom,
                     scene,
                     state,
                     attacker_id,
@@ -604,7 +597,7 @@ impl<'a> Visualizer<'a> {
     fn end_event_visualization(&mut self) {
         let scene = self.scenes.get_mut(&self.core.player_id());
         let state = self.game_states.get_mut(&self.core.player_id());
-        self.event_visualizer.get_mut_ref().end(&self.geom, scene, state);
+        self.event_visualizer.get_mut_ref().end(scene, state);
         state.apply_event(self.event.get_ref());
         self.event_visualizer = None;
         self.event = None;
@@ -612,9 +605,9 @@ impl<'a> Visualizer<'a> {
             let unit_id = self.selected_unit_id.unwrap();
             let pf = self.pathfinders.get_mut(&self.core.player_id());
             pf.fill_map(state, state.units.get(&unit_id));
-            self.selection_manager.move_selection_marker(&self.geom, state, scene);
+            self.selection_manager.move_selection_marker(state, scene);
         }
-        self.picker.update_units(&self.geom, scene);
+        self.picker.update_units(scene);
     }
 
     fn logic(&mut self) {

@@ -5,7 +5,7 @@ use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
 use visualizer::mgl;
 use visualizer::camera::Camera;
-use visualizer::geom::Geom;
+use visualizer::geom;
 use visualizer::mesh::Mesh;
 use visualizer::types::{Color3, MFloat, MatId, VertexCoord};
 use visualizer::scene::{Scene, NodeId};
@@ -15,14 +15,14 @@ fn i_to_f(n: MInt) -> f32 {
     n as MFloat / 255.0
 }
 
-fn get_mesh(geom: &Geom, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
+fn get_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut c_data = Vec::new();
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
-        let pos3d = geom.map_pos_to_world_pos(tile_pos);
+        let pos3d = geom::map_pos_to_world_pos(tile_pos);
         for num in range(0 as MInt, 6) {
-            let vertex = geom.index_to_hex_vertex(num);
-            let next_vertex = geom.index_to_hex_vertex(num + 1);
+            let vertex = geom::index_to_hex_vertex(num);
+            let next_vertex = geom::index_to_hex_vertex(num + 1);
             let col_x = i_to_f(tile_pos.v.x);
             let col_y = i_to_f(tile_pos.v.y);
             let color = Color3{r: col_x, g: col_y, b: i_to_f(1)};
@@ -55,17 +55,13 @@ pub struct TilePicker {
 }
 
 impl TilePicker {
-    pub fn new(
-        win_size: Size2<MInt>,
-        geom: &Geom,
-        map_size: Size2<MInt>
-    ) -> TilePicker {
+    pub fn new(win_size: Size2<MInt>, map_size: Size2<MInt>) -> TilePicker {
         let shader = Shader::new(
             &Path::new("pick.vs.glsl"),
             &Path::new("pick.fs.glsl"),
         );
         let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
-        let map_mesh = get_mesh(geom, map_size, &shader);
+        let map_mesh = get_mesh(map_size, &shader);
         let tile_picker = TilePicker {
             map_mesh: map_mesh,
             units_mesh: None,
@@ -80,7 +76,7 @@ impl TilePicker {
         self.win_size = win_size;
     }
 
-    pub fn update_units(&mut self, geom: &Geom, scene: &Scene) {
+    pub fn update_units(&mut self, scene: &Scene) {
         let last_unit_node_id = NodeId{id: 1000}; // TODO
         let mut c_data = Vec::new();
         let mut v_data = Vec::new();
@@ -92,11 +88,11 @@ impl TilePicker {
             let color = Color3 {r: i_to_f(node_id.id), g: 0.0, b: i_to_f(2)};
             for num in range(0 as MInt, 6) {
                 v_data.push(VertexCoord {
-                    v: node.pos.v + geom.index_to_hex_vertex_s(scale, num).v
+                    v: node.pos.v + geom::index_to_hex_vertex_s(scale, num).v
                 });
                 c_data.push(color);
                 v_data.push(VertexCoord {
-                    v: node.pos.v + geom.index_to_hex_vertex_s(scale, num + 1).v
+                    v: node.pos.v + geom::index_to_hex_vertex_s(scale, num + 1).v
                 });
                 c_data.push(color);
                 v_data.push(VertexCoord{v: node.pos.v});
