@@ -109,7 +109,7 @@ impl Model {
         let mut file = BufferedReader::new(File::open(path));
         for line in file.lines() {
             match line {
-                Ok(line) => self.read_line(line),
+                Ok(line) => self.read_line(line.as_slice()),
                 Err(msg) => fail!("Obj: read error: {}", msg),
             }
         }
