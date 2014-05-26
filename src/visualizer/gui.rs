@@ -11,7 +11,7 @@ pub struct ButtonId {pub id: MInt}
 pub struct Button {
     pos: Point2<MInt>, // TODO: ScreenPos
     size: Size2<MInt>,
-    label: StrBuf,
+    label: String,
 }
 
 impl Button {
@@ -24,7 +24,7 @@ impl Button {
         Button {
             pos: pos,
             size: size,
-            label: StrBuf::from_str(label),
+            label: String::from_str(label),
         }
     }
 

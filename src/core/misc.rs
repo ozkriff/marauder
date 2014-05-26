@@ -2,7 +2,6 @@
 
 use std::f32::consts::PI;
 use std::io::File;
-use std::strbuf::StrBuf;
 use visualizer::types::MFloat;
 
 pub fn deg_to_rad(n: MFloat) -> MFloat {
@@ -13,7 +12,7 @@ pub fn rad_to_deg(n: MFloat) -> MFloat {
     (n * 180.0) / PI
 }
 
-pub fn read_file(path: &Path) -> StrBuf {
+pub fn read_file(path: &Path) -> String {
     if !path.exists() {
         fail!("Path does not exists: {}", path.display());
     }
@@ -21,7 +20,7 @@ pub fn read_file(path: &Path) -> StrBuf {
         Ok(bytes) => bytes,
         Err(msg) => fail!("Can not read from file {}: {}", path.display(), msg),
     };
-    match StrBuf::from_utf8(bytes) {
+    match String::from_utf8(bytes) {
         Ok(s) => s,
         Err(msg) => fail!("Not valid utf8 in file {}: {}", path.display(), msg),
     }
