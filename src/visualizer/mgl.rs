@@ -6,6 +6,7 @@ use std;
 use gl;
 use gl::types::{GLuint, GLsizeiptr};
 use cgmath::matrix::{Matrix, Matrix4, Matrix3, ToMatrix4};
+use cgmath::array::Array2;
 use cgmath::vector::{Vector2, Vector3};
 use cgmath::angle;
 use core::misc::deg_to_rad;
