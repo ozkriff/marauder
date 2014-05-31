@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
-use rand;
-use rand::Rng;
+use std::rand;
+use std::rand::Rng;
 use cgmath::vector::{Vector3, Vector, EuclideanVector};
 use visualizer::geom;
 use core::types::{MapPos, UnitId};
