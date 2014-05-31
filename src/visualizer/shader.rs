@@ -4,6 +4,7 @@ use std;
 use gl;
 use gl::types::{GLint, GLchar, GLuint, GLenum};
 use cgmath::matrix::Matrix4;
+use cgmath::array::Array2;
 use error_context;
 use core::types::MInt;
 use core::misc::read_file;
@@ -50,9 +51,8 @@ impl Shader {
 
     pub fn uniform_mat4f(&self, mat_id: MatId, mat: &Matrix4<MFloat>) {
         unsafe {
-            let matrix_ptr = std::mem::transmute(mat);
             verify!(gl::UniformMatrix4fv(
-                mat_id.id as MInt, 1, gl::FALSE, matrix_ptr));
+                mat_id.id as MInt, 1, gl::FALSE, mat.ptr()));
         }
     }
 
