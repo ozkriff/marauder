@@ -4,6 +4,7 @@ use collections::hashmap::HashMap;
 use core::types::{MInt, Size2, Point2};
 use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;
+use visualizer::context::Context;
 
 #[deriving(Eq, TotalEq, Hash)]
 pub struct ButtonId {pub id: MInt}
@@ -64,6 +65,21 @@ impl ButtonManager {
         self.buttons.insert(id, button);
         self.last_id.id += 1;
         id
+    }
+
+    pub fn get_clicked_button_id(&self, context: &Context) -> Option<ButtonId> {
+        let x = context.mouse_pos.v.x as MInt;
+        let y = context.win_size.h - context.mouse_pos.v.y as MInt;
+        for (id, button) in self.buttons().iter() {
+            if x >= button.pos().v.x
+                && x <= button.pos().v.x + button.size().w
+                && y >= button.pos().v.y
+                && y <= button.pos().v.y + button.size().h
+            {
+                return Some(*id);
+            }
+        }
+        None
     }
 }
 

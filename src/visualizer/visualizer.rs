@@ -141,7 +141,6 @@ fn get_initial_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
     WorldPos{v: Vector3{x: -pos.v.x / 2.0, y: -pos.v.y / 2.0, z: 0.0}}
 }
 
-// TODO: move to gui.rs
 fn get_2d_screen_matrix(context: &Context) -> Matrix4<MFloat> {
     let left = 0.0;
     let right = context.win_size.w as MFloat;
@@ -150,21 +149,6 @@ fn get_2d_screen_matrix(context: &Context) -> Matrix4<MFloat> {
     let near = -1.0;
     let far = 1.0;
     projection::ortho(left, right, bottom, top, near, far)
-}
-
-fn get_clicked_button_id(button_manager: &ButtonManager, context: &Context) -> Option<ButtonId> {
-    let x = context.mouse_pos.v.x as MInt;
-    let y = context.win_size.h - context.mouse_pos.v.y as MInt;
-    for (id, button) in button_manager.buttons().iter() {
-        if x >= button.pos().v.x
-            && x <= button.pos().v.x + button.size().w
-            && y >= button.pos().v.y
-            && y <= button.pos().v.y + button.size().h
-        {
-            return Some(*id);
-        }
-    }
-    None
 }
 
 enum StateChangeCommand {
@@ -419,7 +403,7 @@ impl GameStateVisualizer {
         if self.event_visualizer.is_some() {
             return;
         }
-        match get_clicked_button_id(&self.button_manager, context) {
+        match self.button_manager.get_clicked_button_id(context) {
             Some(button_id) => {
                 if button_id == self.button_end_turn_id {
                     self.end_turn();
@@ -626,7 +610,7 @@ impl MenuStateVisualizer {
     }
 
     fn handle_mouse_button_event(&mut self, context: &Context) {
-        match get_clicked_button_id(&self.button_manager, context) {
+        match self.button_manager.get_clicked_button_id(context) {
             Some(button_id) => {
                 if button_id == self.button_start_id {
                     self.commands.push(StartGame);
