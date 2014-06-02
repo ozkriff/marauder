@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::cell::RefCell;
 use collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;
@@ -46,7 +47,8 @@ use visualizer::font_stash::FontStash;
 use visualizer::gui::{ButtonManager, Button, ButtonId};
 use visualizer::selection::{SelectionManager, get_selection_mesh};
 
-static GREY_03: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
+static GREY_3: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
+static BLACK_3: Color3 = Color3{r: 0.0, g: 0.0, b: 0.0};
 static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
 static BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
 
@@ -139,7 +141,19 @@ fn get_initial_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
     WorldPos{v: Vector3{x: -pos.v.x / 2.0, y: -pos.v.y / 2.0, z: 0.0}}
 }
 
-pub struct Visualizer<'a> {
+enum StateChangeCommand {
+    StartGame,
+    EndGame,
+}
+
+trait StateVisualizer {
+    fn logic(&mut self);
+    fn draw(&mut self, context: &Context, dtime: Time);
+    fn handle_event(&mut self, context: &Context, event: glfw::WindowEvent);
+    fn get_command(&mut self) -> Option<StateChangeCommand>; // TODO: remove mut. use channels.
+}
+
+pub struct GameStateVisualizer<'a> {
     shader: Shader,
     map_mesh_id: MeshId,
     selection_maerker_mesh_id: MeshId,
@@ -150,9 +164,8 @@ pub struct Visualizer<'a> {
     meshes: Vec<Mesh>,
     mvp_mat_id: MatId,
     basic_color_id: ColorId,
-    win: glfw::Window,
-    mouse_pos: Point2<MFloat>,
     camera: Camera,
+    commands: Vec<StateChangeCommand>,
     picker: picker::TilePicker,
     map_pos_under_cursor: Option<MapPos>,
     selected_unit_id: Option<UnitId>,
@@ -163,38 +176,18 @@ pub struct Visualizer<'a> {
     event_visualizer: Option<Box<EventVisualizer>>,
     game_states: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
-    last_time: Time,
-    dtime: Time,
-    win_size: Size2<MInt>,
-    glfw: glfw::Glfw,
-    events: Receiver<(f64, glfw::WindowEvent)>,
-    font_stash: FontStash,
     button_manager: ButtonManager,
     button_end_turn_id: ButtonId,
     selection_manager: SelectionManager,
 }
 
-impl<'a> Visualizer<'a> {
-    pub fn new() -> Visualizer {
-        set_error_context!("constructing Visualizer", "-");
+impl<'a> GameStateVisualizer<'a> {
+    pub fn new(context: &Context) -> GameStateVisualizer {
+        set_error_context!("constructing GameStateVisualizer", "-");
         let players_count = 2;
-        let config = Config::new(&Path::new("conf_visualizer.json"));
-        let win_size = config.get::<Size2<MInt>>("screen_size");
-        let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
-        let (win, events) = glfw.create_window(
-            win_size.w as u32,
-            win_size.h as u32,
-            "Marauder",
-            glfw::Windowed
-        ).unwrap();
-        glfw.make_context_current(Some(&win));
-        win.set_all_polling(true);
-        mgl::load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
-        mgl::init_opengl();
         let core = core::Core::new();
         let map_size = core.map_size();
-        let picker = picker::TilePicker::new(
-            win_size, core.map_size());
+        let picker = picker::TilePicker::new(core.map_size());
         let shader = Shader::new(
             &Path::new("normal.vs.glsl"),
             &Path::new("normal.fs.glsl"),
@@ -213,18 +206,15 @@ impl<'a> Visualizer<'a> {
             &mut meshes, get_marker(&shader, &Path::new("data/flag1.png")));
         let marker_2_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, &Path::new("data/flag2.png")));
-        let font_size = config.get("font_size");
-        let mut font_stash = FontStash::new(
-            &Path::new("data/DroidSerif-Regular.ttf"), font_size);
-        let mut camera = Camera::new(win_size);
+        let mut camera = Camera::new(context.win_size);
         camera.pos = get_initial_camera_pos(&map_size);
         let mut button_manager = ButtonManager::new();
         let button_end_turn_id = button_manager.add_button(Button::new(
             "end turn",
-            &mut font_stash,
+            context.font_stash.borrow_mut().deref_mut(),
             Point2{v: Vector2{x: 10, y: 50}})
         );
-        let vis = Visualizer {
+        let vis = GameStateVisualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
             selection_maerker_mesh_id: selection_maerker_mesh_id,
@@ -235,8 +225,6 @@ impl<'a> Visualizer<'a> {
             mvp_mat_id: mvp_mat_id,
             basic_color_id: basic_color_id,
             shader: shader,
-            win: win,
-            mouse_pos: Point2{v: Vector2::zero()},
             camera: camera,
             picker: picker,
             map_pos_under_cursor: None,
@@ -248,21 +236,12 @@ impl<'a> Visualizer<'a> {
             scenes: get_scenes(players_count),
             game_states: get_game_states(players_count),
             pathfinders: get_pathfinders(players_count, map_size),
-            last_time: Time{n: precise_time_ns()},
-            dtime: Time{n: 0},
-            win_size: win_size,
-            glfw: glfw,
-            events: events,
-            font_stash: font_stash,
             button_manager: button_manager,
             button_end_turn_id: button_end_turn_id,
             selection_manager: SelectionManager::new(selection_maerker_mesh_id),
+            commands: Vec::new(),
         };
         vis
-    }
-
-    fn win<'a>(&'a self) -> &'a glfw::Window {
-        &self.win
     }
 
     fn scene<'a>(&'a self) -> &'a Scene {
@@ -283,18 +262,18 @@ impl<'a> Visualizer<'a> {
         self.meshes.get(self.map_mesh_id.id as uint).draw(&self.shader);
     }
 
-    fn get_2d_screen_matrix(&self) -> Matrix4<MFloat> {
+    fn get_2d_screen_matrix(&self, context: &Context) -> Matrix4<MFloat> {
         let left = 0.0;
-        let right = self.win_size.w as MFloat;
+        let right = context.win_size.w as MFloat;
         let bottom = 0.0;
-        let top = self.win_size.h as MFloat;
+        let top = context.win_size.h as MFloat;
         let near = -1.0;
         let far = 1.0;
         projection::ortho(left, right, bottom, top, near, far)
     }
 
-    fn draw_2d_text(&mut self) {
-        let m = self.get_2d_screen_matrix();
+    fn draw_2d_text(&mut self, context: &Context) {
+        let m = self.get_2d_screen_matrix(context);
         for (_, button) in self.button_manager.buttons().iter() {
             let text_offset = Vector3 {
                 x: button.pos().v.x as MFloat,
@@ -302,42 +281,28 @@ impl<'a> Visualizer<'a> {
                 z: 0.0,
             };
             self.shader.uniform_mat4f(self.mvp_mat_id, &mgl::tr(m, text_offset));
-            button.draw(&mut self.font_stash, &self.shader);
+            button.draw(context.font_stash.borrow_mut().deref_mut(), &self.shader);
         }
     }
 
-    fn draw_3d_text(&mut self) {
+    fn draw_3d_text(&mut self, context: &Context) {
+        let mut font_stash = context.font_stash.borrow_mut();
         let m = self.camera.mat();
-        let m = mgl::scale(m, 1.0 / self.font_stash.get_size());
+        let m = mgl::scale(m, 1.0 / font_stash.get_size());
         let m = mgl::rot_x(m, 90.0);
         self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-        let text_mesh = self.font_stash.get_mesh("kill! Kill! kill!!!", &self.shader);
+        let text_mesh = font_stash.get_mesh("kill! Kill! kill!!!", &self.shader);
         text_mesh.draw(&self.shader);
     }
 
-    fn draw_scene(&mut self) {
+    fn draw_scene(&mut self, dtime: Time) {
         self.shader.uniform_color(self.basic_color_id, WHITE);
         self.draw_units();
         self.draw_map();
         if !self.event_visualizer.is_none() {
             let scene = self.scenes.get_mut(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().draw(scene, self.dtime);
+            self.event_visualizer.get_mut_ref().draw(scene, dtime);
         }
-    }
-
-    fn draw(&mut self) {
-        mgl::set_clear_color(GREY_03);
-        mgl::clear_screen();
-        self.shader.activate();
-        self.draw_scene();
-        self.shader.uniform_color(self.basic_color_id, BLACK);
-        self.draw_3d_text();
-        self.draw_2d_text();
-        self.win().swap_buffers();
-    }
-
-    pub fn is_running(&self) -> bool {
-        return !self.win().should_close()
     }
 
     fn end_turn(&mut self) {
@@ -389,11 +354,9 @@ impl<'a> Visualizer<'a> {
         }
     }
 
-    fn handle_key_event(&mut self, key: glfw::Key) {
+    fn handle_key_event(&mut self, _: &Context, key: glfw::Key) {
         match key {
-            glfw::KeyEscape | glfw::KeyQ => {
-                self.win().set_should_close(true);
-            },
+            glfw::KeyEscape | glfw::KeyQ => self.commands.push(EndGame),
             glfw::KeyUp => self.camera.move(270.0, 0.1),
             glfw::KeyDown => self.camera.move(90.0, 0.1),
             glfw::KeyRight => self.camera.move(0.0, 0.1),
@@ -412,16 +375,15 @@ impl<'a> Visualizer<'a> {
         }
     }
 
-    fn handle_cursor_pos_event(&mut self, pos: Point2<MFloat>) {
-        let rmb = self.win().get_mouse_button(glfw::MouseButtonRight);
+    fn handle_cursor_pos_event(&mut self, context: &Context, new_pos: Point2<MFloat>) {
+        let rmb = context.win.get_mouse_button(glfw::MouseButtonRight);
         if rmb == glfw::Press {
-            let diff = self.mouse_pos.v - pos.v;
-            let win_w = self.win_size.w as MFloat;
-            let win_h = self.win_size.h as MFloat;
+            let diff = context.mouse_pos.v - new_pos.v;
+            let win_w = context.win_size.w as MFloat;
+            let win_h = context.win_size.h as MFloat;
             self.camera.z_angle += diff.x * (360.0 / win_w);
             self.camera.x_angle += diff.y * (360.0 / win_h);
         }
-        self.mouse_pos = pos;
     }
 
     fn move_unit(&mut self) {
@@ -442,9 +404,9 @@ impl<'a> Visualizer<'a> {
     }
 
     // TODO: Move to gui.rs
-    fn get_clicked_button_id(&mut self) -> Option<ButtonId> {
-        let x = self.mouse_pos.v.x as MInt;
-        let y = self.win_size.h - self.mouse_pos.v.y as MInt;
+    fn get_clicked_button_id(&mut self, context: &Context) -> Option<ButtonId> {
+        let x = context.mouse_pos.v.x as MInt;
+        let y = context.win_size.h - context.mouse_pos.v.y as MInt;
         for (id, button) in self.button_manager.buttons().iter() {
             if x >= button.pos().v.x
                 && x <= button.pos().v.x + button.size().w
@@ -457,11 +419,11 @@ impl<'a> Visualizer<'a> {
         None
     }
 
-    fn handle_mouse_button_event(&mut self) {
+    fn handle_mouse_button_event(&mut self, context: &Context) {
         if self.event_visualizer.is_some() {
             return;
         }
-        match self.get_clicked_button_id() {
+        match self.get_clicked_button_id(context) {
             Some(button_id) => {
                 if button_id == self.button_end_turn_id {
                     self.end_turn();
@@ -490,50 +452,12 @@ impl<'a> Visualizer<'a> {
         }
     }
 
-    fn get_events(&mut self) -> Vec<glfw::WindowEvent> {
-        self.glfw.poll_events();
-        let mut events = Vec::new();
-        for (_, event) in glfw::flush_messages(&self.events) {
-            events.push(event);
-        }
-        events
-    }
-
-    fn handle_event(&mut self, event: glfw::WindowEvent) {
-        match event {
-            glfw::KeyEvent(key, _, glfw::Press, _) => {
-                self.handle_key_event(key);
-            },
-            glfw::CursorPosEvent(x, y) => {
-                let p = Point2{v: Vector2{x: x as MFloat, y: y as MFloat}};
-                self.handle_cursor_pos_event(p);
-            },
-            glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
-                self.handle_mouse_button_event();
-            },
-            glfw::SizeEvent(w, h) => {
-                let size = Size2{w: w, h: h};
-                mgl::set_viewport(size);
-                self.picker.set_win_size(size);
-                self.camera.set_win_size(size);
-                self.win_size = size;
-            },
-            _ => {},
-        }
-    }
-
-    fn handle_events(&mut self) {
-        for event in self.get_events().iter() {
-            self.handle_event(*event);
-        }
-    }
-
-    fn pick_tile(&mut self) {
+    fn pick_tile(&mut self, context: &Context) {
         let mouse_pos = Vector2 {
-            x: self.mouse_pos.v.x as MInt,
-            y: self.mouse_pos.v.y as MInt,
+            x: context.mouse_pos.v.x as MInt,
+            y: context.mouse_pos.v.y as MInt,
         };
-        match self.picker.pick_tile(&self.camera, mouse_pos) {
+        match self.picker.pick_tile(&self.camera, context.win_size, mouse_pos) {
             picker::PickedMapPos(pos) => {
                 self.map_pos_under_cursor = Some(pos);
                 self.unit_under_cursor_id = None;
@@ -609,7 +533,9 @@ impl<'a> Visualizer<'a> {
         }
         self.picker.update_units(scene);
     }
+}
 
+impl<'a> StateVisualizer for GameStateVisualizer<'a> {
     fn logic(&mut self) {
         if self.event_visualizer.is_none() {
             match self.core.get_event() {
@@ -621,18 +547,211 @@ impl<'a> Visualizer<'a> {
         }
     }
 
+    fn draw(&mut self, context: &Context, dtime: Time) {
+        self.pick_tile(context);
+        mgl::set_clear_color(GREY_3);
+        mgl::clear_screen();
+        self.shader.activate();
+        self.draw_scene(dtime);
+        self.shader.uniform_color(self.basic_color_id, BLACK);
+        self.draw_3d_text(context);
+        self.draw_2d_text(context);
+        context.win.swap_buffers();
+    }
+
+    fn handle_event(&mut self, context: &Context, event: glfw::WindowEvent) {
+        match event {
+            glfw::KeyEvent(key, _, glfw::Press, _) => {
+                self.handle_key_event(context, key);
+            },
+            glfw::CursorPosEvent(x, y) => {
+                let p = Point2{v: Vector2{x: x as MFloat, y: y as MFloat}};
+                self.handle_cursor_pos_event(context, p);
+            },
+            glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
+                self.handle_mouse_button_event(context);
+            },
+            glfw::SizeEvent(w, h) => {
+                self.camera.regenerate_projection_mat(Size2{w: w, h: h});
+            }
+            _ => {},
+        }
+    }
+
+    fn get_command(&mut self) -> Option<StateChangeCommand> {
+        self.commands.pop()
+    }
+}
+
+pub struct MenuStateVisualizer {
+    commands: Vec<StateChangeCommand>,
+}
+
+impl MenuStateVisualizer {
+    fn new() -> MenuStateVisualizer {
+        MenuStateVisualizer {
+            commands: Vec::new(),
+        }
+    }
+}
+
+impl StateVisualizer for MenuStateVisualizer {
+    fn logic(&mut self) {}
+
+    fn draw(&mut self, context: &Context, _: Time) {
+        mgl::set_clear_color(BLACK_3);
+        mgl::clear_screen();
+        context.win.swap_buffers();
+    }
+
+    fn handle_event(&mut self, context: &Context, event: glfw::WindowEvent) {
+        match event {
+            glfw::KeyEvent(key, _, glfw::Press, _) => {
+                match key {
+                    glfw::Key1 => {
+                        self.commands.push(StartGame);
+                    },
+                    glfw::KeyEscape | glfw::KeyQ => {
+                        println!("CLOSE");
+                        context.win.set_should_close(true); // TODO
+                    },
+                    _ => {},
+                }
+            },
+            _ => {},
+        }
+    }
+
+    fn get_command(&mut self) -> Option<StateChangeCommand> {
+        self.commands.pop()
+    }
+}
+
+pub struct Context {
+    win: glfw::Window,
+    win_size: Size2<MInt>,
+    mouse_pos: Point2<MFloat>, // TODO: Point2 -> ScreenPos
+    config: Config,
+    font_stash: RefCell<FontStash>,
+}
+
+impl Context {
+    fn set_window_size(&mut self, win_size: Size2<MInt>) {
+        self.win_size = win_size;
+        mgl::set_viewport(win_size);
+    }
+
+    fn handle_event(&mut self, event: glfw::WindowEvent) {
+        match event {
+            glfw::CursorPosEvent(x, y) => {
+                self.mouse_pos = Point2{v: Vector2 {
+                    x: x as MFloat,
+                    y: y as MFloat,
+                }};
+            },
+            glfw::SizeEvent(w, h) => {
+                self.set_window_size(Size2{w: w, h: h});
+            },
+            _ => {},
+        }
+    }
+}
+
+type EventsReceiver = Receiver<(f64, glfw::WindowEvent)>;
+
+pub struct Visualizer<'a> {
+    visualizers: Vec<Box<StateVisualizer>>, // TODO: Vec -> Queue
+    dtime: Time,
+    last_time: Time,
+    glfw: glfw::Glfw,
+    events: EventsReceiver,
+    context: Context,
+}
+
+fn create_win(glfw: &glfw::Glfw, win_size: Size2<MInt>)
+    -> (glfw::Window, EventsReceiver)
+{
+    let w = win_size.w as u32;
+    let h = win_size.h as u32;
+    let title = "Marauder";
+    let flags = glfw::Windowed;
+    glfw.create_window(w, h, title, flags).unwrap()
+}
+
+impl<'a> Visualizer<'a> {
+    pub fn new() -> Visualizer {
+        let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+        let config = Config::new(&Path::new("conf_visualizer.json"));
+        let win_size = config.get::<Size2<MInt>>("screen_size");
+        let (win, events) = create_win(&glfw, win_size);
+        glfw.make_context_current(Some(&win));
+        mgl::load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
+        mgl::init_opengl();
+        win.set_all_polling(true);
+        let font_size = config.get("font_size");
+        let font_stash = FontStash::new(
+            &Path::new("data/DroidSerif-Regular.ttf"), font_size);
+        let context = Context {
+            win: win,
+            win_size: win_size,
+            config: config,
+            mouse_pos: Point2{v: Vector2::zero()},
+            font_stash: RefCell::new(font_stash),
+        };
+        let visualizer = box MenuStateVisualizer::new();
+        Visualizer {
+            visualizers: vec![visualizer as Box<StateVisualizer>],
+            dtime: Time{n: 0},
+            last_time: Time{n: precise_time_ns()},
+            glfw: glfw,
+            events: events,
+            context: context,
+        }
+    }
+
+    fn get_events(&mut self) -> Vec<glfw::WindowEvent> {
+        self.glfw.poll_events();
+        let mut events = Vec::new();
+        for (_, event) in glfw::flush_messages(&self.events) {
+            events.push(event);
+        }
+        events
+    }
+
+    pub fn is_running(&self) -> bool {
+        !self.context.win.should_close() // TODO: check State
+    }
+
+    // TODO: simplify
+    pub fn tick(&mut self) {
+        {
+            let events = self.get_events();
+            let visualizer = self.visualizers.mut_last().unwrap(); // TODO: remove unwrap
+            for event in events.iter() {
+                visualizer.handle_event(&self.context, *event);
+                self.context.handle_event(*event);
+            }
+            visualizer.logic();
+            visualizer.draw(&self.context, self.dtime);
+        }
+        let cmd = self.visualizers.mut_last().unwrap().get_command(); // TODO: remove unwrap
+        match cmd {
+            Some(StartGame) => {
+                let visualizer = box GameStateVisualizer::new(&self.context);
+                self.visualizers.push(visualizer as Box<StateVisualizer>);
+            }
+            Some(EndGame) => {
+                self.visualizers.pop();
+            },
+            None => {},
+        }
+        self.update_time();
+    }
+
     pub fn update_time(&mut self) {
         let time = precise_time_ns();
         self.dtime.n = time - self.last_time.n;
         self.last_time.n = time;
-    }
-
-    pub fn tick(&mut self) {
-        self.handle_events();
-        self.logic();
-        self.pick_tile();
-        self.draw();
-        self.update_time();
     }
 }
 

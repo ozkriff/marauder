@@ -54,7 +54,7 @@ impl FontStash {
         }
     }
 
-    pub fn get_size(&mut self) -> MFloat {
+    pub fn get_size(&self) -> MFloat {
         self.size
     }
 

@@ -51,11 +51,10 @@ pub struct TilePicker {
     map_mesh: Mesh,
     units_mesh: Option<Mesh>,
     mvp_mat_id: MatId,
-    win_size: Size2<MInt>,
 }
 
 impl TilePicker {
-    pub fn new(win_size: Size2<MInt>, map_size: Size2<MInt>) -> TilePicker {
+    pub fn new(map_size: Size2<MInt>) -> TilePicker {
         let shader = Shader::new(
             &Path::new("pick.vs.glsl"),
             &Path::new("pick.fs.glsl"),
@@ -67,13 +66,8 @@ impl TilePicker {
             units_mesh: None,
             shader: shader,
             mvp_mat_id: mvp_mat_id,
-            win_size: win_size,
         };
         tile_picker
-    }
-
-    pub fn set_win_size(&mut self, win_size: Size2<MInt>) {
-        self.win_size = win_size;
     }
 
     pub fn update_units(&mut self, scene: &Scene) {
@@ -113,6 +107,7 @@ impl TilePicker {
     pub fn pick_tile(
         &mut self,
         camera: &Camera,
+        win_size: Size2<MInt>,
         mouse_pos: Vector2<MInt>
     ) -> PickResult {
         self.shader.activate();
@@ -124,7 +119,7 @@ impl TilePicker {
             Some(ref units) => units.draw(&self.shader),
             None => {},
         };
-        let (r, g, b, _) = mgl::read_pixel_bytes(self.win_size, mouse_pos);
+        let (r, g, b, _) = mgl::read_pixel_bytes(win_size, mouse_pos);
         match b {
             0 => PickedNothing,
             1 => PickedMapPos(MapPos{v: Vector2{x: r, y: g}}),

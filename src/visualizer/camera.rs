@@ -54,7 +54,7 @@ impl Camera {
         self.pos.v.y -= dx * speed * self.zoom;
     }
 
-    pub fn set_win_size(&mut self, win_size: Size2<MInt>) {
+    pub fn regenerate_projection_mat(&mut self, win_size: Size2<MInt>) {
         self.projection_mat = get_projection_mat(win_size);
     }
 }
