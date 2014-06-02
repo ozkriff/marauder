@@ -153,7 +153,7 @@ trait StateVisualizer {
     fn get_command(&mut self) -> Option<StateChangeCommand>; // TODO: remove mut. use channels.
 }
 
-pub struct GameStateVisualizer<'a> {
+pub struct GameStateVisualizer {
     shader: Shader,
     map_mesh_id: MeshId,
     selection_marker_mesh_id: MeshId,
@@ -181,7 +181,7 @@ pub struct GameStateVisualizer<'a> {
     selection_manager: SelectionManager,
 }
 
-impl<'a> GameStateVisualizer<'a> {
+impl GameStateVisualizer {
     pub fn new(context: &Context) -> GameStateVisualizer {
         set_error_context!("constructing GameStateVisualizer", "-");
         let players_count = 2;
@@ -535,7 +535,7 @@ impl<'a> GameStateVisualizer<'a> {
     }
 }
 
-impl<'a> StateVisualizer for GameStateVisualizer<'a> {
+impl StateVisualizer for GameStateVisualizer {
     fn logic(&mut self) {
         if self.event_visualizer.is_none() {
             match self.core.get_event() {
@@ -659,7 +659,7 @@ impl Context {
 
 type EventsReceiver = Receiver<(f64, glfw::WindowEvent)>;
 
-pub struct Visualizer<'a> {
+pub struct Visualizer {
     visualizers: Vec<Box<StateVisualizer>>, // TODO: Vec -> Queue
     dtime: Time,
     last_time: Time,
@@ -678,7 +678,7 @@ fn create_win(glfw: &glfw::Glfw, win_size: Size2<MInt>)
     glfw.create_window(w, h, title, flags).unwrap()
 }
 
-impl<'a> Visualizer<'a> {
+impl Visualizer {
     pub fn new() -> Visualizer {
         let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         let config = Config::new(&Path::new("conf_visualizer.json"));
