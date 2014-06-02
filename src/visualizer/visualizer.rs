@@ -169,6 +169,7 @@ fn get_clicked_button_id(button_manager: &ButtonManager, context: &Context) -> O
 
 enum StateChangeCommand {
     StartGame,
+    QuitMenu,
     EndGame,
 }
 
@@ -201,6 +202,7 @@ pub struct GameStateVisualizer {
     pathfinders: HashMap<PlayerId, Pathfinder>,
     button_manager: ButtonManager,
     button_end_turn_id: ButtonId,
+    button_quit_id: ButtonId,
     selection_manager: SelectionManager,
 }
 
@@ -229,7 +231,12 @@ impl GameStateVisualizer {
         let button_end_turn_id = button_manager.add_button(Button::new(
             "end turn",
             context.font_stash.borrow_mut().deref_mut(),
-            Point2{v: Vector2{x: 10, y: 50}})
+            Point2{v: Vector2{x: 10, y: 40}})
+        );
+        let button_quit_id = button_manager.add_button(Button::new(
+            "quit",
+            context.font_stash.borrow_mut().deref_mut(),
+            Point2{v: Vector2{x: 10, y: 10}})
         );
         let vis = GameStateVisualizer {
             map_mesh_id: map_mesh_id,
@@ -252,6 +259,7 @@ impl GameStateVisualizer {
             pathfinders: get_pathfinders(players_count, map_size),
             button_manager: button_manager,
             button_end_turn_id: button_end_turn_id,
+            button_quit_id: button_quit_id,
             selection_manager: SelectionManager::new(selection_marker_mesh_id),
             commands: Vec::new(),
         };
@@ -415,6 +423,8 @@ impl GameStateVisualizer {
             Some(button_id) => {
                 if button_id == self.button_end_turn_id {
                     self.end_turn();
+                } else if button_id == self.button_quit_id {
+                    self.commands.push(EndGame);
                 } else {
                     print!("Clicked on {} at {}\n", button_id.id, precise_time_ns());
                 }
@@ -573,22 +583,29 @@ impl StateVisualizer for GameStateVisualizer {
 
 pub struct MenuStateVisualizer {
     button_manager: ButtonManager,
-    buttin_start_id: ButtonId,
+    button_start_id: ButtonId,
+    button_quit_id: ButtonId,
     commands: Vec<StateChangeCommand>,
 }
 
 impl MenuStateVisualizer {
     fn new(context: &Context) -> MenuStateVisualizer {
         let mut button_manager = ButtonManager::new();
-        let buttin_start_id = button_manager.add_button(Button::new(
+        let button_start_id = button_manager.add_button(Button::new(
             "start",
+            context.font_stash.borrow_mut().deref_mut(),
+            Point2{v: Vector2{x: 10, y: 40}})
+        );
+        let button_quit_id = button_manager.add_button(Button::new(
+            "quit",
             context.font_stash.borrow_mut().deref_mut(),
             Point2{v: Vector2{x: 10, y: 10}})
         );
         MenuStateVisualizer {
             commands: Vec::new(),
             button_manager: button_manager,
-            buttin_start_id: buttin_start_id,
+            button_start_id: button_start_id,
+            button_quit_id: button_quit_id,
         }
     }
 
@@ -610,10 +627,11 @@ impl MenuStateVisualizer {
     fn handle_mouse_button_event(&mut self, context: &Context) {
         match get_clicked_button_id(&self.button_manager, context) {
             Some(button_id) => {
-                if button_id == self.buttin_start_id {
+                if button_id == self.button_start_id {
                     self.commands.push(StartGame);
+                } else if button_id == self.button_quit_id {
+                    self.commands.push(QuitMenu);
                 }
-                return;
             },
             None => {},
         }
@@ -640,8 +658,7 @@ impl StateVisualizer for MenuStateVisualizer {
                         self.commands.push(StartGame);
                     },
                     glfw::KeyEscape | glfw::KeyQ => {
-                        println!("CLOSE");
-                        context.win.set_should_close(true); // TODO
+                        self.commands.push(QuitMenu);
                     },
                     _ => {},
                 }
@@ -785,6 +802,9 @@ impl Visualizer {
             }
             Some(EndGame) => {
                 self.visualizers.pop();
+            },
+            Some(QuitMenu) => {
+                self.context.win.set_should_close(true);
             },
             None => {},
         }
