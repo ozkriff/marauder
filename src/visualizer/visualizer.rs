@@ -4,7 +4,6 @@ use std::cell::RefCell;
 use collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;
-use glfw::Context;
 use cgmath::vector::{Vector3, Vector2};
 use cgmath::projection;
 use cgmath::matrix::Matrix4;
@@ -46,6 +45,7 @@ use visualizer::texture::Texture;
 use visualizer::font_stash::FontStash;
 use visualizer::gui::{ButtonManager, Button, ButtonId};
 use visualizer::selection::{SelectionManager, get_selection_mesh};
+use visualizer::context::Context;
 
 static GREY_3: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 static BLACK_3: Color3 = Color3{r: 0.0, g: 0.0, b: 0.0};
@@ -141,6 +141,7 @@ fn get_initial_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
     WorldPos{v: Vector3{x: -pos.v.x / 2.0, y: -pos.v.y / 2.0, z: 0.0}}
 }
 
+// TODO: move to gui.rs
 fn get_2d_screen_matrix(context: &Context) -> Matrix4<MFloat> {
     let left = 0.0;
     let right = context.win_size.w as MFloat;
@@ -151,7 +152,6 @@ fn get_2d_screen_matrix(context: &Context) -> Matrix4<MFloat> {
     projection::ortho(left, right, bottom, top, near, far)
 }
 
-// TODO: move to gui.rs
 fn get_clicked_button_id(button_manager: &ButtonManager, context: &Context) -> Option<ButtonId> {
     let x = context.mouse_pos.v.x as MInt;
     let y = context.win_size.h - context.mouse_pos.v.y as MInt;
@@ -546,6 +546,7 @@ impl StateVisualizer for GameStateVisualizer {
     }
 
     fn draw(&mut self, context: &Context, dtime: Time) {
+        use glfw::Context;
         self.pick_tile(context);
         mgl::set_clear_color(GREY_3);
         mgl::clear_screen();
@@ -642,6 +643,7 @@ impl StateVisualizer for MenuStateVisualizer {
     fn logic(&mut self) {}
 
     fn draw(&mut self, context: &Context, _: Time) {
+        use glfw::Context;
         mgl::set_clear_color(BLACK_3);
         mgl::clear_screen();
         context.shader.activate();
@@ -672,39 +674,6 @@ impl StateVisualizer for MenuStateVisualizer {
 
     fn get_command(&mut self) -> Option<StateChangeCommand> {
         self.commands.pop()
-    }
-}
-
-pub struct Context {
-    win: glfw::Window,
-    win_size: Size2<MInt>,
-    mouse_pos: Point2<MFloat>, // TODO: Point2 -> ScreenPos
-    config: Config,
-    font_stash: RefCell<FontStash>,
-    shader: Shader,
-    mvp_mat_id: MatId,
-    basic_color_id: ColorId,
-}
-
-impl Context {
-    fn set_window_size(&mut self, win_size: Size2<MInt>) {
-        self.win_size = win_size;
-        mgl::set_viewport(win_size);
-    }
-
-    fn handle_event(&mut self, event: glfw::WindowEvent) {
-        match event {
-            glfw::CursorPosEvent(x, y) => {
-                self.mouse_pos = Point2{v: Vector2 {
-                    x: x as MFloat,
-                    y: y as MFloat,
-                }};
-            },
-            glfw::SizeEvent(w, h) => {
-                self.set_window_size(Size2{w: w, h: h});
-            },
-            _ => {},
-        }
     }
 }
 
