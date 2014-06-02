@@ -156,7 +156,7 @@ trait StateVisualizer {
 pub struct GameStateVisualizer<'a> {
     shader: Shader,
     map_mesh_id: MeshId,
-    selection_maerker_mesh_id: MeshId,
+    selection_marker_mesh_id: MeshId,
     unit_mesh_id: MeshId,
     shell_mesh_id: MeshId,
     marker_1_mesh_id: MeshId,
@@ -198,7 +198,7 @@ impl<'a> GameStateVisualizer<'a> {
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(map_size, &shader));
         let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
-        let selection_maerker_mesh_id = add_mesh(
+        let selection_marker_mesh_id = add_mesh(
             &mut meshes, get_selection_mesh(&shader));
         let shell_mesh_id = add_mesh(
             &mut meshes, get_marker(&shader, &Path::new("data/shell.png")));
@@ -217,7 +217,7 @@ impl<'a> GameStateVisualizer<'a> {
         let vis = GameStateVisualizer {
             map_mesh_id: map_mesh_id,
             unit_mesh_id: unit_mesh_id,
-            selection_maerker_mesh_id: selection_maerker_mesh_id,
+            selection_marker_mesh_id: selection_marker_mesh_id,
             shell_mesh_id: shell_mesh_id,
             marker_1_mesh_id: marker_1_mesh_id,
             marker_2_mesh_id: marker_2_mesh_id,
@@ -238,7 +238,7 @@ impl<'a> GameStateVisualizer<'a> {
             pathfinders: get_pathfinders(players_count, map_size),
             button_manager: button_manager,
             button_end_turn_id: button_end_turn_id,
-            selection_manager: SelectionManager::new(selection_maerker_mesh_id),
+            selection_manager: SelectionManager::new(selection_marker_mesh_id),
             commands: Vec::new(),
         };
         vis
