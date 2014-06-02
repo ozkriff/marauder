@@ -141,6 +141,32 @@ fn get_initial_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
     WorldPos{v: Vector3{x: -pos.v.x / 2.0, y: -pos.v.y / 2.0, z: 0.0}}
 }
 
+fn get_2d_screen_matrix(context: &Context) -> Matrix4<MFloat> {
+    let left = 0.0;
+    let right = context.win_size.w as MFloat;
+    let bottom = 0.0;
+    let top = context.win_size.h as MFloat;
+    let near = -1.0;
+    let far = 1.0;
+    projection::ortho(left, right, bottom, top, near, far)
+}
+
+// TODO: move to gui.rs
+fn get_clicked_button_id(button_manager: &ButtonManager, context: &Context) -> Option<ButtonId> {
+    let x = context.mouse_pos.v.x as MInt;
+    let y = context.win_size.h - context.mouse_pos.v.y as MInt;
+    for (id, button) in button_manager.buttons().iter() {
+        if x >= button.pos().v.x
+            && x <= button.pos().v.x + button.size().w
+            && y >= button.pos().v.y
+            && y <= button.pos().v.y + button.size().h
+        {
+            return Some(*id);
+        }
+    }
+    None
+}
+
 enum StateChangeCommand {
     StartGame,
     EndGame,
@@ -154,7 +180,6 @@ trait StateVisualizer {
 }
 
 pub struct GameStateVisualizer {
-    shader: Shader,
     map_mesh_id: MeshId,
     selection_marker_mesh_id: MeshId,
     unit_mesh_id: MeshId,
@@ -162,8 +187,6 @@ pub struct GameStateVisualizer {
     marker_1_mesh_id: MeshId,
     marker_2_mesh_id: MeshId,
     meshes: Vec<Mesh>,
-    mvp_mat_id: MatId,
-    basic_color_id: ColorId,
     camera: Camera,
     commands: Vec<StateChangeCommand>,
     picker: picker::TilePicker,
@@ -188,24 +211,18 @@ impl GameStateVisualizer {
         let core = core::Core::new();
         let map_size = core.map_size();
         let picker = picker::TilePicker::new(core.map_size());
-        let shader = Shader::new(
-            &Path::new("normal.vs.glsl"),
-            &Path::new("normal.fs.glsl"),
-        );
-        let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
-        let basic_color_id = ColorId{id: shader.get_uniform("basic_color")};
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
-            &mut meshes, get_map_mesh(map_size, &shader));
-        let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&shader));
+            &mut meshes, get_map_mesh(map_size, &context.shader));
+        let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&context.shader));
         let selection_marker_mesh_id = add_mesh(
-            &mut meshes, get_selection_mesh(&shader));
+            &mut meshes, get_selection_mesh(&context.shader));
         let shell_mesh_id = add_mesh(
-            &mut meshes, get_marker(&shader, &Path::new("data/shell.png")));
+            &mut meshes, get_marker(&context.shader, &Path::new("data/shell.png")));
         let marker_1_mesh_id = add_mesh(
-            &mut meshes, get_marker(&shader, &Path::new("data/flag1.png")));
+            &mut meshes, get_marker(&context.shader, &Path::new("data/flag1.png")));
         let marker_2_mesh_id = add_mesh(
-            &mut meshes, get_marker(&shader, &Path::new("data/flag2.png")));
+            &mut meshes, get_marker(&context.shader, &Path::new("data/flag2.png")));
         let mut camera = Camera::new(context.win_size);
         camera.pos = get_initial_camera_pos(&map_size);
         let mut button_manager = ButtonManager::new();
@@ -222,9 +239,6 @@ impl GameStateVisualizer {
             marker_1_mesh_id: marker_1_mesh_id,
             marker_2_mesh_id: marker_2_mesh_id,
             meshes: meshes,
-            mvp_mat_id: mvp_mat_id,
-            basic_color_id: basic_color_id,
-            shader: shader,
             camera: camera,
             picker: picker,
             map_pos_under_cursor: None,
@@ -248,40 +262,30 @@ impl GameStateVisualizer {
         self.scenes.get(&self.core.player_id())
     }
 
-    fn draw_units(&self) {
+    fn draw_units(&self, context: &Context) {
         for (_, node) in self.scene().nodes.iter() {
             let m = mgl::tr(self.camera.mat(), node.pos.v);
             let m = mgl::rot_z(m, node.rot);
-            self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-            self.meshes.get(node.mesh_id.id as uint).draw(&self.shader);
+            context.shader.uniform_mat4f(context.mvp_mat_id, &m);
+            self.meshes.get(node.mesh_id.id as uint).draw(&context.shader);
         }
     }
 
-    fn draw_map(&mut self) {
-        self.shader.uniform_mat4f(self.mvp_mat_id, &self.camera.mat());
-        self.meshes.get(self.map_mesh_id.id as uint).draw(&self.shader);
-    }
-
-    fn get_2d_screen_matrix(&self, context: &Context) -> Matrix4<MFloat> {
-        let left = 0.0;
-        let right = context.win_size.w as MFloat;
-        let bottom = 0.0;
-        let top = context.win_size.h as MFloat;
-        let near = -1.0;
-        let far = 1.0;
-        projection::ortho(left, right, bottom, top, near, far)
+    fn draw_map(&mut self, context: &Context) {
+        context.shader.uniform_mat4f(context.mvp_mat_id, &self.camera.mat());
+        self.meshes.get(self.map_mesh_id.id as uint).draw(&context.shader);
     }
 
     fn draw_2d_text(&mut self, context: &Context) {
-        let m = self.get_2d_screen_matrix(context);
+        let m = get_2d_screen_matrix(context);
         for (_, button) in self.button_manager.buttons().iter() {
             let text_offset = Vector3 {
                 x: button.pos().v.x as MFloat,
                 y: button.pos().v.y as MFloat,
                 z: 0.0,
             };
-            self.shader.uniform_mat4f(self.mvp_mat_id, &mgl::tr(m, text_offset));
-            button.draw(context.font_stash.borrow_mut().deref_mut(), &self.shader);
+            context.shader.uniform_mat4f(context.mvp_mat_id, &mgl::tr(m, text_offset));
+            button.draw(context.font_stash.borrow_mut().deref_mut(), &context.shader);
         }
     }
 
@@ -290,15 +294,15 @@ impl GameStateVisualizer {
         let m = self.camera.mat();
         let m = mgl::scale(m, 1.0 / font_stash.get_size());
         let m = mgl::rot_x(m, 90.0);
-        self.shader.uniform_mat4f(self.mvp_mat_id, &m);
-        let text_mesh = font_stash.get_mesh("kill! Kill! kill!!!", &self.shader);
-        text_mesh.draw(&self.shader);
+        context.shader.uniform_mat4f(context.mvp_mat_id, &m);
+        let text_mesh = font_stash.get_mesh("kill! Kill! kill!!!", &context.shader);
+        text_mesh.draw(&context.shader);
     }
 
-    fn draw_scene(&mut self, dtime: Time) {
-        self.shader.uniform_color(self.basic_color_id, WHITE);
-        self.draw_units();
-        self.draw_map();
+    fn draw_scene(&mut self, context: &Context, dtime: Time) {
+        context.shader.uniform_color(context.basic_color_id, WHITE);
+        self.draw_units(context);
+        self.draw_map(context);
         if !self.event_visualizer.is_none() {
             let scene = self.scenes.get_mut(&self.core.player_id());
             self.event_visualizer.get_mut_ref().draw(scene, dtime);
@@ -403,27 +407,11 @@ impl GameStateVisualizer {
         self.core.do_command(core::CommandMove(unit_id, path));
     }
 
-    // TODO: Move to gui.rs
-    fn get_clicked_button_id(&mut self, context: &Context) -> Option<ButtonId> {
-        let x = context.mouse_pos.v.x as MInt;
-        let y = context.win_size.h - context.mouse_pos.v.y as MInt;
-        for (id, button) in self.button_manager.buttons().iter() {
-            if x >= button.pos().v.x
-                && x <= button.pos().v.x + button.size().w
-                && y >= button.pos().v.y
-                && y <= button.pos().v.y + button.size().h
-            {
-                return Some(*id);
-            }
-        }
-        None
-    }
-
     fn handle_mouse_button_event(&mut self, context: &Context) {
         if self.event_visualizer.is_some() {
             return;
         }
-        match self.get_clicked_button_id(context) {
+        match get_clicked_button_id(&self.button_manager, context) {
             Some(button_id) => {
                 if button_id == self.button_end_turn_id {
                     self.end_turn();
@@ -551,9 +539,9 @@ impl StateVisualizer for GameStateVisualizer {
         self.pick_tile(context);
         mgl::set_clear_color(GREY_3);
         mgl::clear_screen();
-        self.shader.activate();
-        self.draw_scene(dtime);
-        self.shader.uniform_color(self.basic_color_id, BLACK);
+        context.shader.activate();
+        self.draw_scene(context, dtime);
+        context.shader.uniform_color(context.basic_color_id, BLACK);
         self.draw_3d_text(context);
         self.draw_2d_text(context);
         context.win.swap_buffers();
@@ -584,13 +572,50 @@ impl StateVisualizer for GameStateVisualizer {
 }
 
 pub struct MenuStateVisualizer {
+    button_manager: ButtonManager,
+    buttin_start_id: ButtonId,
     commands: Vec<StateChangeCommand>,
 }
 
 impl MenuStateVisualizer {
-    fn new() -> MenuStateVisualizer {
+    fn new(context: &Context) -> MenuStateVisualizer {
+        let mut button_manager = ButtonManager::new();
+        let buttin_start_id = button_manager.add_button(Button::new(
+            "start",
+            context.font_stash.borrow_mut().deref_mut(),
+            Point2{v: Vector2{x: 10, y: 10}})
+        );
         MenuStateVisualizer {
             commands: Vec::new(),
+            button_manager: button_manager,
+            buttin_start_id: buttin_start_id,
+        }
+    }
+
+    fn draw_2d_text(&mut self, context: &Context) {
+        // TODO: Reduce code duplication
+        let m = get_2d_screen_matrix(context);
+        for (_, button) in self.button_manager.buttons().iter() {
+            let text_offset = Vector3 {
+                x: button.pos().v.x as MFloat,
+                y: button.pos().v.y as MFloat,
+                z: 0.0,
+            };
+            context.shader.uniform_mat4f(
+                context.mvp_mat_id, &mgl::tr(m, text_offset));
+            button.draw(context.font_stash.borrow_mut().deref_mut(), &context.shader);
+        }
+    }
+
+    fn handle_mouse_button_event(&mut self, context: &Context) {
+        match get_clicked_button_id(&self.button_manager, context) {
+            Some(button_id) => {
+                if button_id == self.buttin_start_id {
+                    self.commands.push(StartGame);
+                }
+                return;
+            },
+            None => {},
         }
     }
 }
@@ -601,6 +626,9 @@ impl StateVisualizer for MenuStateVisualizer {
     fn draw(&mut self, context: &Context, _: Time) {
         mgl::set_clear_color(BLACK_3);
         mgl::clear_screen();
+        context.shader.activate();
+        context.shader.uniform_color(context.basic_color_id, WHITE);
+        self.draw_2d_text(context);
         context.win.swap_buffers();
     }
 
@@ -618,6 +646,9 @@ impl StateVisualizer for MenuStateVisualizer {
                     _ => {},
                 }
             },
+            glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {
+                self.handle_mouse_button_event(context);
+            },
             _ => {},
         }
     }
@@ -633,6 +664,9 @@ pub struct Context {
     mouse_pos: Point2<MFloat>, // TODO: Point2 -> ScreenPos
     config: Config,
     font_stash: RefCell<FontStash>,
+    shader: Shader,
+    mvp_mat_id: MatId,
+    basic_color_id: ColorId,
 }
 
 impl Context {
@@ -691,14 +725,23 @@ impl Visualizer {
         let font_size = config.get("font_size");
         let font_stash = FontStash::new(
             &Path::new("data/DroidSerif-Regular.ttf"), font_size);
+        let shader = Shader::new(
+            &Path::new("normal.vs.glsl"),
+            &Path::new("normal.fs.glsl"),
+        );
+        let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
+        let basic_color_id = ColorId{id: shader.get_uniform("basic_color")};
         let context = Context {
             win: win,
             win_size: win_size,
             config: config,
             mouse_pos: Point2{v: Vector2::zero()},
             font_stash: RefCell::new(font_stash),
+            shader: shader,
+            mvp_mat_id: mvp_mat_id,
+            basic_color_id: basic_color_id,
         };
-        let visualizer = box MenuStateVisualizer::new();
+        let visualizer = box MenuStateVisualizer::new(&context);
         Visualizer {
             visualizers: vec![visualizer as Box<StateVisualizer>],
             dtime: Time{n: 0},
