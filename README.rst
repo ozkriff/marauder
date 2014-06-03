@@ -16,14 +16,6 @@ written in Rust_.
 |screenshot|
 
 
-Devblog
-=======
-
-Devblog (in Russian) with weekly reports: http://ozkriff.github.io
-
-Image gallery: https://ozkriff.imgur.com/marauder
-
-
 Building
 ========
 
