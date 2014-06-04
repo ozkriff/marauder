@@ -5,7 +5,7 @@ use visualizer::types::{WorldPos, MFloat};
 use visualizer::mesh::MeshId;
 use collections::hashmap::HashMap;
 
-#[deriving(Ord, Eq, TotalEq, Hash)]
+#[deriving(PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct NodeId{pub id: MInt}
 
 pub struct SceneNode {

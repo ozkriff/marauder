@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vector2;
-use std::cmp::{TotalOrd};
+use std::cmp::Ord;
 
 #[deriving(Decodable)]
 pub struct Size2<T>{
@@ -13,15 +13,15 @@ pub struct Point2<T>{pub v: Vector2<T>}
 
 pub type MInt = i32;
 
-#[deriving(Ord, Eq, TotalEq, Hash)]
+#[deriving(PartialOrd, PartialEq, Eq, Hash)]
 pub struct PlayerId{pub id: MInt}
 
-#[deriving(Ord, TotalOrd, Eq, TotalEq, Hash)]
+#[deriving(PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct UnitId{pub id: MInt}
 
 pub struct SlotId{pub id: MInt}
 
-#[deriving(Eq, TotalEq, Clone, Show)]
+#[deriving(PartialEq, Clone, Show)]
 pub struct MapPos{pub v: Vector2<MInt>}
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

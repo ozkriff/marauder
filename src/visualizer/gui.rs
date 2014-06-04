@@ -6,7 +6,7 @@ use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;
 use visualizer::context::Context;
 
-#[deriving(Eq, TotalEq, Hash)]
+#[deriving(PartialEq, Eq, Hash)]
 pub struct ButtonId {pub id: MInt}
 
 pub struct Button {
