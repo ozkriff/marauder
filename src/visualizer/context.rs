@@ -2,7 +2,6 @@
 
 use std::cell::RefCell;
 use glfw;
-// use glfw::Context;
 use cgmath::vector::Vector2;
 use core::types::{Size2, MInt, Point2};
 use core::conf::Config;
