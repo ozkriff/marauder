@@ -500,12 +500,13 @@ impl GameStateVisualizer {
                     marker_mesh,
                 )
             },
-            core::EventAttackUnit(attacker_id, defender_id) => {
+            core::EventAttackUnit(attacker_id, defender_id, killed) => {
                 EventAttackUnitVisualizer::new(
                     scene,
                     state,
                     attacker_id,
                     defender_id,
+                    killed,
                     self.shell_mesh_id,
                 )
             },

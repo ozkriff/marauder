@@ -54,9 +54,11 @@ impl<'a> GameState {
                     type_id: type_id,
                 });
             },
-            EventAttackUnit(_, defender_id) => {
-                assert!(self.units.find(&defender_id).is_some());
-                self.units.remove(&defender_id);
+            EventAttackUnit(_, defender_id, killed) => {
+                if killed {
+                    assert!(self.units.find(&defender_id).is_some());
+                    self.units.remove(&defender_id);
+                }
             },
         }
     }

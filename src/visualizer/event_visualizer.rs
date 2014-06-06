@@ -233,6 +233,7 @@ fn vec3_z(z: MFloat) -> Vector3<MFloat> {
 pub struct EventAttackUnitVisualizer {
     attacker_id: UnitId,
     defender_id: UnitId,
+    killed: bool,
     move: MoveHelper,
     shell_move: MoveHelper,
     shell_node_id: NodeId,
@@ -244,6 +245,7 @@ impl EventAttackUnitVisualizer {
         _: &GameState,
         attacker_id: UnitId,
         defender_id: UnitId,
+        killed: bool,
         shell_mesh_id: MeshId
     ) -> Box<EventVisualizer> {
         let node_id = unit_id_to_node_id(defender_id);
@@ -264,6 +266,7 @@ impl EventAttackUnitVisualizer {
         box EventAttackUnitVisualizer {
             attacker_id: attacker_id,
             defender_id: defender_id,
+            killed: killed,
             move: move,
             shell_move: shell_move,
             shell_node_id: shell_node_id,
@@ -273,22 +276,31 @@ impl EventAttackUnitVisualizer {
 
 impl EventVisualizer for EventAttackUnitVisualizer {
     fn is_finished(&self) -> bool {
-        self.move.is_finished() && self.shell_move.is_finished()
+        // TODO: Simplify
+        if self.killed {
+            self.move.is_finished() && self.shell_move.is_finished()
+        } else {
+            self.shell_move.is_finished()
+        }
     }
 
     fn draw(&mut self, scene: &mut Scene, dtime: Time) {
         scene.nodes.get_mut(&self.shell_node_id).pos = self.shell_move.step(dtime);
-        if self.shell_move.is_finished() {
-            let node_id = unit_id_to_node_id(self.defender_id);
-            scene.nodes.get_mut(&node_id).pos = self.move.step(dtime);
+        if self.killed {
+            if self.shell_move.is_finished() {
+                let node_id = unit_id_to_node_id(self.defender_id);
+                scene.nodes.get_mut(&node_id).pos = self.move.step(dtime);
+            }
         }
     }
 
     fn end(&mut self, scene: &mut Scene, _: &GameState) {
-        let node_id = unit_id_to_node_id(self.defender_id);
-        scene.nodes.remove(&node_id);
+        if self.killed {
+            let node_id = unit_id_to_node_id(self.defender_id);
+            scene.nodes.remove(&node_id);
+            scene.nodes.remove(&marker_id(self.defender_id));
+        }
         scene.nodes.remove(&self.shell_node_id);
-        scene.nodes.remove(&marker_id(self.defender_id));
     }
 }
 

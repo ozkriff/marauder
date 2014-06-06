@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::rand::{task_rng, Rng};
 use collections::hashmap::HashMap;
 use cgmath::vector::Vector2;
 use error_context;
@@ -20,7 +21,7 @@ pub enum Event {
     EventMove(UnitId, Vec<MapPos>),
     EventEndTurn(PlayerId, PlayerId), // old_id, new_id
     EventCreateUnit(UnitId, MapPos, UnitTypeId, PlayerId),
-    EventAttackUnit(UnitId, UnitId),
+    EventAttackUnit(UnitId, UnitId, /* killed: */ bool),
 }
 
 pub struct Player {
@@ -93,6 +94,25 @@ impl Core {
         self.map_size
     }
 
+    fn get_unit<'a>(&'a self, id: UnitId) -> &'a Unit {
+        match self.game_state.units.find(&id) {
+            Some(unit) => unit,
+            None => fail!("!"),
+        }
+    }
+
+    fn hit_test(&self, attacker_id: UnitId, defender_id: UnitId) -> bool {
+        let attacker_type_id = self.get_unit(attacker_id).type_id;
+        let defender_type_id = self.get_unit(defender_id).type_id;
+        let needed = match (attacker_type_id, defender_type_id) { // TODO: rename
+            (Tank, Tank) => 5,
+            (Tank, Soldier) => 3,
+            (Soldier, Tank) => 7,
+            (Soldier, Soldier) => 5,
+        };
+        task_rng().gen_range(0, 10 + 1) > needed
+    }
+
     pub fn player_id(&self) -> PlayerId {
         self.current_player_id
     }
@@ -123,6 +143,7 @@ impl Core {
                     self,
                     attacker_id,
                     defender_id,
+                    self.hit_test(attacker_id, defender_id),
                 ) as Box<CoreEvent>
             },
         }
@@ -267,29 +288,35 @@ impl CoreEvent for CoreEventCreateUnit {
 struct CoreEventAttackUnit {
     attacker_id: UnitId,
     defender_id: UnitId,
+    killed: bool,
 }
 
 impl CoreEventAttackUnit {
     fn new(
         _: &Core,
         attacker_id: UnitId,
-        defender_id: UnitId
+        defender_id: UnitId,
+        killed: bool
     ) -> Box<CoreEventAttackUnit> {
+        println!("killed: {}", killed);
         box CoreEventAttackUnit {
             attacker_id: attacker_id,
             defender_id: defender_id,
+            killed: killed,
         }
     }
 }
 
 impl CoreEvent for CoreEventAttackUnit {
     fn to_event(&self) -> Event {
-        EventAttackUnit(self.attacker_id, self.defender_id)
+        EventAttackUnit(self.attacker_id, self.defender_id, self.killed)
     }
 
     fn apply(&self, core: &mut Core) {
-        assert!(core.game_state.units.find(&self.defender_id).is_some());
-        core.game_state.units.remove(&self.defender_id);
+        if self.killed {
+            assert!(core.game_state.units.find(&self.defender_id).is_some());
+            core.game_state.units.remove(&self.defender_id);
+        }
     }
 }
 
