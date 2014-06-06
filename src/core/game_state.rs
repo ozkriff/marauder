@@ -43,7 +43,7 @@ impl<'a> GameState {
                 unit.slot_id = slot_id;
             },
             EventEndTurn(_, _) => {},
-            EventCreateUnit(id, pos, player_id) => {
+            EventCreateUnit(id, pos, type_id, player_id) => {
                 assert!(self.units.find(&id).is_none());
                 let slot_id = self.get_free_slot(id, pos).unwrap();
                 self.units.insert(id, Unit {
@@ -51,6 +51,7 @@ impl<'a> GameState {
                     pos: pos,
                     slot_id: slot_id,
                     player_id: player_id,
+                    type_id: type_id,
                 });
             },
             EventAttackUnit(_, defender_id) => {

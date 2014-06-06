@@ -19,7 +19,7 @@ pub enum Command {
 pub enum Event {
     EventMove(UnitId, Vec<MapPos>),
     EventEndTurn(PlayerId, PlayerId), // old_id, new_id
-    EventCreateUnit(UnitId, MapPos, PlayerId),
+    EventCreateUnit(UnitId, MapPos, UnitTypeId, PlayerId),
     EventAttackUnit(UnitId, UnitId),
 }
 
@@ -27,11 +27,17 @@ pub struct Player {
     pub id: PlayerId,
 }
 
+pub enum UnitTypeId {
+    Tank,
+    Soldier,
+}
+
 pub struct Unit {
     pub id: UnitId,
     pub pos: MapPos,
     pub slot_id: SlotId,
     pub player_id: PlayerId,
+    pub type_id: UnitTypeId,
 }
 
 pub struct Core {
@@ -70,16 +76,16 @@ impl Core {
             event_lists: get_event_lists(),
             map_size: map_size,
         };
-        core.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, PlayerId{id: 0});
-        core.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, PlayerId{id: 0});
-        core.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, PlayerId{id: 1});
-        core.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, PlayerId{id: 1});
+        core.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, Tank, PlayerId{id: 0});
+        core.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, Soldier, PlayerId{id: 0});
+        core.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, Tank, PlayerId{id: 1});
+        core.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, Soldier, PlayerId{id: 1});
         core
     }
 
-    fn add_unit(&mut self, pos: MapPos, player_id: PlayerId) {
+    fn add_unit(&mut self, pos: MapPos, type_id: UnitTypeId, player_id: PlayerId) {
         let core_event = CoreEventCreateUnit::new(
-            self, pos, player_id);
+            self, pos, type_id, player_id);
         self.do_core_event(core_event);
     }
 
@@ -105,6 +111,7 @@ impl Core {
                 CoreEventCreateUnit::new(
                     self,
                     pos,
+                    Tank, // TODO: replace Tank with ...
                     self.current_player_id,
                 ) as Box<CoreEvent>
             },
@@ -212,6 +219,7 @@ impl CoreEvent for CoreEventEndTurn {
 struct CoreEventCreateUnit {
     pos: MapPos,
     id: UnitId,
+    type_id: UnitTypeId,
     player_id: PlayerId,
 }
 
@@ -219,6 +227,7 @@ impl CoreEventCreateUnit {
     fn new(
         core: &Core,
         pos: MapPos,
+        type_id: UnitTypeId,
         player_id: PlayerId
     ) -> Box<CoreEventCreateUnit> {
         let new_id = match core.game_state.units.keys().max_by(|&n| n) {
@@ -228,6 +237,7 @@ impl CoreEventCreateUnit {
         box CoreEventCreateUnit {
             id: UnitId{id: new_id},
             pos: pos,
+            type_id: type_id,
             player_id: player_id,
         }
     }
@@ -235,7 +245,7 @@ impl CoreEventCreateUnit {
 
 impl CoreEvent for CoreEventCreateUnit {
     fn to_event(&self) -> Event {
-        EventCreateUnit(self.id, self.pos, self.player_id)
+        EventCreateUnit(self.id, self.pos, self.type_id, self.player_id)
     }
 
     fn apply(&self, core: &mut Core) {
@@ -248,6 +258,7 @@ impl CoreEvent for CoreEventCreateUnit {
             id: self.id,
             pos: self.pos,
             slot_id: slot_id,
+            type_id: self.type_id,
             player_id: core.current_player_id,
         });
     }

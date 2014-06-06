@@ -121,9 +121,19 @@ fn get_map_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     mesh
 }
 
-fn load_unit_mesh(shader: &Shader) -> Mesh {
+// TODO: join with load_soldier_mesh
+fn load_tank_mesh(shader: &Shader) -> Mesh {
     let tex = Texture::new(&Path::new("data/tank.png"));
     let obj = obj::Model::new(&Path::new("data/tank.obj"));
+    let mut mesh = Mesh::new(obj.build().as_slice());
+    mesh.set_texture(tex, obj.build_tex_coord().as_slice());
+    mesh.prepare(shader);
+    mesh
+}
+
+fn load_soldier_mesh(shader: &Shader) -> Mesh {
+    let tex = Texture::new(&Path::new("data/soldier.png"));
+    let obj = obj::Model::new(&Path::new("data/soldier.obj"));
     let mut mesh = Mesh::new(obj.build().as_slice());
     mesh.set_texture(tex, obj.build_tex_coord().as_slice());
     mesh.prepare(shader);
@@ -167,7 +177,8 @@ trait StateVisualizer {
 pub struct GameStateVisualizer {
     map_mesh_id: MeshId,
     selection_marker_mesh_id: MeshId,
-    unit_mesh_id: MeshId,
+    tank_mesh_id: MeshId,
+    soldier_mesh_id: MeshId,
     shell_mesh_id: MeshId,
     marker_1_mesh_id: MeshId,
     marker_2_mesh_id: MeshId,
@@ -200,7 +211,10 @@ impl GameStateVisualizer {
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(map_size, &context.shader));
-        let unit_mesh_id = add_mesh(&mut meshes, load_unit_mesh(&context.shader));
+        let tank_mesh_id = add_mesh(
+            &mut meshes, load_tank_mesh(&context.shader));
+        let soldier_mesh_id = add_mesh(
+            &mut meshes, load_soldier_mesh(&context.shader));
         let selection_marker_mesh_id = add_mesh(
             &mut meshes, get_selection_mesh(&context.shader));
         let shell_mesh_id = add_mesh(
@@ -224,7 +238,8 @@ impl GameStateVisualizer {
         );
         let vis = GameStateVisualizer {
             map_mesh_id: map_mesh_id,
-            unit_mesh_id: unit_mesh_id,
+            tank_mesh_id: tank_mesh_id,
+            soldier_mesh_id: soldier_mesh_id,
             selection_marker_mesh_id: selection_marker_mesh_id,
             shell_mesh_id: shell_mesh_id,
             marker_1_mesh_id: marker_1_mesh_id,
@@ -467,7 +482,7 @@ impl GameStateVisualizer {
             core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
             },
-            core::EventCreateUnit(id, ref pos, player_id) => {
+            core::EventCreateUnit(id, ref pos, type_id, player_id) => {
                 let marker_mesh = match player_id.id {
                     0 => self.marker_1_mesh_id,
                     1 => self.marker_2_mesh_id,
@@ -478,7 +493,10 @@ impl GameStateVisualizer {
                     state,
                     id,
                     *pos,
-                    self.unit_mesh_id,
+                    match type_id {
+                        core::Tank => self.tank_mesh_id,
+                        core::Soldier => self.soldier_mesh_id,
+                    },
                     marker_mesh,
                 )
             },
