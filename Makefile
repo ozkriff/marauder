@@ -17,6 +17,7 @@ SRC = \
 	src/core/game_state.rs \
 	src/core/pathfinder.rs \
 	src/core/types.rs \
+	src/core/fs.rs \
 	src/visualizer/mod.rs \
 	src/visualizer/camera.rs \
 	src/visualizer/geom.rs \
@@ -40,7 +41,7 @@ bin/marauder: Makefile ${SRC}
 	${RUSTC} src/main.rs -o bin/marauder
 
 run: bin/marauder
-	(cd bin && RUST_BACKTRACE=1 exec ./marauder)
+	RUST_BACKTRACE=1 ./bin/marauder
 
 clean:
 	rm -f bin/marauder

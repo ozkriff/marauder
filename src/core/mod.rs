@@ -8,5 +8,6 @@ pub mod map;
 pub mod game_state;
 pub mod core;
 pub mod conf;
+pub mod fs;
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

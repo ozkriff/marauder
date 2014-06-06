@@ -15,6 +15,7 @@ use core::pathfinder::Pathfinder;
 use core::conf::Config;
 use core::core;
 use core::core::SLOTS_COUNT;
+use core::fs::FileSystem;
 use visualizer::mgl;
 use visualizer::camera::Camera;
 use visualizer::geom;
@@ -98,7 +99,7 @@ fn get_pathfinders(
     m
 }
 
-fn get_map_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
+fn get_map_mesh(fs: &FileSystem, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut vertex_data = Vec::new();
     let mut tex_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
@@ -114,7 +115,7 @@ fn get_map_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
             tex_data.push(TextureCoord{v: Vector2{x: 0.5, y: 0.5}});
         }
     }
-    let tex = Texture::new(&Path::new("data/floor.png"));
+    let tex = Texture::new(&fs.get(&Path::new("data/floor.png")));
     let mut mesh = Mesh::new(vertex_data.as_slice());
     mesh.set_texture(tex, tex_data.as_slice());
     mesh.prepare(shader);
@@ -122,18 +123,18 @@ fn get_map_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
 }
 
 // TODO: join with load_soldier_mesh
-fn load_tank_mesh(shader: &Shader) -> Mesh {
-    let tex = Texture::new(&Path::new("data/tank.png"));
-    let obj = obj::Model::new(&Path::new("data/tank.obj"));
+fn load_tank_mesh(fs: &FileSystem, shader: &Shader) -> Mesh {
+    let tex = Texture::new(&fs.get(&Path::new("data/tank.png")));
+    let obj = obj::Model::new(&fs.get(&Path::new("data/tank.obj")));
     let mut mesh = Mesh::new(obj.build().as_slice());
     mesh.set_texture(tex, obj.build_tex_coord().as_slice());
     mesh.prepare(shader);
     mesh
 }
 
-fn load_soldier_mesh(shader: &Shader) -> Mesh {
-    let tex = Texture::new(&Path::new("data/soldier.png"));
-    let obj = obj::Model::new(&Path::new("data/soldier.obj"));
+fn load_soldier_mesh(fs: &FileSystem, shader: &Shader) -> Mesh {
+    let tex = Texture::new(&fs.get(&Path::new("data/soldier.png")));
+    let obj = obj::Model::new(&fs.get(&Path::new("data/soldier.obj")));
     let mut mesh = Mesh::new(obj.build().as_slice());
     mesh.set_texture(tex, obj.build_tex_coord().as_slice());
     mesh.prepare(shader);
@@ -202,27 +203,33 @@ pub struct GameStateVisualizer {
 }
 
 impl GameStateVisualizer {
-    pub fn new(context: &Context) -> GameStateVisualizer {
+    pub fn new(fs: &FileSystem, context: &Context) -> GameStateVisualizer {
         set_error_context!("constructing GameStateVisualizer", "-");
         let players_count = 2;
-        let core = core::Core::new();
+        let core = core::Core::new(fs);
         let map_size = core.map_size();
-        let picker = picker::TilePicker::new(core.map_size());
+        let picker = picker::TilePicker::new(fs, core.map_size());
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
-            &mut meshes, get_map_mesh(map_size, &context.shader));
+            &mut meshes, get_map_mesh(fs, map_size, &context.shader));
         let tank_mesh_id = add_mesh(
-            &mut meshes, load_tank_mesh(&context.shader));
+            &mut meshes, load_tank_mesh(fs, &context.shader));
         let soldier_mesh_id = add_mesh(
-            &mut meshes, load_soldier_mesh(&context.shader));
+            &mut meshes, load_soldier_mesh(fs, &context.shader));
         let selection_marker_mesh_id = add_mesh(
-            &mut meshes, get_selection_mesh(&context.shader));
+            &mut meshes, get_selection_mesh(fs, &context.shader));
         let shell_mesh_id = add_mesh(
-            &mut meshes, get_marker(&context.shader, &Path::new("data/shell.png")));
+            &mut meshes,
+            get_marker(&context.shader, &fs.get(&Path::new("data/shell.png"))),
+        );
         let marker_1_mesh_id = add_mesh(
-            &mut meshes, get_marker(&context.shader, &Path::new("data/flag1.png")));
+            &mut meshes,
+            get_marker(&context.shader, &fs.get(&Path::new("data/flag1.png"))),
+        );
         let marker_2_mesh_id = add_mesh(
-            &mut meshes, get_marker(&context.shader, &Path::new("data/flag2.png")));
+            &mut meshes,
+            get_marker(&context.shader, &fs.get(&Path::new("data/flag2.png"))),
+        );
         let mut camera = Camera::new(context.win_size);
         camera.pos = get_initial_camera_pos(&map_size);
         let mut button_manager = ButtonManager::new();
@@ -689,6 +696,7 @@ pub struct Visualizer {
     glfw: glfw::Glfw,
     events: EventsReceiver,
     context: Context,
+    fs: FileSystem,
 }
 
 fn create_win(glfw: &glfw::Glfw, win_size: Size2<MInt>)
@@ -703,8 +711,9 @@ fn create_win(glfw: &glfw::Glfw, win_size: Size2<MInt>)
 
 impl Visualizer {
     pub fn new() -> Visualizer {
+        let fs = FileSystem::new();
         let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
-        let config = Config::new(&Path::new("conf_visualizer.json"));
+        let config = Config::new(&fs.get(&Path::new("data/conf_visualizer.json")));
         let win_size = config.get::<Size2<MInt>>("screen_size");
         let (win, events) = create_win(&glfw, win_size);
         glfw.make_context_current(Some(&win));
@@ -713,10 +722,10 @@ impl Visualizer {
         win.set_all_polling(true);
         let font_size = config.get("font_size");
         let font_stash = FontStash::new(
-            &Path::new("data/DroidSerif-Regular.ttf"), font_size);
+            &fs.get(&Path::new("data/DroidSerif-Regular.ttf")), font_size);
         let shader = Shader::new(
-            &Path::new("normal.vs.glsl"),
-            &Path::new("normal.fs.glsl"),
+            &fs.get(&Path::new("data/normal.vs.glsl")),
+            &fs.get(&Path::new("data/normal.fs.glsl")),
         );
         let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
         let basic_color_id = ColorId{id: shader.get_uniform("basic_color")};
@@ -738,6 +747,7 @@ impl Visualizer {
             glfw: glfw,
             events: events,
             context: context,
+            fs: fs,
         }
     }
 
@@ -769,7 +779,8 @@ impl Visualizer {
         let cmd = self.visualizers.mut_last().unwrap().get_command(); // TODO: remove unwrap
         match cmd {
             Some(StartGame) => {
-                let visualizer = box GameStateVisualizer::new(&self.context);
+                let visualizer = box GameStateVisualizer::new(
+                    &self.fs, &self.context);
                 self.visualizers.push(visualizer as Box<StateVisualizer>);
             }
             Some(EndGame) => {

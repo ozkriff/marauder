@@ -3,6 +3,7 @@
 use cgmath::vector::{Vector2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
+use core::fs::FileSystem;
 use visualizer::mgl;
 use visualizer::camera::Camera;
 use visualizer::geom;
@@ -54,10 +55,10 @@ pub struct TilePicker {
 }
 
 impl TilePicker {
-    pub fn new(map_size: Size2<MInt>) -> TilePicker {
+    pub fn new(fs: &FileSystem, map_size: Size2<MInt>) -> TilePicker {
         let shader = Shader::new(
-            &Path::new("pick.vs.glsl"),
-            &Path::new("pick.fs.glsl"),
+            &fs.get(&Path::new("data/pick.vs.glsl")),
+            &fs.get(&Path::new("data/pick.fs.glsl")),
         );
         let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
         let map_mesh = get_mesh(map_size, &shader);

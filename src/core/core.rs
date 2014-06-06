@@ -7,6 +7,7 @@ use error_context;
 use core::types::{Size2, MInt, UnitId, SlotId, PlayerId, MapPos};
 use core::conf::Config;
 use core::game_state::GameState;
+use core::fs::FileSystem;
 
 pub static SLOTS_COUNT: MInt = 4;
 
@@ -65,9 +66,9 @@ fn get_players_list() -> Vec<Player> {
 }
 
 impl Core {
-    pub fn new() -> Core {
+    pub fn new(fs: &FileSystem) -> Core {
         set_error_context!("constructing Core", "-");
-        let config = Config::new(&Path::new("conf_core.json"));
+        let config = Config::new(&fs.get(&Path::new("data/conf_core.json")));
         let map_size = config.get("map_size");
         let mut core = Core {
             game_state: GameState::new(),

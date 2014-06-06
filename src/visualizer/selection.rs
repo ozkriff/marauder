@@ -4,6 +4,7 @@ use cgmath::vector::Vector2;
 use core::types::{MInt, UnitId};
 use core::game_state::GameState;
 use core::misc::add_quad_to_vec;
+use core::fs::FileSystem;
 use visualizer::scene::{NodeId, Scene, SceneNode};
 use visualizer::geom;
 use visualizer::mesh::{Mesh, MeshId};
@@ -71,8 +72,8 @@ impl SelectionManager {
     }
 }
 
-pub fn get_selection_mesh(shader: &Shader) -> Mesh {
-    let tex = Texture::new(&Path::new("data/shell.png"));
+pub fn get_selection_mesh(fs: &FileSystem, shader: &Shader) -> Mesh {
+    let tex = Texture::new(&fs.get(&Path::new("data/shell.png")));
     let mut vertex_data = Vec::new();
     let mut tex_data = Vec::new();
     let scale_1 = 0.4;
