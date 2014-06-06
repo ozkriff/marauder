@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::cmp;
-use collections::hashmap::HashMap;
+use std::collections::hashmap::HashMap;
 use stb_tt;
 use cgmath::vector::{Vector3, Vector2};
 use core::types::{Size2, Point2, MInt};

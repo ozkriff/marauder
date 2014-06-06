@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::cell::RefCell;
-use collections::hashmap::HashMap;
+use std::collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;
 use cgmath::vector::{Vector3, Vector2};

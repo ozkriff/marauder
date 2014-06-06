@@ -3,7 +3,7 @@
 use core::types::{MInt};
 use visualizer::types::{WorldPos, MFloat};
 use visualizer::mesh::MeshId;
-use collections::hashmap::HashMap;
+use std::collections::hashmap::HashMap;
 
 #[deriving(PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct NodeId{pub id: MInt}

@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use collections::hashmap::HashMap;
+use std::collections::hashmap::HashMap;
 use core::types::{MInt, Size2, Point2};
 use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;

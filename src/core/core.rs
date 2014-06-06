@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::rand::{task_rng, Rng};
-use collections::hashmap::HashMap;
+use std::collections::hashmap::HashMap;
 use cgmath::vector::Vector2;
 use error_context;
 use core::types::{Size2, MInt, UnitId, SlotId, PlayerId, MapPos};
