@@ -34,7 +34,7 @@ impl SelectionManager {
     fn get_pos(&self, state: &GameState) -> WorldPos {
         let unit_id = self.unit_id.unwrap();
         let map_pos = state.units.get(&unit_id).pos;
-        let mut world_pos = geom::unit_pos(unit_id, map_pos, state);
+        let mut world_pos = geom::map_pos_to_world_pos(map_pos);
         world_pos.v.z += 0.1; // TODO: replace with some constant
         world_pos
     }

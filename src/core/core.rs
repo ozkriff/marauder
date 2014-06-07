@@ -4,12 +4,10 @@ use std::rand::{task_rng, Rng};
 use std::collections::hashmap::HashMap;
 use cgmath::vector::Vector2;
 use error_context;
-use core::types::{Size2, MInt, UnitId, SlotId, PlayerId, MapPos};
+use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::conf::Config;
 use core::game_state::GameState;
 use core::fs::FileSystem;
-
-pub static SLOTS_COUNT: MInt = 4;
 
 pub enum Command {
     CommandMove(UnitId, Vec<MapPos>),
@@ -37,7 +35,6 @@ pub enum UnitTypeId {
 pub struct Unit {
     pub id: UnitId,
     pub pos: MapPos,
-    pub slot_id: SlotId,
     pub player_id: PlayerId,
     pub type_id: UnitTypeId,
 }
@@ -272,14 +269,9 @@ impl CoreEvent for CoreEventCreateUnit {
 
     fn apply(&self, core: &mut Core) {
         assert!(core.game_state.units.find(&self.id).is_none());
-        let slot_id = match core.game_state.get_free_slot(self.id, self.pos) {
-            Some(id) => id,
-            None => fail!("No free slot in {}", self.pos),
-        };
         core.game_state.units.insert(self.id, Unit {
             id: self.id,
             pos: self.pos,
-            slot_id: slot_id,
             type_id: self.type_id,
             player_id: core.current_player_id,
         });

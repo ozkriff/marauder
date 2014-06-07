@@ -19,8 +19,6 @@ pub struct PlayerId{pub id: MInt}
 #[deriving(PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct UnitId{pub id: MInt}
 
-pub struct SlotId{pub id: MInt}
-
 #[deriving(PartialEq, Clone, Show)]
 pub struct MapPos{pub v: Vector2<MInt>}
 

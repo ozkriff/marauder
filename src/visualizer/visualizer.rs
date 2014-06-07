@@ -14,7 +14,6 @@ use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
 use core::conf::Config;
 use core::core;
-use core::core::SLOTS_COUNT;
 use core::fs::FileSystem;
 use visualizer::mgl;
 use visualizer::camera::Camera;
@@ -330,17 +329,16 @@ impl GameStateVisualizer {
         self.selection_manager.deselect(scene);
     }
 
-    fn is_full_tile(&self, pos: MapPos) -> bool {
+    fn is_tile_occupied(&self, pos: MapPos) -> bool {
         let state = self.game_states.get(&self.core.player_id());
-        let max_units_per_tile = SLOTS_COUNT;
-        state.units_at(pos).len() as MInt >= max_units_per_tile
+        state.units_at(pos).len() > 0
     }
 
     fn create_unit(&mut self) {
         let pos_opt = self.map_pos_under_cursor;
         if pos_opt.is_some() {
             let pos = pos_opt.unwrap();
-            if self.is_full_tile(pos) {
+            if self.is_tile_occupied(pos) {
                 return;
             }
             let cmd = core::CommandCreateUnit(pos);
@@ -409,7 +407,7 @@ impl GameStateVisualizer {
         if self.selected_unit_id.is_none() {
             return;
         }
-        if self.is_full_tile(pos) {
+        if self.is_tile_occupied(pos) {
             return;
         }
         let unit_id = self.selected_unit_id.unwrap();

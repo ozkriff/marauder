@@ -3,13 +3,11 @@
 use std::f32::consts::{PI, FRAC_PI_2};
 use std::num::{pow, abs};
 use cgmath::vector::{Vector2, Vector3, Vector};
-use core::types::{MInt, MapPos, SlotId, UnitId};
-use core::game_state::GameState;
+use core::types::{MInt, MapPos};
 use core::misc::{rad_to_deg};
-use core::core::SLOTS_COUNT;
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
 
-pub static HEX_EX_RADIUS: MFloat = 1.2;
+pub static HEX_EX_RADIUS: MFloat = 1.0;
 // (pow(1.0, 2) - pow(0.5, 2)).sqrt()
 pub static HEX_IN_RADIUS: MFloat = 0.866025403784 * HEX_EX_RADIUS;
 
@@ -49,13 +47,6 @@ pub fn index_to_hex_vertex_s(scale: MFloat, i: MInt) -> VertexCoord {
     VertexCoord{v: v}
 }
 
-pub fn slot_pos(slot_index: SlotId) -> VertexCoord {
-    VertexCoord{
-        v: index_to_circle_vertex(
-            SLOTS_COUNT, slot_index.id).v.mul_s(0.6)
-    }
-}
-
 pub fn dist(a: WorldPos, b: WorldPos) -> MFloat {
     let dx = abs(b.v.x - a.v.x);
     let dy = abs(b.v.y - a.v.y);
@@ -69,19 +60,6 @@ pub fn get_rot_angle(a: WorldPos, b: WorldPos) -> MFloat {
         angle = -(180.0 + angle);
     }
     angle
-}
-
-pub fn unit_pos(
-    unit_id: UnitId,
-    map_pos: MapPos,
-    state: &GameState,
-) -> WorldPos {
-    let slot_id = match state.get_free_slot(unit_id, map_pos) {
-        Some(id) => id,
-        None => fail!("No free slot in {}", map_pos),
-    };
-    let center_pos = map_pos_to_world_pos(map_pos);
-    WorldPos{v: center_pos.v + slot_pos(slot_id).v}
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

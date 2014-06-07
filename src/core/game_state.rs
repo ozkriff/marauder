@@ -8,9 +8,8 @@ use core::core::{
     EventEndTurn,
     EventCreateUnit,
     EventAttackUnit,
-    SLOTS_COUNT,
 };
-use core::types::{UnitId, SlotId, MapPos};
+use core::types::{UnitId, MapPos};
 
 pub struct GameState {
     pub units: HashMap<UnitId, Unit>,
@@ -37,19 +36,15 @@ impl<'a> GameState {
         match *event {
             EventMove(id, ref path) => {
                 let pos = *path.last().unwrap();
-                let slot_id = self.get_free_slot(id, pos).unwrap();
                 let unit = self.units.get_mut(&id);
                 unit.pos = pos;
-                unit.slot_id = slot_id;
             },
             EventEndTurn(_, _) => {},
             EventCreateUnit(id, pos, type_id, player_id) => {
                 assert!(self.units.find(&id).is_none());
-                let slot_id = self.get_free_slot(id, pos).unwrap();
                 self.units.insert(id, Unit {
                     id: id,
                     pos: pos,
-                    slot_id: slot_id,
                     player_id: player_id,
                     type_id: type_id,
                 });
@@ -61,26 +56,6 @@ impl<'a> GameState {
                 }
             },
         }
-    }
-
-    // TODO: simplify
-    pub fn get_free_slot(&self, unit_id: UnitId, pos: MapPos) -> Option<SlotId> {
-        for id in range(0, SLOTS_COUNT) {
-            let mut index = Some(SlotId{id: id});
-            for unit in self.units_at(pos).iter() {
-                if unit.id == unit_id {
-                    return Some(unit.slot_id);
-                }
-                if unit.slot_id.id == id {
-                    index = None;
-                    break;
-                }
-            }
-            if index.is_some() {
-                return index;
-            }
-        }
-        None
     }
 }
 

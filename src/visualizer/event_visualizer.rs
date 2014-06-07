@@ -65,13 +65,13 @@ impl EventVisualizer for EventMoveVisualizer {
 impl EventMoveVisualizer {
     pub fn new(
         scene: &mut Scene,
-        state: &GameState,
+        _: &GameState,
         unit_id: UnitId,
         path: Vec<MapPos>
     ) -> Box<EventVisualizer> {
         let mut world_path = Vec::new();
         for map_pos in path.iter() {
-            let world_pos = geom::unit_pos(unit_id, *map_pos, state);
+            let world_pos = geom::map_pos_to_world_pos(*map_pos);
             world_path.push(world_pos);
         }
         let speed = 3.8; // TODO: Get from UnitType
@@ -140,14 +140,14 @@ pub struct EventCreateUnitVisualizer {
 impl EventCreateUnitVisualizer {
     pub fn new(
         scene: &mut Scene,
-        state: &GameState,
+        _: &GameState,
         id: UnitId,
         pos: MapPos,
         mesh_id: MeshId,
         marker_mesh_id: MeshId
     ) -> Box<EventVisualizer> {
         let node_id = unit_id_to_node_id(id);
-        let world_pos = geom::unit_pos(id, pos, state);
+        let world_pos = geom::map_pos_to_world_pos(pos);
         let to = world_pos;
         let from = WorldPos{v: to.v.sub_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))};
         let rot = rand::task_rng().gen_range::<MFloat>(0.0, 360.0);
