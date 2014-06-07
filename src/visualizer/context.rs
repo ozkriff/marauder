@@ -3,6 +3,8 @@
 use std::cell::RefCell;
 use glfw;
 use cgmath::vector::Vector2;
+use cgmath::matrix::Matrix4;
+use cgmath::projection;
 use core::types::{Size2, MInt, Point2};
 use core::conf::Config;
 use visualizer::types::{MFloat, MatId, ColorId};
@@ -41,6 +43,17 @@ impl Context {
             _ => {},
         }
     }
+}
+
+// TODO: move to some other mod
+pub fn get_2d_screen_matrix(context: &Context) -> Matrix4<MFloat> {
+    let left = 0.0;
+    let right = context.win_size.w as MFloat;
+    let bottom = 0.0;
+    let top = context.win_size.h as MFloat;
+    let near = -1.0;
+    let far = 1.0;
+    projection::ortho(left, right, bottom, top, near, far)
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

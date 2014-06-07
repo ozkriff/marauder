@@ -30,6 +30,9 @@ SRC = \
 	src/visualizer/picker.rs \
 	src/visualizer/types.rs \
 	src/visualizer/visualizer.rs \
+	src/visualizer/state_visualizer.rs \
+	src/visualizer/menu_state_visualizer.rs \
+	src/visualizer/game_state_visualizer.rs \
 	src/visualizer/font_stash.rs \
 	src/visualizer/gui.rs \
 	src/visualizer/selection.rs \
