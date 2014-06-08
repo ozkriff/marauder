@@ -20,6 +20,7 @@ SRC = \
 	src/core/fs.rs \
 	src/visualizer/mod.rs \
 	src/visualizer/camera.rs \
+	src/visualizer/scene.rs \
 	src/visualizer/geom.rs \
 	src/visualizer/mgl.rs \
 	src/visualizer/mesh.rs \
