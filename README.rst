@@ -32,7 +32,7 @@ Compile Marauder::
     make
 
 Models, textures, sounds, etc are stored in separate repo.
-Marauder expects them in 'data' directory.
+Marauder expects them in 'bin/data' directory.
 
 Download to 'data' directory::
 
@@ -44,13 +44,13 @@ Run Marauder::
 
 or::
 
-    cd bin && ./marauder
+    ./bin/marauder
 
 
 How to Play
 ===========
 
-- Use arrows to move camera and '-'/'+' to zoom;
+- Use arrows or WASD to move camera and '-'/'+' to zoom;
 - Hold RMB to rotate camera;
 - Press 'u' to create new unit in current tile;
 - Click on friendly unit to select it;
