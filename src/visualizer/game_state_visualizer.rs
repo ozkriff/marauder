@@ -4,6 +4,7 @@ use std::collections::hashmap::HashMap;
 use time::precise_time_ns;
 use glfw;
 use cgmath::vector::{Vector3, Vector2};
+use cgmath::matrix::{Matrix4};
 use error_context;
 use core::map::MapPosIter;
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos, Point2};
@@ -17,7 +18,7 @@ use visualizer::geom;
 use visualizer::picker;
 use visualizer::obj;
 use visualizer::mesh::{Mesh, MeshId};
-use visualizer::scene::Scene;
+use visualizer::scene::{Scene, SceneNode};
 use visualizer::types::{
     WorldPos,
     VertexCoord,
@@ -243,12 +244,30 @@ impl GameStateVisualizer {
         self.scenes.get(&self.core.player_id())
     }
 
-    fn draw_units(&self, context: &Context) {
+    fn draw_scene_node(
+        &self,
+        node: &SceneNode,
+        m: Matrix4<MFloat>,
+        context: &Context
+    ) {
+        let m = mgl::tr(m, node.pos.v);
+        let m = mgl::rot_z(m, node.rot);
+        match node.mesh_id {
+            Some(mesh_id) => {
+                context.shader.uniform_mat4f(context.mvp_mat_id, &m);
+                let id = mesh_id.id as uint;
+                self.meshes.get(id).draw(&context.shader);
+            },
+            None => {},
+        }
+        for node in node.children.iter() {
+            self.draw_scene_node(node, m, context);
+        }
+    }
+
+    fn draw_scene_nodes(&self, context: &Context) {
         for (_, node) in self.scene().nodes.iter() {
-            let m = mgl::tr(self.camera.mat(), node.pos.v);
-            let m = mgl::rot_z(m, node.rot);
-            context.shader.uniform_mat4f(context.mvp_mat_id, &m);
-            self.meshes.get(node.mesh_id.id as uint).draw(&context.shader);
+            self.draw_scene_node(node, self.camera.mat(), context);
         }
     }
 
@@ -282,7 +301,7 @@ impl GameStateVisualizer {
 
     fn draw_scene(&mut self, context: &Context, dtime: Time) {
         context.shader.uniform_color(context.basic_color_id, mgl::WHITE);
-        self.draw_units(context);
+        self.draw_scene_nodes(context);
         self.draw_map(context);
         if !self.event_visualizer.is_none() {
             let scene = self.scenes.get_mut(&self.core.player_id());
@@ -465,6 +484,7 @@ impl GameStateVisualizer {
                     scene,
                     state,
                     id,
+                    type_id,
                     *pos,
                     match type_id {
                         core::Tank => self.tank_mesh_id,

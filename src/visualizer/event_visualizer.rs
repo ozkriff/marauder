@@ -6,6 +6,7 @@ use cgmath::vector::{Vector3, Vector, EuclideanVector};
 use visualizer::geom;
 use core::types::{MapPos, UnitId};
 use core::game_state::GameState;
+use core::core;
 use visualizer::mesh::{MeshId};
 use visualizer::scene::{Scene, SceneNode, NodeId};
 use visualizer::types::{MFloat, WorldPos, Time};
@@ -137,11 +138,54 @@ pub struct EventCreateUnitVisualizer {
     move: MoveHelper,
 }
 
+fn get_unit_scene_nodes(
+    type_id: core::UnitTypeId,
+    mesh_id: MeshId,
+) -> Vec<SceneNode> {
+    match type_id {
+        core::Tank => vec![
+            SceneNode {
+                pos: WorldPos{v: Vector3{x: 0.0, y: 0.0, z: 0.0}},
+                rot: 0.0,
+                mesh_id: Some(mesh_id),
+                children: vec![],
+            },
+        ],
+        core::Soldier => vec![
+            SceneNode {
+                pos: WorldPos{v: Vector3{x: 0.2, y: 0.2, z: 0.0}},
+                rot: 0.0,
+                mesh_id: Some(mesh_id),
+                children: vec![],
+            },
+            SceneNode {
+                pos: WorldPos{v: Vector3{x: 0.2, y: -0.2, z: 0.0}},
+                rot: 0.0,
+                mesh_id: Some(mesh_id),
+                children: vec![],
+            },
+            SceneNode {
+                pos: WorldPos{v: Vector3{x: -0.2, y: 0.2, z: 0.0}},
+                rot: 0.0,
+                mesh_id: Some(mesh_id),
+                children: vec![],
+            },
+            SceneNode {
+                pos: WorldPos{v: Vector3{x: -0.2, y: -0.2, z: 0.0}},
+                rot: 0.0,
+                mesh_id: Some(mesh_id),
+                children: vec![],
+            },
+        ],
+    }
+}
+
 impl EventCreateUnitVisualizer {
     pub fn new(
         scene: &mut Scene,
         _: &GameState,
         id: UnitId,
+        type_id: core::UnitTypeId,
         pos: MapPos,
         mesh_id: MeshId,
         marker_mesh_id: MeshId
@@ -154,12 +198,14 @@ impl EventCreateUnitVisualizer {
         scene.nodes.insert(node_id, SceneNode {
             pos: from,
             rot: rot,
-            mesh_id: mesh_id,
+            mesh_id: None,
+            children: get_unit_scene_nodes(type_id, mesh_id),
         });
         scene.nodes.insert(marker_id(id), SceneNode {
             pos: WorldPos{v: to.v.add_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))},
             rot: 0.0,
-            mesh_id: marker_mesh_id,
+            mesh_id: Some(marker_mesh_id),
+            children: Vec::new(),
         });
         let move = MoveHelper::new(from, to, 1.0);
         box EventCreateUnitVisualizer {
@@ -259,7 +305,8 @@ impl EventAttackUnitVisualizer {
             scene.nodes.insert(shell_node_id, SceneNode {
                 pos: from,
                 rot: 0.0,
-                mesh_id: shell_mesh_id,
+                mesh_id: Some(shell_mesh_id),
+                children: Vec::new(),
             });
             MoveHelper::new(from, to, 10.0)
         };

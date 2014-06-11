@@ -61,7 +61,8 @@ impl SelectionManager {
         let node = SceneNode {
             pos: self.get_pos(state),
             rot: 0.0,
-            mesh_id: self.mesh_id,
+            mesh_id: Some(self.mesh_id),
+            children: Vec::new(),
         };
         scene.nodes.insert(self.node_id, node);
     }
@@ -76,7 +77,7 @@ pub fn get_selection_mesh(fs: &FileSystem, shader: &Shader) -> Mesh {
     let tex = Texture::new(&fs.get(&Path::new("data/shell.png")));
     let mut vertex_data = Vec::new();
     let mut tex_data = Vec::new();
-    let scale_1 = 0.4;
+    let scale_1 = 0.6;
     let scale_2 = scale_1 + 0.05;
     for num in range(0 as MInt, 6) {
         let vertex_1_1 = geom::index_to_hex_vertex_s(scale_1, num);
