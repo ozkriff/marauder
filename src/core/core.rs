@@ -16,6 +16,7 @@ pub enum Command {
     CommandAttackUnit(UnitId, UnitId),
 }
 
+#[deriving(Clone)]
 pub enum Event {
     EventMove(UnitId, Vec<MapPos>),
     EventEndTurn(PlayerId, PlayerId), // old_id, new_id
@@ -27,6 +28,7 @@ pub struct Player {
     pub id: PlayerId,
 }
 
+#[deriving(Clone)]
 pub enum UnitTypeId {
     Tank,
     Soldier,
@@ -43,7 +45,7 @@ pub struct Core {
     game_state: GameState,
     players: Vec<Player>,
     current_player_id: PlayerId,
-    core_event_list: Vec<Box<CoreEvent>>,
+    core_event_list: Vec<Event>,
     event_lists: HashMap<PlayerId, Vec<Event>>,
     map_size: Size2<MInt>,
 }
@@ -82,10 +84,22 @@ impl Core {
         core
     }
 
+    fn get_new_unit_id(&self) -> UnitId {
+        let id = match self.game_state.units.keys().max_by(|&n| n) {
+            Some(n) => n.id + 1,
+            None => 0,
+        };
+        UnitId{id: id}
+    }
+
     fn add_unit(&mut self, pos: MapPos, type_id: UnitTypeId, player_id: PlayerId) {
-        let core_event = CoreEventCreateUnit::new(
-            self, pos, type_id, player_id);
-        self.do_core_event(core_event);
+        let event = EventCreateUnit(
+            self.get_new_unit_id(),
+            pos,
+            type_id,
+            player_id,
+        );
+        self.do_core_event(event);
     }
 
     pub fn map_size(&self) -> Size2<MInt> {
@@ -120,195 +134,75 @@ impl Core {
         list.shift()
     }
 
-    fn command_to_core_event(&self, command: Command) -> Box<CoreEvent> {
+    fn command_to_event(&self, command: Command) -> Event {
         match command {
             CommandEndTurn => {
-                CoreEventEndTurn::new(self) as Box<CoreEvent>
+                let old_id = self.current_player_id.id;
+                let max_id = self.players.len() as MInt;
+                let new_id = if old_id + 1 == max_id {
+                    0
+                } else {
+                    old_id + 1
+                };
+                EventEndTurn(PlayerId{id: old_id}, PlayerId{id: new_id})
             },
             CommandCreateUnit(pos) => {
-                CoreEventCreateUnit::new(
-                    self,
+                EventCreateUnit(
+                    self.get_new_unit_id(),
                     pos,
                     Tank, // TODO: replace Tank with ...
                     self.current_player_id,
-                ) as Box<CoreEvent>
+                )
             },
             CommandMove(unit_id, path) => {
-                CoreEventMove::new(self, unit_id, path) as Box<CoreEvent>
+                EventMove(unit_id, path)
             },
             CommandAttackUnit(attacker_id, defender_id) => {
-                CoreEventAttackUnit::new(
-                    self,
+                EventAttackUnit(
                     attacker_id,
                     defender_id,
                     self.hit_test(attacker_id, defender_id),
-                ) as Box<CoreEvent>
+                )
             },
         }
     }
 
     pub fn do_command(&mut self, command: Command) {
-        let core_event = self.command_to_core_event(command);
-        self.do_core_event(core_event);
+        let event = self.command_to_event(command);
+        self.do_core_event(event);
     }
 
-    fn do_core_event(&mut self, core_event: Box<CoreEvent>) {
+    fn do_core_event(&mut self, core_event: Event) {
         self.core_event_list.push(core_event);
         self.make_events();
+    }
+
+    fn apply_event(&mut self, event: &Event) {
+        match *event {
+            EventEndTurn(old_player_id, new_player_id) => {
+                for player in self.players.iter() {
+                    if player.id == new_player_id {
+                        if self.current_player_id == old_player_id {
+                            self.current_player_id = player.id;
+                        }
+                        return;
+                    }
+                }
+            },
+            _ => {},
+        }
     }
 
     fn make_events(&mut self) {
         while self.core_event_list.len() != 0 {
             let event = self.core_event_list.pop().unwrap();
-            event.apply(self);
+            self.apply_event(&event);
+            self.game_state.apply_event(&event);
             for player in self.players.iter() {
                 let event_list = self.event_lists.get_mut(&player.id);
-                event_list.push(event.to_event());
+                // TODO: per player event filter
+                event_list.push(event.clone());
             }
-        }
-    }
-}
-
-trait CoreEvent {
-    fn apply(&self, core: &mut Core);
-    fn to_event(&self) -> Event;
-    // TODO: fn is_visible(&self) -> MBool;
-}
-
-struct CoreEventMove {
-    unit_id: UnitId,
-    path: Vec<MapPos>,
-}
-
-impl CoreEventMove {
-    fn new(_: &Core, unit_id: UnitId, path: Vec<MapPos>) -> Box<CoreEventMove> {
-        box CoreEventMove {
-            path: path,
-            unit_id: unit_id,
-        }
-    }
-}
-
-impl CoreEvent for CoreEventMove {
-    fn to_event(&self) -> Event {
-        EventMove(self.unit_id, self.path.clone())
-    }
-
-    fn apply(&self, core: &mut Core) {
-        let unit = core.game_state.units.get_mut(&self.unit_id);
-        unit.pos = *self.path.last().unwrap();
-    }
-}
-
-struct CoreEventEndTurn {
-    old_id: PlayerId,
-    new_id: PlayerId,
-}
-
-impl CoreEventEndTurn {
-    fn new(core: &Core) -> Box<CoreEventEndTurn> {
-        let old_id = core.current_player_id.id;
-        let max_id = core.players.len() as MInt;
-        let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
-        box CoreEventEndTurn {
-            old_id: PlayerId{id: old_id},
-            new_id: PlayerId{id: new_id},
-        }
-    }
-}
-
-impl CoreEvent for CoreEventEndTurn {
-    fn to_event(&self) -> Event {
-        EventEndTurn(self.old_id, self.new_id)
-    }
-
-    fn apply(&self, core: &mut Core) {
-        // core.deselected_any_units();
-        for player in core.players.iter() {
-            if player.id == self.new_id {
-                if core.current_player_id == self.old_id {
-                    core.current_player_id = player.id;
-                }
-                return;
-            }
-        }
-    }
-}
-
-struct CoreEventCreateUnit {
-    pos: MapPos,
-    id: UnitId,
-    type_id: UnitTypeId,
-    player_id: PlayerId,
-}
-
-impl CoreEventCreateUnit {
-    fn new(
-        core: &Core,
-        pos: MapPos,
-        type_id: UnitTypeId,
-        player_id: PlayerId
-    ) -> Box<CoreEventCreateUnit> {
-        let new_id = match core.game_state.units.keys().max_by(|&n| n) {
-            Some(n) => n.id + 1,
-            None => 0,
-        };
-        box CoreEventCreateUnit {
-            id: UnitId{id: new_id},
-            pos: pos,
-            type_id: type_id,
-            player_id: player_id,
-        }
-    }
-}
-
-impl CoreEvent for CoreEventCreateUnit {
-    fn to_event(&self) -> Event {
-        EventCreateUnit(self.id, self.pos, self.type_id, self.player_id)
-    }
-
-    fn apply(&self, core: &mut Core) {
-        assert!(core.game_state.units.find(&self.id).is_none());
-        core.game_state.units.insert(self.id, Unit {
-            id: self.id,
-            pos: self.pos,
-            type_id: self.type_id,
-            player_id: core.current_player_id,
-        });
-    }
-}
-
-struct CoreEventAttackUnit {
-    attacker_id: UnitId,
-    defender_id: UnitId,
-    killed: bool,
-}
-
-impl CoreEventAttackUnit {
-    fn new(
-        _: &Core,
-        attacker_id: UnitId,
-        defender_id: UnitId,
-        killed: bool
-    ) -> Box<CoreEventAttackUnit> {
-        println!("killed: {}", killed);
-        box CoreEventAttackUnit {
-            attacker_id: attacker_id,
-            defender_id: defender_id,
-            killed: killed,
-        }
-    }
-}
-
-impl CoreEvent for CoreEventAttackUnit {
-    fn to_event(&self) -> Event {
-        EventAttackUnit(self.attacker_id, self.defender_id, self.killed)
-    }
-
-    fn apply(&self, core: &mut Core) {
-        if self.killed {
-            assert!(core.game_state.units.find(&self.defender_id).is_some());
-            core.game_state.units.remove(&self.defender_id);
         }
     }
 }
