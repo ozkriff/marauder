@@ -230,7 +230,6 @@ impl EventVisualizer for EventCreateUnitVisualizer {
 }
 
 pub struct MoveHelper {
-    from: WorldPos,
     to: WorldPos,
     current: WorldPos,
     dist: MFloat,
@@ -247,7 +246,6 @@ impl MoveHelper {
         let dir = to.v.sub_v(&from.v).normalize();
         let dist = geom::dist(from, to);
         MoveHelper {
-            from: from,
             to: to,
             current: from,
             dist: dist,
@@ -277,7 +275,6 @@ fn vec3_z(z: MFloat) -> Vector3<MFloat> {
 }
 
 pub struct EventAttackUnitVisualizer {
-    attacker_id: UnitId,
     defender_id: UnitId,
     killed: bool,
     move: MoveHelper,
@@ -311,7 +308,6 @@ impl EventAttackUnitVisualizer {
             MoveHelper::new(from, to, 10.0)
         };
         box EventAttackUnitVisualizer {
-            attacker_id: attacker_id,
             defender_id: defender_id,
             killed: killed,
             move: move,

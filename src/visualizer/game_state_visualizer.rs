@@ -145,7 +145,6 @@ fn get_initial_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
 
 pub struct GameStateVisualizer {
     map_mesh_id: MeshId,
-    selection_marker_mesh_id: MeshId,
     tank_mesh_id: MeshId,
     soldier_mesh_id: MeshId,
     shell_mesh_id: MeshId,
@@ -215,7 +214,6 @@ impl GameStateVisualizer {
             map_mesh_id: map_mesh_id,
             tank_mesh_id: tank_mesh_id,
             soldier_mesh_id: soldier_mesh_id,
-            selection_marker_mesh_id: selection_marker_mesh_id,
             shell_mesh_id: shell_mesh_id,
             marker_1_mesh_id: marker_1_mesh_id,
             marker_2_mesh_id: marker_2_mesh_id,

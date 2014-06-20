@@ -14,7 +14,6 @@ use visualizer::shader::Shader;
 struct Glyph {
     pos: Point2<MInt>,
     size: Size2<MInt>,
-    index: MInt,
     xoff: MInt,
     yoff: MInt,
 }
@@ -165,7 +164,6 @@ impl FontStash {
         let glyph = Glyph {
             pos: pos,
             size: size,
-            index: index,
             xoff: xoff,
             yoff: yoff,
         };

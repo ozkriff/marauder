@@ -19,7 +19,7 @@ extern crate gl;
 extern crate stb_image;
 extern crate stb_tt;
 
-#[phase(syntax, link)]
+#[phase(plugin, link)]
 extern crate error_context;
 
 use visualizer::visualizer::Visualizer;
