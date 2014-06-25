@@ -113,19 +113,11 @@ fn get_map_mesh(fs: &FileSystem, map_size: Size2<MInt>, shader: &Shader) -> Mesh
     mesh
 }
 
-// TODO: join with load_soldier_mesh
-fn load_tank_mesh(fs: &FileSystem, shader: &Shader) -> Mesh {
-    let tex = Texture::new(&fs.get(&Path::new("data/tank.png")));
-    let obj = obj::Model::new(&fs.get(&Path::new("data/tank.obj")));
-    let mut mesh = Mesh::new(obj.build().as_slice());
-    mesh.set_texture(tex, obj.build_tex_coord().as_slice());
-    mesh.prepare(shader);
-    mesh
-}
-
-fn load_soldier_mesh(fs: &FileSystem, shader: &Shader) -> Mesh {
-    let tex = Texture::new(&fs.get(&Path::new("data/soldier.png")));
-    let obj = obj::Model::new(&fs.get(&Path::new("data/soldier.obj")));
+fn load_unit_mesh(fs: &FileSystem, shader: &Shader, name: &str) -> Mesh {
+    let tex_path = Path::new(format!("data/{}.png", name).as_slice());
+    let obj_path = Path::new(format!("data/{}.obj", name).as_slice());
+    let tex = Texture::new(&fs.get(&tex_path));
+    let obj = obj::Model::new(&fs.get(&obj_path));
     let mut mesh = Mesh::new(obj.build().as_slice());
     mesh.set_texture(tex, obj.build_tex_coord().as_slice());
     mesh.prepare(shader);
@@ -185,9 +177,9 @@ impl GameStateVisualizer {
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(fs, map_size, &context.shader));
         let tank_mesh_id = add_mesh(
-            &mut meshes, load_tank_mesh(fs, &context.shader));
+            &mut meshes, load_unit_mesh(fs, &context.shader, "tank"));
         let soldier_mesh_id = add_mesh(
-            &mut meshes, load_soldier_mesh(fs, &context.shader));
+            &mut meshes, load_unit_mesh(fs, &context.shader, "soldier"));
         let selection_marker_mesh_id = add_mesh(
             &mut meshes, get_selection_mesh(fs, &context.shader));
         let shell_mesh_id = add_mesh(
