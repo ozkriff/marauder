@@ -281,19 +281,6 @@ impl GameStateVisualizer {
         self.meshes.get(self.map_mesh_id.id as uint).draw(&context.shader);
     }
 
-    fn draw_2d_text(&mut self, context: &Context) {
-        let m = mgl::get_2d_screen_matrix(context.win_size);
-        for (_, button) in self.button_manager.buttons().iter() {
-            let text_offset = Vector3 {
-                x: button.pos().v.x as MFloat,
-                y: button.pos().v.y as MFloat,
-                z: 0.0,
-            };
-            context.shader.uniform_mat4f(context.mvp_mat_id, &mgl::tr(m, text_offset));
-            button.draw(&context.shader);
-        }
-    }
-
     fn draw_3d_text(&mut self, context: &Context) {
         let mut font_stash = context.font_stash.borrow_mut();
         let m = self.camera.mat();
@@ -555,7 +542,7 @@ impl StateVisualizer for GameStateVisualizer {
         self.draw_scene(context, dtime);
         context.shader.uniform_color(context.basic_color_id, mgl::BLACK);
         self.draw_3d_text(context);
-        self.draw_2d_text(context);
+        self.button_manager.draw(context);
         context.win.swap_buffers();
     }
 

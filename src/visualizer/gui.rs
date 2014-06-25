@@ -1,11 +1,14 @@
 // See LICENSE file for copyright and license details.
 
 use std::collections::hashmap::HashMap;
+use cgmath::vector::Vector3;
 use core::types::{MInt, Size2, Point2};
+use visualizer::types::MFloat;
 use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;
 use visualizer::context::Context;
 use visualizer::mesh::Mesh;
+use visualizer::mgl;
 
 #[deriving(PartialEq, Eq, Hash)]
 pub struct ButtonId {pub id: MInt}
@@ -81,6 +84,20 @@ impl ButtonManager {
             }
         }
         None
+    }
+
+    pub fn draw(&self, context: &Context) {
+        let m = mgl::get_2d_screen_matrix(context.win_size);
+        for (_, button) in self.buttons().iter() {
+            let text_offset = Vector3 {
+                x: button.pos().v.x as MFloat,
+                y: button.pos().v.y as MFloat,
+                z: 0.0,
+            };
+            context.shader.uniform_mat4f(
+                context.mvp_mat_id, &mgl::tr(m, text_offset));
+            button.draw(&context.shader);
+        }
     }
 }
 

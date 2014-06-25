@@ -1,10 +1,10 @@
 // See LICENSE file for copyright and license details.
 
 use glfw;
-use cgmath::vector::{Vector3, Vector2};
+use cgmath::vector::Vector2;
 use core::types::{Point2};
 use visualizer::mgl;
-use visualizer::types::{MFloat, Time};
+use visualizer::types::Time;
 use visualizer::gui::{ButtonManager, Button, ButtonId};
 use visualizer::context::Context;
 use visualizer::state_visualizer::{
@@ -44,21 +44,6 @@ impl MenuStateVisualizer {
         }
     }
 
-    fn draw_2d_text(&mut self, context: &Context) {
-        // TODO: Reduce code duplication
-        let m = mgl::get_2d_screen_matrix(context.win_size);
-        for (_, button) in self.button_manager.buttons().iter() {
-            let text_offset = Vector3 {
-                x: button.pos().v.x as MFloat,
-                y: button.pos().v.y as MFloat,
-                z: 0.0,
-            };
-            context.shader.uniform_mat4f(
-                context.mvp_mat_id, &mgl::tr(m, text_offset));
-            button.draw(&context.shader);
-        }
-    }
-
     fn handle_mouse_button_event(&mut self, context: &Context) {
         match self.button_manager.get_clicked_button_id(context) {
             Some(button_id) => {
@@ -82,7 +67,7 @@ impl StateVisualizer for MenuStateVisualizer {
         mgl::clear_screen();
         context.shader.activate();
         context.shader.uniform_color(context.basic_color_id, mgl::WHITE);
-        self.draw_2d_text(context);
+        self.button_manager.draw(context);
         context.win.swap_buffers();
     }
 
