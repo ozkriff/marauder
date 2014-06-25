@@ -37,7 +37,7 @@ get_gl_rs() {
 get_cgmath_rs() {
     echo === cgmath-rs ===
     git clone --depth=1 https://github.com/bjz/cgmath-rs
-    rustc cgmath-rs/src/cgmath/lib.rs --out-dir .
+    rustc cgmath-rs/src/cgmath.rs --out-dir .
 }
 
 get_stb_image() {
