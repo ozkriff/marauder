@@ -5,6 +5,7 @@ use core::types::{MInt, Size2, Point2};
 use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;
 use visualizer::context::Context;
+use visualizer::mesh::Mesh;
 
 #[deriving(PartialEq, Eq, Hash)]
 pub struct ButtonId {pub id: MInt}
@@ -12,26 +13,26 @@ pub struct ButtonId {pub id: MInt}
 pub struct Button {
     pos: Point2<MInt>, // TODO: ScreenPos
     size: Size2<MInt>,
-    label: String,
+    mesh: Mesh,
 }
 
 impl Button {
     pub fn new(
         label: &str,
         font_stash: &mut FontStash,
+        shader: &Shader,
         pos: Point2<MInt>
     ) -> Button {
         let (_, size) = font_stash.get_text_size(label);
         Button {
             pos: pos,
             size: size,
-            label: String::from_str(label),
+            mesh: font_stash.get_mesh(label, shader),
         }
     }
 
-    pub fn draw(&self, font_stash: &mut FontStash, shader: &Shader) {
-        let text_mesh = font_stash.get_mesh(self.label.as_slice(), shader);
-        text_mesh.draw(shader);
+    pub fn draw(&self, shader: &Shader) {
+        self.mesh.draw(shader);
     }
 
     pub fn pos(&self) -> Point2<MInt> {

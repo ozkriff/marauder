@@ -27,11 +27,13 @@ impl MenuStateVisualizer {
         let button_start_id = button_manager.add_button(Button::new(
             "start",
             context.font_stash.borrow_mut().deref_mut(),
+            &context.shader,
             Point2{v: Vector2{x: 10, y: 40}})
         );
         let button_quit_id = button_manager.add_button(Button::new(
             "quit",
             context.font_stash.borrow_mut().deref_mut(),
+            &context.shader,
             Point2{v: Vector2{x: 10, y: 10}})
         );
         MenuStateVisualizer {
@@ -53,7 +55,7 @@ impl MenuStateVisualizer {
             };
             context.shader.uniform_mat4f(
                 context.mvp_mat_id, &mgl::tr(m, text_offset));
-            button.draw(context.font_stash.borrow_mut().deref_mut(), &context.shader);
+            button.draw(&context.shader);
         }
     }
 
