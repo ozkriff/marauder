@@ -22,7 +22,7 @@ impl SelectionManager {
     pub fn new(mesh_id: MeshId) -> SelectionManager {
         SelectionManager {
             unit_id: None,
-            node_id: NodeId{id: 666 + 1}, // TODO
+            node_id: NodeId{id: 1666 + 1}, // TODO
             mesh_id: mesh_id,
         }
     }

@@ -4,19 +4,51 @@ use cgmath::vector::{Vector2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
 use core::fs::FileSystem;
+use core::game_state::GameState;
 use visualizer::mgl;
 use visualizer::camera::Camera;
 use visualizer::geom;
 use visualizer::mesh::Mesh;
 use visualizer::types::{Color3, MFloat, MatId, VertexCoord};
-use visualizer::scene::{Scene, NodeId};
 use visualizer::shader::Shader;
 
 fn i_to_f(n: MInt) -> f32 {
     n as MFloat / 255.0
 }
 
-fn get_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
+pub enum PickResult {
+    PickedMapPos(MapPos),
+    PickedUnitId(UnitId),
+    PickedNothing
+}
+
+pub struct TilePicker {
+    shader: Shader,
+    mesh: Mesh,
+    mvp_mat_id: MatId,
+    map_size: Size2<MInt>,
+}
+
+fn tile_color(state: &GameState, pos: MapPos) -> Color3 {
+    let mut unit = None;
+    for (_, unit2) in state.units.iter() {
+        if unit2.pos == pos {
+            unit = Some(unit2);
+        }
+    }
+    match unit {
+        Some(unit) => {
+            Color3{r: i_to_f(unit.id.id), g: 0.0, b: i_to_f(2)}
+        },
+        None => {
+            let col_x = i_to_f(pos.v.x);
+            let col_y = i_to_f(pos.v.y);
+            Color3{r: col_x, g: col_y, b: i_to_f(1)}
+        },
+    }
+}
+
+fn get_mesh(state: &GameState, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut c_data = Vec::new();
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
@@ -24,9 +56,7 @@ fn get_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
         for num in range(0 as MInt, 6) {
             let vertex = geom::index_to_hex_vertex(num);
             let next_vertex = geom::index_to_hex_vertex(num + 1);
-            let col_x = i_to_f(tile_pos.v.x);
-            let col_y = i_to_f(tile_pos.v.y);
-            let color = Color3{r: col_x, g: col_y, b: i_to_f(1)};
+            let color = tile_color(state, tile_pos);
             v_data.push(VertexCoord{v: pos3d.v + vertex.v});
             c_data.push(color);
             v_data.push(VertexCoord{v: pos3d.v + next_vertex.v});
@@ -41,68 +71,25 @@ fn get_mesh(map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     mesh
 }
 
-pub enum PickResult {
-    PickedMapPos(MapPos),
-    PickedUnitId(UnitId),
-    PickedNothing
-}
-
-pub struct TilePicker {
-    shader: Shader,
-    map_mesh: Mesh,
-    units_mesh: Option<Mesh>,
-    mvp_mat_id: MatId,
-}
-
 impl TilePicker {
-    pub fn new(fs: &FileSystem, map_size: Size2<MInt>) -> TilePicker {
+    pub fn new(fs: &FileSystem, state: &GameState, map_size: Size2<MInt>) -> TilePicker {
         let shader = Shader::new(
             &fs.get(&Path::new("data/pick.vs.glsl")),
             &fs.get(&Path::new("data/pick.fs.glsl")),
         );
         let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
-        let map_mesh = get_mesh(map_size, &shader);
+        let mesh = get_mesh(state, map_size, &shader);
         let tile_picker = TilePicker {
-            map_mesh: map_mesh,
-            units_mesh: None,
+            mesh: mesh,
             shader: shader,
             mvp_mat_id: mvp_mat_id,
+            map_size: map_size,
         };
         tile_picker
     }
 
-    pub fn update_units(&mut self, scene: &Scene) {
-        let last_unit_node_id = NodeId{id: 1000}; // TODO
-        let mut c_data = Vec::new();
-        let mut v_data = Vec::new();
-        let scale = 0.5;
-        for (node_id, node) in scene.nodes.iter() {
-            if node_id.id >= last_unit_node_id.id {
-                continue;
-            }
-            let color = Color3 {r: i_to_f(node_id.id), g: 0.0, b: i_to_f(2)};
-            for num in range(0 as MInt, 6) {
-                v_data.push(VertexCoord {
-                    v: node.pos.v + geom::index_to_hex_vertex_s(scale, num).v
-                });
-                c_data.push(color);
-                v_data.push(VertexCoord {
-                    v: node.pos.v + geom::index_to_hex_vertex_s(scale, num + 1).v
-                });
-                c_data.push(color);
-                v_data.push(VertexCoord{v: node.pos.v});
-                c_data.push(color);
-            }
-        }
-        // draw unit markers slightly above the floor
-        let unit_marker_height = 0.01;
-        for vertex_coord in v_data.mut_iter() {
-            vertex_coord.v.z = unit_marker_height;
-        }
-        let mut mesh = Mesh::new(v_data.as_slice());
-        mesh.set_color(c_data.as_slice());
-        mesh.prepare(&self.shader);
-        self.units_mesh = Some(mesh);
+    pub fn update_units(&mut self, state: &GameState) {
+        self.mesh = get_mesh(state, self.map_size, &self.shader);
     }
 
     pub fn pick_tile(
@@ -115,11 +102,7 @@ impl TilePicker {
         self.shader.uniform_mat4f(self.mvp_mat_id, &camera.mat());
         mgl::set_clear_color(Color3{r: 0.0, g: 0.0, b: 0.0});
         mgl::clear_screen();
-        self.map_mesh.draw(&self.shader);
-        match self.units_mesh {
-            Some(ref units) => units.draw(&self.shader),
-            None => {},
-        };
+        self.mesh.draw(&self.shader);
         let (r, g, b, _) = mgl::read_pixel_bytes(win_size, mouse_pos);
         match b {
             0 => PickedNothing,

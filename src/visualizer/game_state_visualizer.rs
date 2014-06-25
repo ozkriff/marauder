@@ -175,7 +175,12 @@ impl GameStateVisualizer {
         let players_count = 2;
         let core = core::Core::new(fs);
         let map_size = core.map_size();
-        let picker = picker::TilePicker::new(fs, core.map_size());
+        let game_states = get_game_states(players_count);
+        let picker = picker::TilePicker::new(
+            fs,
+            game_states.get(&core.player_id()),
+            core.map_size(),
+        );
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(fs, map_size, &context.shader));
@@ -229,7 +234,7 @@ impl GameStateVisualizer {
             event_visualizer: None,
             event: None,
             scenes: get_scenes(players_count),
-            game_states: get_game_states(players_count),
+            game_states: game_states,
             pathfinders: get_pathfinders(players_count, map_size),
             button_manager: button_manager,
             button_end_turn_id: button_end_turn_id,
@@ -525,7 +530,7 @@ impl GameStateVisualizer {
             pf.fill_map(state, state.units.get(&unit_id));
             self.selection_manager.move_selection_marker(state, scene);
         }
-        self.picker.update_units(scene);
+        self.picker.update_units(state);
     }
 }
 

@@ -295,7 +295,7 @@ impl EventAttackUnitVisualizer {
         let from = scene.nodes.get(&node_id).pos;
         let to = WorldPos{v: from.v.sub_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))};
         let move = MoveHelper::new(from, to, 1.0);
-        let shell_node_id = NodeId{id: 666}; // TODO
+        let shell_node_id = NodeId{id: 1666}; // TODO
         let shell_move = {
             let from = scene.nodes.get(&unit_id_to_node_id(attacker_id)).pos;
             let to = scene.nodes.get(&unit_id_to_node_id(defender_id)).pos;
