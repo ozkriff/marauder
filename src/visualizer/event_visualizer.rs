@@ -319,9 +319,8 @@ impl EventAttackUnitVisualizer {
 
 impl EventVisualizer for EventAttackUnitVisualizer {
     fn is_finished(&self) -> bool {
-        // TODO: Simplify
         if self.killed {
-            self.move.is_finished() && self.shell_move.is_finished()
+            self.move.is_finished()
         } else {
             self.shell_move.is_finished()
         }
