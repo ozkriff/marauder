@@ -6,7 +6,7 @@ use core::types::{Point2};
 use visualizer::mgl;
 use visualizer::types::{MFloat, Time};
 use visualizer::gui::{ButtonManager, Button, ButtonId};
-use visualizer::context::{Context, get_2d_screen_matrix};
+use visualizer::context::Context;
 use visualizer::state_visualizer::{
     StateVisualizer,
     StateChangeCommand,
@@ -46,7 +46,7 @@ impl MenuStateVisualizer {
 
     fn draw_2d_text(&mut self, context: &Context) {
         // TODO: Reduce code duplication
-        let m = get_2d_screen_matrix(context);
+        let m = mgl::get_2d_screen_matrix(context.win_size);
         for (_, button) in self.button_manager.buttons().iter() {
             let text_offset = Vector3 {
                 x: button.pos().v.x as MFloat,

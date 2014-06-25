@@ -37,7 +37,7 @@ use visualizer::shader::Shader;
 use visualizer::texture::Texture;
 use visualizer::gui::{ButtonManager, Button, ButtonId};
 use visualizer::selection::{SelectionManager, get_selection_mesh};
-use visualizer::context::{Context, get_2d_screen_matrix};
+use visualizer::context::Context;
 use visualizer::state_visualizer::{
     StateVisualizer,
     StateChangeCommand,
@@ -282,7 +282,7 @@ impl GameStateVisualizer {
     }
 
     fn draw_2d_text(&mut self, context: &Context) {
-        let m = get_2d_screen_matrix(context);
+        let m = mgl::get_2d_screen_matrix(context.win_size);
         for (_, button) in self.button_manager.buttons().iter() {
             let text_offset = Vector3 {
                 x: button.pos().v.x as MFloat,

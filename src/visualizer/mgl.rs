@@ -9,6 +9,7 @@ use cgmath::matrix::{Matrix, Matrix4, Matrix3, ToMatrix4};
 use cgmath::array::Array2;
 use cgmath::vector::{Vector2, Vector3};
 use cgmath::angle;
+use cgmath::projection;
 use core::misc::deg_to_rad;
 use core::types::{Size2, MInt};
 use visualizer::types::{MFloat, Color3, Color4};
@@ -201,6 +202,16 @@ pub fn read_pixel_bytes(
         ));
     }
     (data[0] as MInt, data[1] as MInt, data[2] as MInt, data[3] as MInt)
+}
+
+pub fn get_2d_screen_matrix(win_size: Size2<MInt>) -> Matrix4<MFloat> {
+    let left = 0.0;
+    let right = win_size.w as MFloat;
+    let bottom = 0.0;
+    let top = win_size.h as MFloat;
+    let near = -1.0;
+    let far = 1.0;
+    projection::ortho(left, right, bottom, top, near, far)
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
