@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use cgmath::vector::Vector2;
-use core::types::{MInt, UnitId};
+use core::types::UnitId;
 use core::game_state::GameState;
 use core::misc::add_quad_to_vec;
 use core::fs::FileSystem;
@@ -79,7 +79,7 @@ pub fn get_selection_mesh(fs: &FileSystem, shader: &Shader) -> Mesh {
     let mut tex_data = Vec::new();
     let scale_1 = 0.6;
     let scale_2 = scale_1 + 0.05;
-    for num in range(0 as MInt, 6) {
+    for num in range(0i32, 6) {
         let vertex_1_1 = geom::index_to_hex_vertex_s(scale_1, num);
         let vertex_1_2 = geom::index_to_hex_vertex_s(scale_2, num);
         let vertex_2_1 = geom::index_to_hex_vertex_s(scale_1, num + 1);

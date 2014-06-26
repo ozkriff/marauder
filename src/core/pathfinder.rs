@@ -96,8 +96,8 @@ impl Pathfinder {
         pos: MapPos
     ) {
         assert!(self.map.is_inboard(pos));
-        for i in range(0 as MInt, 6) {
-            let neighbour_pos = Dir::get_neighbour_pos(pos, Dir::from_int(i));
+        for i in range(0i, 6) {
+            let neighbour_pos = Dir::get_neighbour_pos(pos, Dir::from_int(i as MInt));
             if self.map.is_inboard(neighbour_pos) {
                 self.process_neighbour_pos(
                     state, unit, pos, neighbour_pos);

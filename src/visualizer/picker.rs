@@ -53,7 +53,7 @@ fn get_mesh(state: &GameState, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut v_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
         let pos3d = geom::map_pos_to_world_pos(tile_pos);
-        for num in range(0 as MInt, 6) {
+        for num in range(0i32, 6) {
             let vertex = geom::index_to_hex_vertex(num);
             let next_vertex = geom::index_to_hex_vertex(num + 1);
             let color = tile_color(state, tile_pos);

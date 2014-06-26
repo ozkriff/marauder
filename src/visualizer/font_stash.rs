@@ -120,7 +120,7 @@ impl FontStash {
         size: Size2<MInt>,
         bitmap: Vec<u8>
     ) {
-        let mut data = Vec::from_elem((size.w * size.h) as uint * 4, 0 as u8);
+        let mut data = Vec::from_elem((size.w * size.h) as uint * 4, 0u8);
         for y in range(0, size.h) {
             for x in range(0, size.w) {
                 let n = (x + y * size.w) as uint * 4;

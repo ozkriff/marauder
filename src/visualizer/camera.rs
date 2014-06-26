@@ -18,7 +18,7 @@ pub struct Camera {
 }
 
 fn get_projection_mat(win_size: Size2<MInt>) -> Matrix4<MFloat> {
-    let fov = angle::deg(45.0 as MFloat);
+    let fov = angle::deg(45.0f32);
     let ratio = win_size.w as MFloat / win_size.h as MFloat;
     let display_range_min = 0.1;
     let display_range_max = 100.0;

@@ -118,8 +118,8 @@ impl Model {
     pub fn build(&self) -> Vec<VertexCoord> {
         let mut mesh = Vec::new();
         for face in self.faces.iter() {
-            for i in range(0, 3) {
-                let vertex_id = face.vertex[i as uint] - 1;
+            for i in range(0u, 3) {
+                let vertex_id = face.vertex[i] - 1;
                 mesh.push(*self.coords.get(vertex_id as uint));
             }
         }
@@ -129,8 +129,8 @@ impl Model {
     pub fn build_tex_coord(&self) -> Vec<TextureCoord> {
         let mut tex_coords = Vec::new();
         for face in self.faces.iter() {
-            for i in range(0, 3) {
-                let texture_coord_id = face.texture[i as uint] as uint - 1;
+            for i in range(0u, 3) {
+                let texture_coord_id = face.texture[i] as uint - 1;
                 tex_coords.push(*self.texture_coords.get(texture_coord_id));
             }
         }

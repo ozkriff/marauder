@@ -122,7 +122,7 @@ impl Core {
             (Soldier, Tank) => 7,
             (Soldier, Soldier) => 5,
         };
-        task_rng().gen_range(0, 10 + 1) > needed
+        task_rng().gen_range(0i, 10 + 1) > needed
     }
 
     pub fn player_id(&self) -> PlayerId {

@@ -72,7 +72,7 @@ fn load_image(path: &Path) -> image::Image<u8> {
 fn get_empty_texture(size: Size2<MInt>) -> Texture {
     let s = size.w;
     assert_eq!(size.w, size.h)
-    let data = Vec::from_elem((s * s) as uint * 4, 0 as u8);
+    let data = Vec::from_elem((s * s) as uint * 4, 0u8);
     let mut id = 0;
     unsafe {
         verify!(gl::GenTextures(1, &mut id))
