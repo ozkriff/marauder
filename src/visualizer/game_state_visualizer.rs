@@ -143,6 +143,7 @@ pub struct GameStateVisualizer {
     marker_1_mesh_id: MeshId,
     marker_2_mesh_id: MeshId,
     meshes: Vec<Mesh>,
+    map_text_mesh: Mesh,
     camera: Camera,
     commands: Vec<StateChangeCommand>,
     picker: picker::TilePicker,
@@ -209,6 +210,8 @@ impl GameStateVisualizer {
             &context.shader,
             Point2{v: Vector2{x: 10, y: 10}})
         );
+        let map_text_mesh = context.font_stash.borrow_mut().deref_mut()
+            .get_mesh("test text", &context.shader);
         let vis = GameStateVisualizer {
             map_mesh_id: map_mesh_id,
             tank_mesh_id: tank_mesh_id,
@@ -217,6 +220,7 @@ impl GameStateVisualizer {
             marker_1_mesh_id: marker_1_mesh_id,
             marker_2_mesh_id: marker_2_mesh_id,
             meshes: meshes,
+            map_text_mesh: map_text_mesh,
             camera: camera,
             picker: picker,
             map_pos_under_cursor: None,
@@ -279,8 +283,7 @@ impl GameStateVisualizer {
         let m = mgl::scale(m, 1.0 / font_stash.get_size());
         let m = mgl::rot_x(m, 90.0);
         context.shader.uniform_mat4f(context.mvp_mat_id, &m);
-        let text_mesh = font_stash.get_mesh("kill! Kill! kill!!!", &context.shader);
-        text_mesh.draw(&context.shader);
+        self.map_text_mesh.draw(&context.shader);
     }
 
     fn draw_scene(&mut self, context: &Context, dtime: Time) {
