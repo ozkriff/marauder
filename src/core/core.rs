@@ -39,6 +39,7 @@ pub struct Unit {
     pub pos: MapPos,
     pub player_id: PlayerId,
     pub type_id: UnitTypeId,
+    pub moved: bool,
 }
 
 pub struct Core {

@@ -9,7 +9,7 @@ use core::core::{
     EventCreateUnit,
     EventAttackUnit,
 };
-use core::types::{UnitId, MapPos};
+use core::types::{PlayerId, UnitId, MapPos};
 
 pub struct GameState {
     pub units: HashMap<UnitId, Unit>,
@@ -32,14 +32,26 @@ impl<'a> GameState {
         units
     }
 
+    fn refresh_units(&mut self, player_id: PlayerId) {
+        for (_, unit) in self.units.mut_iter() {
+            if unit.player_id == player_id {
+                unit.moved = false;
+            }
+        }
+    }
+
     pub fn apply_event(&mut self, event: &Event) {
         match *event {
             EventMove(id, ref path) => {
                 let pos = *path.last().unwrap();
                 let unit = self.units.get_mut(&id);
                 unit.pos = pos;
+                assert!(!unit.moved);
+                unit.moved = true;
             },
-            EventEndTurn(_, _) => {},
+            EventEndTurn(_, new_player_id) => {
+                self.refresh_units(new_player_id);
+            },
             EventCreateUnit(id, pos, type_id, player_id) => {
                 assert!(self.units.find(&id).is_none());
                 self.units.insert(id, Unit {
@@ -47,6 +59,7 @@ impl<'a> GameState {
                     pos: pos,
                     player_id: player_id,
                     type_id: type_id,
+                    moved: false,
                 });
             },
             EventAttackUnit(_, defender_id, killed) => {

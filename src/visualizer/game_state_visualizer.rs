@@ -381,10 +381,15 @@ impl GameStateVisualizer {
         if self.selected_unit_id.is_none() {
             return;
         }
+        let unit_id = self.selected_unit_id.unwrap();
         if self.is_tile_occupied(pos) {
             return;
         }
-        let unit_id = self.selected_unit_id.unwrap();
+        let state = self.game_states.get(&self.core.player_id());
+        let unit = state.units.get(&unit_id);
+        if unit.moved {
+            return;
+        }
         let pf = self.pathfinders.get_mut(&self.core.player_id());
         let path = pf.get_path(pos);
         if path.len() < 2 {
