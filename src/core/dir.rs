@@ -73,7 +73,7 @@ impl Dir {
         let subtable_index = if is_odd_row { 1 } else { 0 };
         let direction_index = dir.to_int();
         assert!(direction_index >= 0 && direction_index < 6);
-        let difference = DIR_TO_POS_DIFF[subtable_index as uint][direction_index as uint];
+        let difference = DIR_TO_POS_DIFF[subtable_index][direction_index as uint];
         MapPos{v: pos.v + difference}
     }
 }
