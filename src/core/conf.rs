@@ -23,7 +23,7 @@ impl Config {
             some_error => fail!("Unknown config parsing error: {}", some_error),
         };
         Config {
-            json: *json,
+            json: json,
         }
     }
 
