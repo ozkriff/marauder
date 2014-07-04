@@ -88,7 +88,7 @@ impl Model {
     fn read_line(&mut self, line: &str) {
         let mut words = line.words();
         fn is_correct_tag(tag: &str) -> bool {
-            tag.len() != 0 && tag[0] != ('#' as u8)
+            tag.len() != 0 && tag.as_bytes()[0] != ('#' as u8)
         }
         match words.next() {
             Some(tag) if is_correct_tag(tag) => {
