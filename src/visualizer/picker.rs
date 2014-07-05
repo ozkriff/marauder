@@ -12,6 +12,10 @@ use visualizer::mesh::Mesh;
 use visualizer::types::{Color3, MFloat, MatId, VertexCoord};
 use visualizer::shader::Shader;
 
+static PICK_CODE_NOTHING: MInt = 0;
+static PICK_CODE_MAP_POS: MInt = 1;
+static PICK_CODE_UNIT: MInt = 2;
+
 fn i_to_f(n: MInt) -> f32 {
     n as MFloat / 255.0
 }
@@ -38,12 +42,12 @@ fn tile_color(state: &GameState, pos: MapPos) -> Color3 {
     }
     match unit {
         Some(unit) => {
-            Color3{r: i_to_f(unit.id.id), g: 0.0, b: i_to_f(2)}
+            Color3{r: i_to_f(unit.id.id), g: 0.0, b: i_to_f(PICK_CODE_UNIT)}
         },
         None => {
             let col_x = i_to_f(pos.v.x);
             let col_y = i_to_f(pos.v.y);
-            Color3{r: col_x, g: col_y, b: i_to_f(1)}
+            Color3{r: col_x, g: col_y, b: i_to_f(PICK_CODE_MAP_POS)}
         },
     }
 }
@@ -105,9 +109,9 @@ impl TilePicker {
         self.mesh.draw(&self.shader);
         let (r, g, b, _) = mgl::read_pixel_bytes(win_size, mouse_pos);
         match b {
-            0 => PickedNothing,
-            1 => PickedMapPos(MapPos{v: Vector2{x: r, y: g}}),
-            2 => PickedUnitId(UnitId{id: r}),
+            PICK_CODE_NOTHING => PickedNothing,
+            PICK_CODE_MAP_POS => PickedMapPos(MapPos{v: Vector2{x: r, y: g}}),
+            PICK_CODE_UNIT => PickedUnitId(UnitId{id: r}),
             n => fail!("Picker: bad color tag: {}", n),
         }
     }
