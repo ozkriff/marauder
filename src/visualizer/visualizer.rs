@@ -31,6 +31,7 @@ pub struct Visualizer {
     events: EventsReceiver,
     context: Context,
     fs: FileSystem,
+    should_close: bool,
 }
 
 fn create_win(glfw: &glfw::Glfw, win_size: Size2<MInt>)
@@ -82,6 +83,7 @@ impl Visualizer {
             events: events,
             context: context,
             fs: fs,
+            should_close: false,
         }
     }
 
@@ -95,7 +97,7 @@ impl Visualizer {
     }
 
     pub fn is_running(&self) -> bool {
-        !self.context.win.should_close() // TODO: check State
+        !self.should_close
     }
 
     // TODO: simplify
@@ -121,7 +123,7 @@ impl Visualizer {
                 self.visualizers.pop();
             },
             Some(QuitMenu) => {
-                self.context.win.set_should_close(true);
+                self.should_close = true;
             },
             None => {},
         }
