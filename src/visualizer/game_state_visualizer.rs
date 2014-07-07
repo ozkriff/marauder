@@ -145,7 +145,8 @@ pub struct GameStateVisualizer {
     meshes: Vec<Mesh>,
     map_text_mesh: Mesh,
     camera: Camera,
-    commands: Vec<StateChangeCommand>,
+    commands_rx: Receiver<StateChangeCommand>,
+    commands_tx: Sender<StateChangeCommand>,
     picker: picker::TilePicker,
     map_pos_under_cursor: Option<MapPos>,
     selected_unit_id: Option<UnitId>,
@@ -212,6 +213,7 @@ impl GameStateVisualizer {
         );
         let map_text_mesh = context.font_stash.borrow_mut().deref_mut()
             .get_mesh("test text", &context.shader);
+        let (commands_tx, commands_rx) = channel();
         let vis = GameStateVisualizer {
             map_mesh_id: map_mesh_id,
             tank_mesh_id: tank_mesh_id,
@@ -236,7 +238,8 @@ impl GameStateVisualizer {
             button_end_turn_id: button_end_turn_id,
             button_quit_id: button_quit_id,
             selection_manager: SelectionManager::new(selection_marker_mesh_id),
-            commands: Vec::new(),
+            commands_rx: commands_rx,
+            commands_tx: commands_tx,
         };
         vis
     }
@@ -346,7 +349,7 @@ impl GameStateVisualizer {
 
     fn handle_key_event(&mut self, _: &Context, key: glfw::Key) {
         match key {
-            glfw::KeyEscape | glfw::KeyQ => self.commands.push(EndGame),
+            glfw::KeyEscape | glfw::KeyQ => self.commands_tx.send(EndGame),
             glfw::KeyUp | glfw::KeyW => self.camera.move(270.0, 0.1),
             glfw::KeyDown | glfw::KeyS => self.camera.move(90.0, 0.1),
             glfw::KeyRight | glfw::KeyD => self.camera.move(0.0, 0.1),
@@ -407,7 +410,7 @@ impl GameStateVisualizer {
                 if button_id == self.button_end_turn_id {
                     self.end_turn();
                 } else if button_id == self.button_quit_id {
-                    self.commands.push(EndGame);
+                    self.commands_tx.send(EndGame);
                 } else {
                     print!("Clicked on {} at {}\n", button_id.id, precise_time_ns());
                 }
@@ -565,8 +568,11 @@ impl StateVisualizer for GameStateVisualizer {
         }
     }
 
-    fn get_command(&mut self) -> Option<StateChangeCommand> {
-        self.commands.pop()
+    fn get_command(&self) -> Option<StateChangeCommand> {
+        match self.commands_rx.try_recv() {
+            Ok(cmd) => Some(cmd),
+            Err(_) => None,
+        }
     }
 }
 

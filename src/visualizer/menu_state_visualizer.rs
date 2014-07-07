@@ -18,7 +18,8 @@ pub struct MenuStateVisualizer {
     button_manager: ButtonManager,
     button_start_id: ButtonId,
     button_quit_id: ButtonId,
-    commands: Vec<StateChangeCommand>,
+    commands_rx: Receiver<StateChangeCommand>,
+    commands_tx: Sender<StateChangeCommand>,
 }
 
 impl MenuStateVisualizer {
@@ -36,11 +37,13 @@ impl MenuStateVisualizer {
             &context.shader,
             Point2{v: Vector2{x: 10, y: 10}})
         );
+        let (commands_tx, commands_rx) = channel();
         MenuStateVisualizer {
-            commands: Vec::new(),
             button_manager: button_manager,
             button_start_id: button_start_id,
             button_quit_id: button_quit_id,
+            commands_rx: commands_rx,
+            commands_tx: commands_tx,
         }
     }
 
@@ -48,9 +51,9 @@ impl MenuStateVisualizer {
         match self.button_manager.get_clicked_button_id(context) {
             Some(button_id) => {
                 if button_id == self.button_start_id {
-                    self.commands.push(StartGame);
+                    self.commands_tx.send(StartGame);
                 } else if button_id == self.button_quit_id {
-                    self.commands.push(QuitMenu);
+                    self.commands_tx.send(QuitMenu);
                 }
             },
             None => {},
@@ -76,10 +79,10 @@ impl StateVisualizer for MenuStateVisualizer {
             glfw::KeyEvent(key, _, glfw::Press, _) => {
                 match key {
                     glfw::Key1 => {
-                        self.commands.push(StartGame);
+                        self.commands_tx.send(StartGame);
                     },
                     glfw::KeyEscape | glfw::KeyQ => {
-                        self.commands.push(QuitMenu);
+                        self.commands_tx.send(QuitMenu);
                     },
                     _ => {},
                 }
@@ -91,8 +94,11 @@ impl StateVisualizer for MenuStateVisualizer {
         }
     }
 
-    fn get_command(&mut self) -> Option<StateChangeCommand> {
-        self.commands.pop()
+    fn get_command(&self) -> Option<StateChangeCommand> {
+        match self.commands_rx.try_recv() {
+            Ok(cmd) => Some(cmd),
+            Err(_) => None,
+        }
     }
 }
 

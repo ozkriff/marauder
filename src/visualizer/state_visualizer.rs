@@ -14,7 +14,7 @@ pub trait StateVisualizer {
     fn logic(&mut self);
     fn draw(&mut self, context: &Context, dtime: Time);
     fn handle_event(&mut self, context: &Context, event: glfw::WindowEvent);
-    fn get_command(&mut self) -> Option<StateChangeCommand>; // TODO: remove mut. use channels.
+    fn get_command(&self) -> Option<StateChangeCommand>;
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

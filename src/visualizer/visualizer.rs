@@ -112,7 +112,7 @@ impl Visualizer {
             visualizer.logic();
             visualizer.draw(&self.context, self.dtime);
         }
-        let cmd = self.visualizers.mut_last().unwrap().get_command(); // TODO: remove unwrap
+        let cmd = self.visualizers.last().unwrap().get_command(); // TODO: remove unwrap
         match cmd {
             Some(StartGame) => {
                 let visualizer = box GameStateVisualizer::new(
