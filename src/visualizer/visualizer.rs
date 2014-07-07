@@ -24,7 +24,7 @@ use visualizer::menu_state_visualizer::MenuStateVisualizer;
 type EventsReceiver = Receiver<(f64, glfw::WindowEvent)>;
 
 pub struct Visualizer {
-    visualizers: Vec<Box<StateVisualizer>>, // TODO: Vec -> Queue
+    visualizers: Vec<Box<StateVisualizer>>,
     dtime: Time,
     last_time: Time,
     glfw: glfw::Glfw,
