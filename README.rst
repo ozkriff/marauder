@@ -23,20 +23,16 @@ See .travis.yml.
 
 Latest rust-nightly is required.
 
-Download and compile deps (gl-rs, glfw3, glfw-rs, rust-stb-imgae, etc...)::
-
-    ./make_deps.sh
-
 Compile Marauder::
 
-    make
+    cargo build
 
 Models, textures, sounds, etc are stored in separate repo.
-Marauder expects them in 'bin/data' directory.
+Marauder expects them in 'target/data' directory.
 
 Download to 'data' directory::
 
-    git clone --depth=1 https://github.com/ozkriff/marauder-data bin/data
+    git clone --depth=1 https://github.com/ozkriff/marauder-data target/data
 
 Run Marauder::
 
@@ -44,7 +40,7 @@ Run Marauder::
 
 or::
 
-    ./bin/marauder
+    ./target/marauder
 
 
 How to Play

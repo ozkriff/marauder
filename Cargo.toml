@@ -1,0 +1,28 @@
+[package]
+
+name = "marauder"
+version = "0.0.1"
+authors = [
+   "ozkriff@gmail.com",
+]
+
+[[bin]]
+name = "marauder"
+
+[dependencies.glfw]
+git = "https://github.com/bjz/glfw-rs"
+
+[dependencies.gl]
+git = "https://github.com/bjz/gl-rs"
+
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath-rs"
+
+[dependencies.error_context]
+git = "https://github.com/ozkriff/error-context"
+
+[dependencies.stb_image]
+git = "https://github.com/ozkriff/rust-stb-image" # TODO: s/ozkriff/mozilla-servo/
+
+[dependencies.stb_tt]
+git = "https://github.com/ozkriff/stb-tt-rs"

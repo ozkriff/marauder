@@ -1,17 +1,34 @@
 # See LICENSE file for copyright and license details.
 
-before_install:
-    - sudo add-apt-repository -y ppa:hansjorg/rust
-    - sudo apt-get update
-
 install:
-    - sudo apt-get install rust-nightly
-    - sudo apt-get install libXxf86vm-dev
+    # cargo
+    - curl -O http://static.rust-lang.org/cargo-dist/cargo-nightly-linux.tar.gz
+    - tar xf cargo-nightly-linux.tar.gz
+    - export PATH=$PATH:$(pwd)/cargo-nightly/bin
+
+    # rustc
+    - wget http://static.rust-lang.org/dist/rust-nightly-x86_64-unknown-linux-gnu.tar.gz
+    - tar xzf rust-nightly-x86_64-unknown-linux-gnu.tar.gz
+    - export PATH=$PATH:$(pwd)/rust-nightly-x86_64-unknown-linux-gnu/bin
     - rustc -v
-    - ./make_deps.sh
-    - git clone --depth=1 https://github.com/ozkriff/marauder-data data
+
+    # glfw
+    - sudo apt-get install libXxf86vm-dev
+    - git clone https://github.com/glfw/glfw.git
+    - cd glfw
+    - git checkout 3.0.3
+    - cmake -DBUILD_SHARED_LIBS=ON .
+    - make
+    - sudo make install
+    - cd ..
+
+    # target/data
+    - git clone --depth=1 https://github.com/ozkriff/marauder-data target/data
+
+    - sudo apt-get install libXxf86vm-dev
+    - sudo apt-get install libxml2
 
 script:
-    - make
+    - cargo build
 
 # vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
