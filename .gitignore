@@ -1,7 +1,7 @@
-marauder
-deps
-data
+target/.marauder.fingerprint
+target/marauder
+target/data
+target/deps
 
 # vim tmp files
 *.swp
-lib*-*.so
