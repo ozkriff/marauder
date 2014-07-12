@@ -11,7 +11,7 @@ pub struct NodeId{pub id: MInt}
 pub struct SceneNode {
     pub pos: WorldPos,
     pub rot: MFloat,
-    pub mesh_id: Option<MeshId>, // TODO: make priv
+    pub mesh_id: Option<MeshId>,
     pub children: Vec<SceneNode>,
 }
 
