@@ -329,6 +329,11 @@ impl GameStateVisualizer {
         if defender_id_opt.is_some() && attacker_id_opt.is_some() {
             let defender_id = defender_id_opt.unwrap();
             let attacker_id = attacker_id_opt.unwrap();
+            let state = self.game_states.get(&self.core.player_id());
+            let attacker = state.units.get(&attacker_id);
+            if attacker.attacked {
+                return;
+            }
             let cmd = core::CommandAttackUnit(attacker_id, defender_id);
             self.core.do_command(cmd);
         }

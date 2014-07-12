@@ -40,6 +40,7 @@ pub struct Unit {
     pub player_id: PlayerId,
     pub type_id: UnitTypeId,
     pub moved: bool,
+    pub attacked: bool,
 }
 
 pub struct Core {

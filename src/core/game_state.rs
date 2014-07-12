@@ -36,6 +36,7 @@ impl<'a> GameState {
         for (_, unit) in self.units.mut_iter() {
             if unit.player_id == player_id {
                 unit.moved = false;
+                unit.attacked = false;
             }
         }
     }
@@ -60,13 +61,17 @@ impl<'a> GameState {
                     player_id: player_id,
                     type_id: type_id,
                     moved: false,
+                    attacked: false,
                 });
             },
-            EventAttackUnit(_, defender_id, killed) => {
+            EventAttackUnit(attacker_id, defender_id, killed) => {
                 if killed {
                     assert!(self.units.find(&defender_id).is_some());
                     self.units.remove(&defender_id);
                 }
+                let unit = self.units.get_mut(&attacker_id);
+                assert!(!unit.attacked);
+                unit.attacked = true;
             },
         }
     }
