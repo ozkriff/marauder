@@ -100,19 +100,11 @@ impl Visualizer {
         !self.should_close
     }
 
-    // TODO: simplify
-    pub fn tick(&mut self) {
-        {
-            let events = self.get_events();
-            let visualizer = self.visualizers.mut_last().unwrap(); // TODO: remove unwrap
-            for event in events.iter() {
-                visualizer.handle_event(&self.context, *event);
-                self.context.handle_event(*event);
-            }
-            visualizer.logic();
-            visualizer.draw(&self.context, self.dtime);
-        }
-        let cmd = self.visualizers.last().unwrap().get_command(); // TODO: remove unwrap
+    fn handle_cmd(&mut self) {
+        let cmd = match self.visualizers.last() {
+            Some(visualizer) => visualizer.get_command(),
+            None => fail!("No state visualizer"),
+        };
         match cmd {
             Some(StartGame) => {
                 let visualizer = box GameStateVisualizer::new(
@@ -127,6 +119,24 @@ impl Visualizer {
             },
             None => {},
         }
+    }
+
+    // TODO: simplify
+    pub fn tick(&mut self) {
+        {
+            let events = self.get_events();
+            let visualizer = match self.visualizers.mut_last() {
+                Some(visualizer) => visualizer,
+                None => fail!("No state visualizer"),
+            };
+            for event in events.iter() {
+                visualizer.handle_event(&self.context, *event);
+                self.context.handle_event(*event);
+            }
+            visualizer.logic();
+            visualizer.draw(&self.context, self.dtime);
+        }
+        self.handle_cmd();
         self.update_time();
     }
 
