@@ -118,13 +118,13 @@ impl Core {
     fn hit_test(&self, attacker_id: UnitId, defender_id: UnitId) -> bool {
         let attacker_type_id = self.get_unit(attacker_id).type_id;
         let defender_type_id = self.get_unit(defender_id).type_id;
-        let needed = match (attacker_type_id, defender_type_id) { // TODO: rename
+        let required_points = match (attacker_type_id, defender_type_id) {
             (Tank, Tank) => 5,
             (Tank, Soldier) => 3,
             (Soldier, Tank) => 7,
             (Soldier, Soldier) => 5,
         };
-        task_rng().gen_range(0i, 10 + 1) > needed
+        task_rng().gen_range(0i, 10 + 1) > required_points
     }
 
     pub fn player_id(&self) -> PlayerId {
