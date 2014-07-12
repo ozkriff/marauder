@@ -1,14 +1,12 @@
 # See LICENSE file for copyright and license details.
 
-all: target/marauder
+all: build
 
-target/marauder:
+.PHONY: build
+build:
 	cargo build
 
-run: target/marauder
+run: build
 	RUST_BACKTRACE=1 ./target/marauder
-
-clean:
-	rm -f target/marauder
 
 # vim: set tabstop=4 shiftwidth=4 softtabstop=4:
