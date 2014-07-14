@@ -5,15 +5,16 @@ use cgmath::angle;
 use cgmath::matrix::Matrix4;
 use cgmath::vector::Vector3;
 use core::types::{MInt, Size2};
-use core::misc::deg_to_rad;
+use core::misc::{clamp, deg_to_rad};
 use visualizer::mgl;
 use visualizer::types::{MFloat, WorldPos};
 
 pub struct Camera {
-    pub x_angle: MFloat,
-    pub z_angle: MFloat,
-    pub pos: WorldPos,
-    pub zoom: MFloat,
+    x_angle: MFloat, // TODO: MFloat -> Angle
+    z_angle: MFloat,
+    pos: WorldPos,
+    max_pos: WorldPos,
+    pub zoom: MFloat, // TODO: make private, add constrains
     projection_mat: Matrix4<MFloat>,
 }
 
@@ -32,6 +33,7 @@ impl Camera {
             x_angle: 45.0,
             z_angle: 0.0,
             pos: WorldPos{v: Vector3::zero()},
+            max_pos: WorldPos{v: Vector3::zero()},
             zoom: 10.0,
             projection_mat: get_projection_mat(win_size),
         }
@@ -46,12 +48,42 @@ impl Camera {
         m
     }
 
+    pub fn add_z_angle(&mut self, angle: MFloat) {
+        self.z_angle += angle;
+        while self.z_angle < 0.0 {
+            self.z_angle += 360.0;
+        }
+        while self.z_angle > 360.0 {
+            self.z_angle -= 360.0;
+        }
+    }
+
+    pub fn add_x_angle(&mut self, angle: MFloat) {
+        self.x_angle += angle;
+        self.x_angle = clamp(self.x_angle, 30.0, 75.0);
+    }
+
+    fn clamp_pos(&mut self) {
+        self.pos.v.x = clamp(self.pos.v.x, self.max_pos.v.x, 0.0);
+        self.pos.v.y = clamp(self.pos.v.y, self.max_pos.v.y, 0.0);
+    }
+
+    pub fn set_pos(&mut self, pos: WorldPos) {
+        self.pos = pos;
+        self.clamp_pos();
+    }
+
+    pub fn set_max_pos(&mut self, max_pos: WorldPos) {
+        self.max_pos = max_pos;
+    }
+
     pub fn move(&mut self, angle: MFloat, speed: MFloat) {
         let speed_in_radians = deg_to_rad(self.z_angle - angle);
         let dx = speed_in_radians.sin();
         let dy = speed_in_radians.cos();
         self.pos.v.x -= dy * speed * self.zoom;
         self.pos.v.y -= dx * speed * self.zoom;
+        self.clamp_pos();
     }
 
     pub fn regenerate_projection_mat(&mut self, win_size: Size2<MInt>) {

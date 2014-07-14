@@ -4,6 +4,14 @@ use std::f32::consts::PI;
 use std::io::File;
 use visualizer::types::MFloat;
 
+pub fn clamp<T: Float>(n: T, min: T, max: T) -> T {
+    match n {
+        n if n < min => min,
+        n if n > max => max,
+        n => n,
+    }
+}
+
 pub fn deg_to_rad(n: MFloat) -> MFloat {
     n * PI / 180.0
 }

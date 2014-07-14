@@ -130,9 +130,14 @@ fn add_mesh(meshes: &mut Vec<Mesh>, mesh: Mesh) -> MeshId {
 }
 
 fn get_initial_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
+    let pos = get_max_camera_pos(map_size);
+    WorldPos{v: Vector3{x: pos.v.x / 2.0, y: pos.v.y / 2.0, z: 0.0}}
+}
+
+fn get_max_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
     let pos = geom::map_pos_to_world_pos(
         MapPos{v: Vector2{x: map_size.w, y: map_size.h}});
-    WorldPos{v: Vector3{x: -pos.v.x / 2.0, y: -pos.v.y / 2.0, z: 0.0}}
+    WorldPos{v: Vector3{x: -pos.v.x, y: -pos.v.y, z: 0.0}}
 }
 
 pub struct GameStateVisualizer {
@@ -197,7 +202,8 @@ impl GameStateVisualizer {
             get_marker(&context.shader, &fs.get(&Path::new("data/flag2.png"))),
         );
         let mut camera = Camera::new(context.win_size);
-        camera.pos = get_initial_camera_pos(&map_size);
+        camera.set_pos(get_initial_camera_pos(&map_size));
+        camera.set_max_pos(get_max_camera_pos(&map_size));
         let mut button_manager = ButtonManager::new();
         let button_end_turn_id = button_manager.add_button(Button::new(
             "end turn",
@@ -379,8 +385,8 @@ impl GameStateVisualizer {
             let diff = context.mouse_pos.v - new_pos.v;
             let win_w = context.win_size.w as MFloat;
             let win_h = context.win_size.h as MFloat;
-            self.camera.z_angle += diff.x * (360.0 / win_w);
-            self.camera.x_angle += diff.y * (360.0 / win_h);
+            self.camera.add_z_angle(diff.x * (360.0 / win_w));
+            self.camera.add_x_angle(diff.y * (360.0 / win_h));
         }
     }
 
