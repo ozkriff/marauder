@@ -14,7 +14,7 @@ pub struct Camera {
     z_angle: MFloat,
     pos: WorldPos,
     max_pos: WorldPos,
-    pub zoom: MFloat, // TODO: make private, add constrains
+    zoom: MFloat,
     projection_mat: Matrix4<MFloat>,
 }
 
@@ -75,6 +75,11 @@ impl Camera {
 
     pub fn set_max_pos(&mut self, max_pos: WorldPos) {
         self.max_pos = max_pos;
+    }
+
+    pub fn change_zoom(&mut self, ratio: MFloat) {
+        self.zoom *= ratio;
+        self.zoom = clamp(self.zoom, 5.0, 40.0);
     }
 
     pub fn move(&mut self, angle: MFloat, speed: MFloat) {

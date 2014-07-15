@@ -365,8 +365,8 @@ impl GameStateVisualizer {
             glfw::KeyDown | glfw::KeyS => self.camera.move(90.0, 0.1),
             glfw::KeyRight | glfw::KeyD => self.camera.move(0.0, 0.1),
             glfw::KeyLeft | glfw::KeyA => self.camera.move(180.0, 0.1),
-            glfw::KeyMinus => self.camera.zoom *= 1.3,
-            glfw::KeyEqual => self.camera.zoom /= 1.3,
+            glfw::KeyMinus => self.camera.change_zoom(1.3),
+            glfw::KeyEqual => self.camera.change_zoom(0.7),
             _ => {},
         }
         if self.event_visualizer.is_some() {
