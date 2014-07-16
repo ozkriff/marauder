@@ -30,7 +30,6 @@ pub struct FontStash {
 
 impl FontStash {
     pub fn new(font_path: &Path, size: MFloat) -> FontStash {
-        // TODO: use updateble mesh
         let texture_size = 1024;
         let font = stb_tt::Font::new(font_path, size);
         let texture = Texture::new_empty(
@@ -57,7 +56,6 @@ impl FontStash {
         self.size
     }
 
-    // TODO: Rect type
     pub fn get_text_size(&mut self, text: &str) -> (Point2<MInt>, Size2<MInt>) {
         let mut size = Size2{w: 0, h: 0};
         let mut pos = Point2{v: Vector2{x: 0, y: 0}};
@@ -78,7 +76,6 @@ impl FontStash {
     }
 
     pub fn get_mesh(&mut self, text: &str, shader: &Shader) -> Mesh {
-        // TODO: create mesh in c-tor, update mesh vertices data here
         let mut vertex_data = Vec::new();
         let mut tex_data = Vec::new();
         let s = self.texture_size as MFloat;
