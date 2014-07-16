@@ -1,4 +1,4 @@
-target/.marauder.fingerprint
+target/.marauder.*fingerprint
 target/marauder
 target/data
 target/deps
