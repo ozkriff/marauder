@@ -202,8 +202,8 @@ impl GameStateVisualizer {
             get_marker(&context.shader, &fs.get(&Path::new("data/flag2.png"))),
         );
         let mut camera = Camera::new(context.win_size);
-        camera.set_pos(get_initial_camera_pos(&map_size));
         camera.set_max_pos(get_max_camera_pos(&map_size));
+        camera.set_pos(get_initial_camera_pos(&map_size));
         let mut button_manager = ButtonManager::new();
         let button_end_turn_id = button_manager.add_button(Button::new(
             "end turn",
