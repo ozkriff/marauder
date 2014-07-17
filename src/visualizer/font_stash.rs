@@ -124,7 +124,7 @@ impl FontStash {
                 *data.get_mut(n + 0) = 255;
                 *data.get_mut(n + 1) = 255;
                 *data.get_mut(n + 2) = 255;
-                *data.get_mut(n + 3) = *bitmap.get((x + y * size.w) as uint);
+                *data.get_mut(n + 3) = bitmap[(x + y * size.w) as uint];
             }
         }
         self.texture.bind();

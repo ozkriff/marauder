@@ -267,7 +267,7 @@ impl GameStateVisualizer {
             Some(mesh_id) => {
                 context.shader.uniform_mat4f(context.mvp_mat_id, &m);
                 let id = mesh_id.id as uint;
-                self.meshes.get(id).draw(&context.shader);
+                self.meshes[id].draw(&context.shader);
             },
             None => {},
         }
@@ -284,7 +284,7 @@ impl GameStateVisualizer {
 
     fn draw_map(&mut self, context: &Context) {
         context.shader.uniform_mat4f(context.mvp_mat_id, &self.camera.mat());
-        self.meshes.get(self.map_mesh_id.id as uint).draw(&context.shader);
+        self.meshes[self.map_mesh_id.id as uint].draw(&context.shader);
     }
 
     fn draw_3d_text(&mut self, context: &Context) {

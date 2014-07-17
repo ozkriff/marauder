@@ -85,9 +85,9 @@ impl EventMoveVisualizer {
         let node_id = unit_id_to_node_id(unit_id);
         let node = scene.nodes.get_mut(&node_id);
         node.rot = geom::get_rot_angle(
-            *world_path.get(0), *world_path.get(1));
+            world_path[0], world_path[1]);
         let move = MoveHelper::new(
-            *world_path.get(0), *world_path.get(1), speed);
+            world_path[0], world_path[1], speed);
         let mut vis = box EventMoveVisualizer {
             unit_id: unit_id,
             path: world_path,
@@ -112,12 +112,12 @@ impl EventMoveVisualizer {
 
     fn current_waypoint(&self) -> WorldPos {
         assert!(self.path.len() >= 1);
-        *self.path.get(0)
+        self.path[0]
     }
 
     fn next_waypoint(&self) -> WorldPos {
         assert!(self.path.len() >= 2);
-        *self.path.get(1)
+        self.path[1]
     }
 }
 

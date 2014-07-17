@@ -25,7 +25,7 @@ impl<'a> Map {
     }
 
     fn tile(&'a self, pos: MapPos) -> &'a Tile {
-        self.tiles.get((pos.v.x + pos.v.y * self.size.w) as uint)
+        &self.tiles[(pos.v.x + pos.v.y * self.size.w) as uint]
     }
 
     fn is_inboard(&self, pos: MapPos) -> bool {

@@ -55,7 +55,7 @@ impl Texture {
                 size.h,
                 format,
                 gl::UNSIGNED_BYTE,
-                std::mem::transmute(data.get(0)),
+                std::mem::transmute(&data[0]),
             ));
         }
     }
@@ -92,7 +92,7 @@ fn get_empty_texture(size: Size2<MInt>) -> Texture {
             border,
             format,
             gl::UNSIGNED_BYTE,
-            std::mem::transmute(data.get(0)),
+            std::mem::transmute(&data[0]),
         ));
     }
     verify!(gl::TexParameteri(gl::TEXTURE_2D,
@@ -127,7 +127,7 @@ fn load_texture(path: &Path) -> Texture {
             border,
             format,
             gl::UNSIGNED_BYTE,
-            std::mem::transmute(image.data.get(0)),
+            std::mem::transmute(&image.data[0]),
         ));
     }
     verify!(gl::TexParameteri(gl::TEXTURE_2D,
