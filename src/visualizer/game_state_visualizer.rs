@@ -319,31 +319,31 @@ impl GameStateVisualizer {
     }
 
     fn create_unit(&mut self) {
-        let pos_opt = self.map_pos_under_cursor;
-        if pos_opt.is_some() {
-            let pos = pos_opt.unwrap();
-            if self.is_tile_occupied(pos) {
-                return;
-            }
-            let cmd = core::CommandCreateUnit(pos);
-            self.core.do_command(cmd);
+        match self.map_pos_under_cursor {
+            Some(pos) => {
+                if self.is_tile_occupied(pos) {
+                    return;
+                }
+                let cmd = core::CommandCreateUnit(pos);
+                self.core.do_command(cmd);
+            },
+            None => {},
         }
     }
 
     fn attack_unit(&mut self) {
-        let defender_id_opt = self.unit_under_cursor_id;
-        let attacker_id_opt = self.selected_unit_id;
-        if defender_id_opt.is_some() && attacker_id_opt.is_some() {
-            let defender_id = defender_id_opt.unwrap();
-            let attacker_id = attacker_id_opt.unwrap();
-            let state = self.game_states.get(&self.core.player_id());
-            let attacker = state.units.get(&attacker_id);
-            if attacker.attacked {
-                return;
-            }
-            let cmd = core::CommandAttackUnit(attacker_id, defender_id);
-            self.core.do_command(cmd);
-        }
+        match (self.unit_under_cursor_id, self.selected_unit_id) {
+            (Some(defender_id), Some(attacker_id)) => {
+                let state = self.game_states.get(&self.core.player_id());
+                let attacker = state.units.get(&attacker_id);
+                if attacker.attacked {
+                    return;
+                }
+                let cmd = core::CommandAttackUnit(attacker_id, defender_id);
+                self.core.do_command(cmd);
+            },
+            _ => {},
+       }
     }
 
     fn select_unit(&mut self) {
