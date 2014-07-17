@@ -5,7 +5,11 @@ use core::types::UnitId;
 use core::game_state::GameState;
 use core::misc::add_quad_to_vec;
 use core::fs::FileSystem;
-use visualizer::scene::{NodeId, Scene, SceneNode};
+use visualizer::scene::{
+    Scene,
+    SceneNode,
+    SELECTION_NODE_ID,
+};
 use visualizer::geom;
 use visualizer::mesh::{Mesh, MeshId};
 use visualizer::texture::Texture;
@@ -14,7 +18,6 @@ use visualizer::shader::Shader;
 
 pub struct SelectionManager {
     unit_id: Option<UnitId>,
-    node_id: NodeId,
     mesh_id: MeshId,
 }
 
@@ -22,7 +25,6 @@ impl SelectionManager {
     pub fn new(mesh_id: MeshId) -> SelectionManager {
         SelectionManager {
             unit_id: None,
-            node_id: NodeId{id: 1666 + 1}, // TODO
             mesh_id: mesh_id,
         }
     }
@@ -44,7 +46,7 @@ impl SelectionManager {
         state: &GameState,
         scene: &mut Scene
     ) {
-        let node = scene.nodes.get_mut(&self.node_id);
+        let node = scene.nodes.get_mut(&SELECTION_NODE_ID);
         node.pos = self.get_pos(state);
     }
 
@@ -55,8 +57,8 @@ impl SelectionManager {
         unit_id: UnitId
     ) {
         self.set_unit_id(unit_id);
-        if scene.nodes.find(&self.node_id).is_some() {
-            scene.nodes.remove(&self.node_id);
+        if scene.nodes.find(&SELECTION_NODE_ID).is_some() {
+            scene.nodes.remove(&SELECTION_NODE_ID);
         }
         let node = SceneNode {
             pos: self.get_pos(state),
@@ -64,11 +66,11 @@ impl SelectionManager {
             mesh_id: Some(self.mesh_id),
             children: Vec::new(),
         };
-        scene.nodes.insert(self.node_id, node);
+        scene.nodes.insert(SELECTION_NODE_ID, node);
     }
 
     pub fn deselect(&mut self, scene: &mut Scene) {
-        scene.nodes.remove(&self.node_id);
+        scene.nodes.remove(&SELECTION_NODE_ID);
         self.unit_id = None;
     }
 }

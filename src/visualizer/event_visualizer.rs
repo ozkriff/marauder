@@ -8,7 +8,13 @@ use core::types::{MapPos, UnitId};
 use core::game_state::GameState;
 use core::core;
 use visualizer::mesh::{MeshId};
-use visualizer::scene::{Scene, SceneNode, NodeId};
+use visualizer::scene::{
+    Scene,
+    SceneNode,
+    NodeId,
+    MAX_UNIT_NODE_ID,
+    SHELL_NODE_ID,
+};
 use visualizer::types::{MFloat, WorldPos, Time};
 
 fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
@@ -16,7 +22,7 @@ fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
 }
 
 fn marker_id(unit_id: UnitId) -> NodeId {
-    NodeId{id: unit_id.id + 1000}
+    NodeId{id: MAX_UNIT_NODE_ID.id + unit_id.id}
 }
 
 pub trait EventVisualizer {
@@ -279,7 +285,6 @@ pub struct EventAttackUnitVisualizer {
     killed: bool,
     move: MoveHelper,
     shell_move: MoveHelper,
-    shell_node_id: NodeId,
 }
 
 impl EventAttackUnitVisualizer {
@@ -295,11 +300,10 @@ impl EventAttackUnitVisualizer {
         let from = scene.nodes.get(&node_id).pos;
         let to = WorldPos{v: from.v.sub_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))};
         let move = MoveHelper::new(from, to, 1.0);
-        let shell_node_id = NodeId{id: 1666}; // TODO
         let shell_move = {
             let from = scene.nodes.get(&unit_id_to_node_id(attacker_id)).pos;
             let to = scene.nodes.get(&unit_id_to_node_id(defender_id)).pos;
-            scene.nodes.insert(shell_node_id, SceneNode {
+            scene.nodes.insert(SHELL_NODE_ID, SceneNode {
                 pos: from,
                 rot: 0.0,
                 mesh_id: Some(shell_mesh_id),
@@ -312,7 +316,6 @@ impl EventAttackUnitVisualizer {
             killed: killed,
             move: move,
             shell_move: shell_move,
-            shell_node_id: shell_node_id,
         } as Box<EventVisualizer>
     }
 }
@@ -327,7 +330,7 @@ impl EventVisualizer for EventAttackUnitVisualizer {
     }
 
     fn draw(&mut self, scene: &mut Scene, dtime: Time) {
-        scene.nodes.get_mut(&self.shell_node_id).pos = self.shell_move.step(dtime);
+        scene.nodes.get_mut(&SHELL_NODE_ID).pos = self.shell_move.step(dtime);
         if self.killed {
             if self.shell_move.is_finished() {
                 let node_id = unit_id_to_node_id(self.defender_id);
@@ -342,7 +345,7 @@ impl EventVisualizer for EventAttackUnitVisualizer {
             scene.nodes.remove(&node_id);
             scene.nodes.remove(&marker_id(self.defender_id));
         }
-        scene.nodes.remove(&self.shell_node_id);
+        scene.nodes.remove(&SHELL_NODE_ID);
     }
 }
 
