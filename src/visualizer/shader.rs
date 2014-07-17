@@ -16,7 +16,8 @@ pub struct Shader {
 
 impl Shader {
     pub fn new(vs_path: &Path, fs_path: &Path) -> Shader {
-        set_error_context!("loading shader", vs_path.as_str().unwrap()); // TODO
+        set_error_context!("loading shader (vs)", vs_path.as_str().unwrap());
+        set_error_context!("loading shader (fs)", fs_path.as_str().unwrap());
         compile_program(
             read_file(vs_path).as_slice(),
             read_file(fs_path).as_slice(),
