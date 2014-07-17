@@ -13,8 +13,11 @@ use visualizer::scene::{
 use visualizer::geom;
 use visualizer::mesh::{Mesh, MeshId};
 use visualizer::texture::Texture;
-use visualizer::types::{WorldPos, TextureCoord};
+use visualizer::types::{MFloat, WorldPos, TextureCoord};
 use visualizer::shader::Shader;
+
+// TODO: Reuse in other places
+static SELECTION_MARKER_HEIGHT: MFloat = 0.01;
 
 pub struct SelectionManager {
     unit_id: Option<UnitId>,
@@ -37,7 +40,7 @@ impl SelectionManager {
         let unit_id = self.unit_id.unwrap();
         let map_pos = state.units.get(&unit_id).pos;
         let mut world_pos = geom::map_pos_to_world_pos(map_pos);
-        world_pos.v.z += 0.1; // TODO: replace with some constant
+        world_pos.v.z += SELECTION_MARKER_HEIGHT;
         world_pos
     }
 
