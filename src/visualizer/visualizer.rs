@@ -4,11 +4,11 @@ use std::cell::RefCell;
 use time::precise_time_ns;
 use glfw;
 use cgmath::vector::{Vector2};
-use core::types::{Size2, MInt, Point2};
+use core::types::{Size2, MInt};
 use core::conf::Config;
 use core::fs::FileSystem;
 use visualizer::mgl;
-use visualizer::types::{MatId, ColorId, Time};
+use visualizer::types::{MatId, ColorId, Time, ScreenPos};
 use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;
 use visualizer::context::Context;
@@ -68,7 +68,7 @@ impl Visualizer {
             win: win,
             win_size: win_size,
             config: config,
-            mouse_pos: Point2{v: Vector2::zero()},
+            mouse_pos: ScreenPos{v: Vector2::zero()},
             font_stash: RefCell::new(font_stash),
             shader: shader,
             mvp_mat_id: mvp_mat_id,

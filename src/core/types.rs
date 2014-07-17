@@ -9,8 +9,6 @@ pub struct Size2<T>{
     pub h: T,
 }
 
-pub struct Point2<T>{pub v: Vector2<T>}
-
 pub type MInt = i32;
 
 #[deriving(PartialOrd, PartialEq, Eq, Hash, Clone)]

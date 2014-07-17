@@ -9,7 +9,7 @@ use visualizer::mgl;
 use visualizer::camera::Camera;
 use visualizer::geom;
 use visualizer::mesh::Mesh;
-use visualizer::types::{Color3, MFloat, MatId, VertexCoord};
+use visualizer::types::{Color3, MFloat, MatId, VertexCoord, ScreenPos};
 use visualizer::shader::Shader;
 
 static PICK_CODE_NOTHING: MInt = 0;
@@ -100,7 +100,7 @@ impl TilePicker {
         &mut self,
         camera: &Camera,
         win_size: Size2<MInt>,
-        mouse_pos: Vector2<MInt>
+        mouse_pos: ScreenPos
     ) -> PickResult {
         self.shader.activate();
         self.shader.uniform_mat4f(self.mvp_mat_id, &camera.mat());

@@ -7,7 +7,7 @@ use cgmath::vector::{Vector3, Vector2};
 use cgmath::matrix::{Matrix4};
 use error_context;
 use core::map::MapPosIter;
-use core::types::{Size2, MInt, UnitId, PlayerId, MapPos, Point2};
+use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
 use core::core;
@@ -25,6 +25,7 @@ use visualizer::types::{
     TextureCoord,
     MFloat,
     Time,
+    ScreenPos,
 };
 use visualizer::event_visualizer::{
     EventVisualizer,
@@ -209,13 +210,13 @@ impl GameStateVisualizer {
             "end turn",
             context.font_stash.borrow_mut().deref_mut(),
             &context.shader,
-            Point2{v: Vector2{x: 10, y: 40}})
+            ScreenPos{v: Vector2{x: 10, y: 40}})
         );
         let button_quit_id = button_manager.add_button(Button::new(
             "quit",
             context.font_stash.borrow_mut().deref_mut(),
             &context.shader,
-            Point2{v: Vector2{x: 10, y: 10}})
+            ScreenPos{v: Vector2{x: 10, y: 10}})
         );
         let map_text_mesh = context.font_stash.borrow_mut().deref_mut()
             .get_mesh("test text", &context.shader);
@@ -379,14 +380,14 @@ impl GameStateVisualizer {
         }
     }
 
-    fn handle_cursor_pos_event(&mut self, context: &Context, new_pos: Point2<MFloat>) {
+    fn handle_cursor_pos_event(&mut self, context: &Context, new_pos: ScreenPos) {
         let rmb = context.win.get_mouse_button(glfw::MouseButtonRight);
         if rmb == glfw::Press {
             let diff = context.mouse_pos.v - new_pos.v;
             let win_w = context.win_size.w as MFloat;
             let win_h = context.win_size.h as MFloat;
-            self.camera.add_z_angle(diff.x * (360.0 / win_w));
-            self.camera.add_x_angle(diff.y * (360.0 / win_h));
+            self.camera.add_z_angle(diff.x as MFloat * (360.0 / win_w));
+            self.camera.add_x_angle(diff.y as MFloat * (360.0 / win_h));
         }
     }
 
@@ -448,11 +449,9 @@ impl GameStateVisualizer {
     }
 
     fn pick_tile(&mut self, context: &Context) {
-        let mouse_pos = Vector2 {
-            x: context.mouse_pos.v.x as MInt,
-            y: context.mouse_pos.v.y as MInt,
-        };
-        match self.picker.pick_tile(&self.camera, context.win_size, mouse_pos) {
+        let pick_result = self.picker.pick_tile(
+            &self.camera, context.win_size, context.mouse_pos);
+        match pick_result {
             picker::PickedMapPos(pos) => {
                 self.map_pos_under_cursor = Some(pos);
                 self.unit_under_cursor_id = None;
@@ -566,7 +565,7 @@ impl StateVisualizer for GameStateVisualizer {
                 self.handle_key_event(context, key);
             },
             glfw::CursorPosEvent(x, y) => {
-                let p = Point2{v: Vector2{x: x as MFloat, y: y as MFloat}};
+                let p = ScreenPos{v: Vector2{x: x as MInt, y: y as MInt}};
                 self.handle_cursor_pos_event(context, p);
             },
             glfw::MouseButtonEvent(glfw::MouseButtonLeft, glfw::Press, _) => {

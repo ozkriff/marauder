@@ -3,9 +3,9 @@
 use std::cell::RefCell;
 use glfw;
 use cgmath::vector::Vector2;
-use core::types::{Size2, MInt, Point2};
+use core::types::{Size2, MInt};
 use core::conf::Config;
-use visualizer::types::{MFloat, MatId, ColorId};
+use visualizer::types::{MatId, ColorId, ScreenPos};
 use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;
 use visualizer::mgl;
@@ -13,7 +13,7 @@ use visualizer::mgl;
 pub struct Context {
     pub win: glfw::Window,
     pub win_size: Size2<MInt>,
-    pub mouse_pos: Point2<MFloat>, // TODO: Point2 -> ScreenPos
+    pub mouse_pos: ScreenPos,
     pub config: Config,
     pub font_stash: RefCell<FontStash>,
     pub shader: Shader,
@@ -30,9 +30,9 @@ impl Context {
     pub fn handle_event(&mut self, event: glfw::WindowEvent) {
         match event {
             glfw::CursorPosEvent(x, y) => {
-                self.mouse_pos = Point2{v: Vector2 {
-                    x: x as MFloat,
-                    y: y as MFloat,
+                self.mouse_pos = ScreenPos{v: Vector2 {
+                    x: x as MInt,
+                    y: y as MInt,
                 }};
             },
             glfw::SizeEvent(w, h) => {

@@ -2,8 +2,8 @@
 
 use std::collections::hashmap::HashMap;
 use cgmath::vector::Vector3;
-use core::types::{MInt, Size2, Point2};
-use visualizer::types::MFloat;
+use core::types::{MInt, Size2};
+use visualizer::types::{MFloat, ScreenPos};
 use visualizer::shader::Shader;
 use visualizer::font_stash::FontStash;
 use visualizer::context::Context;
@@ -14,7 +14,7 @@ use visualizer::mgl;
 pub struct ButtonId {pub id: MInt}
 
 pub struct Button {
-    pos: Point2<MInt>, // TODO: ScreenPos
+    pos: ScreenPos,
     size: Size2<MInt>,
     mesh: Mesh,
 }
@@ -24,7 +24,7 @@ impl Button {
         label: &str,
         font_stash: &mut FontStash,
         shader: &Shader,
-        pos: Point2<MInt>
+        pos: ScreenPos
     ) -> Button {
         let (_, size) = font_stash.get_text_size(label);
         Button {
@@ -38,7 +38,7 @@ impl Button {
         self.mesh.draw(shader);
     }
 
-    pub fn pos(&self) -> Point2<MInt> {
+    pub fn pos(&self) -> ScreenPos {
         self.pos
     }
 
@@ -72,8 +72,8 @@ impl ButtonManager {
     }
 
     pub fn get_clicked_button_id(&self, context: &Context) -> Option<ButtonId> {
-        let x = context.mouse_pos.v.x as MInt;
-        let y = context.win_size.h - context.mouse_pos.v.y as MInt;
+        let x = context.mouse_pos.v.x;
+        let y = context.win_size.h - context.mouse_pos.v.y;
         for (id, button) in self.buttons().iter() {
             if x >= button.pos().v.x
                 && x <= button.pos().v.x + button.size().w

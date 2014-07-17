@@ -2,9 +2,8 @@
 
 use glfw;
 use cgmath::vector::Vector2;
-use core::types::{Point2};
 use visualizer::mgl;
-use visualizer::types::Time;
+use visualizer::types::{Time, ScreenPos};
 use visualizer::gui::{ButtonManager, Button, ButtonId};
 use visualizer::context::Context;
 use visualizer::state_visualizer::{
@@ -29,13 +28,13 @@ impl MenuStateVisualizer {
             "start",
             context.font_stash.borrow_mut().deref_mut(),
             &context.shader,
-            Point2{v: Vector2{x: 10, y: 40}})
+            ScreenPos{v: Vector2{x: 10, y: 40}})
         );
         let button_quit_id = button_manager.add_button(Button::new(
             "quit",
             context.font_stash.borrow_mut().deref_mut(),
             &context.shader,
-            Point2{v: Vector2{x: 10, y: 10}})
+            ScreenPos{v: Vector2{x: 10, y: 10}})
         );
         let (commands_tx, commands_rx) = channel();
         MenuStateVisualizer {

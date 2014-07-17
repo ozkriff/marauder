@@ -4,15 +4,15 @@ use std::cmp;
 use std::collections::hashmap::HashMap;
 use stb_tt;
 use cgmath::vector::{Vector3, Vector2};
-use core::types::{Size2, Point2, MInt};
+use core::types::{Size2, MInt};
 use core::misc::add_quad_to_vec;
 use visualizer::texture::Texture;
-use visualizer::types::{VertexCoord, TextureCoord, MFloat};
+use visualizer::types::{VertexCoord, TextureCoord, MFloat, ScreenPos};
 use visualizer::mesh::Mesh;
 use visualizer::shader::Shader;
 
 struct Glyph {
-    pos: Point2<MInt>,
+    pos: ScreenPos,
     size: Size2<MInt>,
     xoff: MInt,
     yoff: MInt,
@@ -23,7 +23,7 @@ pub struct FontStash {
     font: stb_tt::Font,
     texture: Texture,
     texture_size: MInt,
-    pos: Point2<MInt>,
+    pos: ScreenPos,
     glyphs: HashMap<char, Glyph>,
     max_h: MInt,
 }
@@ -39,7 +39,7 @@ impl FontStash {
             font: font,
             texture: texture,
             texture_size: texture_size,
-            pos: Point2{v: Vector2{x: 0, y: 0}},
+            pos: ScreenPos{v: Vector2{x: 0, y: 0}},
             glyphs: HashMap::new(),
             max_h: 0,
         }
@@ -56,9 +56,9 @@ impl FontStash {
         self.size
     }
 
-    pub fn get_text_size(&mut self, text: &str) -> (Point2<MInt>, Size2<MInt>) {
+    pub fn get_text_size(&mut self, text: &str) -> (ScreenPos, Size2<MInt>) {
         let mut size = Size2{w: 0, h: 0};
-        let mut pos = Point2{v: Vector2{x: 0, y: 0}};
+        let mut pos = ScreenPos{v: Vector2{x: 0, y: 0}};
         for c in text.chars() {
             let glyph = self.get_glyph(c);
             let w = glyph.size.w;
@@ -113,7 +113,7 @@ impl FontStash {
 
     fn insert_image_to_cache(
         &mut self,
-        pos: Point2<MInt>,
+        pos: ScreenPos,
         size: Size2<MInt>,
         bitmap: Vec<u8>
     ) {

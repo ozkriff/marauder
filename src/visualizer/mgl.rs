@@ -7,12 +7,12 @@ use gl;
 use gl::types::{GLuint, GLsizeiptr};
 use cgmath::matrix::{Matrix, Matrix4, Matrix3, ToMatrix4};
 use cgmath::array::Array2;
-use cgmath::vector::{Vector2, Vector3};
+use cgmath::vector::{Vector3};
 use cgmath::angle;
 use cgmath::projection;
 use core::misc::deg_to_rad;
 use core::types::{Size2, MInt};
-use visualizer::types::{MFloat, Color3, Color4};
+use visualizer::types::{MFloat, Color3, Color4, ScreenPos};
 
 pub use load_gl_funcs_with = gl::load_with;
 
@@ -187,15 +187,15 @@ impl Drop for Vbo {
 
 pub fn read_pixel_bytes(
     win_size: Size2<MInt>,
-    mouse_pos: Vector2<MInt>,
+    mouse_pos: ScreenPos,
 ) -> (MInt, MInt, MInt, MInt) {
     let height = win_size.h;
-    let reverted_h = height - mouse_pos.y;
+    let reverted_h = height - mouse_pos.v.y;
     let data: [u8, ..4] = [0, 0, 0, 0]; // mut
     unsafe {
         let data_ptr = std::mem::transmute(&data[0]);
         verify!(gl::ReadPixels(
-            mouse_pos.x, reverted_h, 1, 1,
+            mouse_pos.v.x, reverted_h, 1, 1,
             gl::RGBA,
             gl::UNSIGNED_BYTE,
             data_ptr

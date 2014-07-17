@@ -1,6 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use gl::types::{GLfloat, GLuint};
+use core::types::{MInt};
 use cgmath::vector::{Vector3, Vector2};
 
 pub struct Color3 {
@@ -29,6 +30,9 @@ pub struct TextureCoord{pub v: Vector2<MFloat>}
 
 #[deriving(Clone)]
 pub struct WorldPos{pub v: Vector3<MFloat>}
+
+#[deriving(Clone)]
+pub struct ScreenPos{pub v: Vector2<MInt>}
 
 pub struct Time{pub n: u64}
 
