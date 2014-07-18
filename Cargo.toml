@@ -6,9 +6,6 @@ authors = [
    "ozkriff@gmail.com",
 ]
 
-[[bin]]
-name = "marauder"
-
 [dependencies.glfw]
 git = "https://github.com/bjz/glfw-rs"
 
