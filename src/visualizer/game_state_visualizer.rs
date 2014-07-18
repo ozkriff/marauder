@@ -300,9 +300,12 @@ impl GameStateVisualizer {
         context.shader.uniform_color(context.basic_color_id, mgl::WHITE);
         self.draw_scene_nodes(context);
         self.draw_map(context);
-        if !self.event_visualizer.is_none() {
-            let scene = self.scenes.get_mut(&self.core.player_id());
-            self.event_visualizer.get_mut_ref().draw(scene, dtime);
+        match self.event_visualizer {
+            Some(ref mut event_visualizer) => {
+                let scene = self.scenes.get_mut(&self.core.player_id());
+                event_visualizer.draw(scene, dtime);
+            },
+            None => {},
         }
     }
 
@@ -347,15 +350,17 @@ impl GameStateVisualizer {
     }
 
     fn select_unit(&mut self) {
-        if self.unit_under_cursor_id.is_some() {
-            let unit_id = self.unit_under_cursor_id.unwrap();
-            self.selected_unit_id = Some(unit_id);
-            let state = self.game_states.get(&self.core.player_id());
-            let pf = self.pathfinders.get_mut(&self.core.player_id());
-            pf.fill_map(state, state.units.get(&unit_id));
-            let scene = self.scenes.get_mut(&self.core.player_id());
-            self.selection_manager.create_selection_marker(
-                state, scene, unit_id);
+        match self.unit_under_cursor_id {
+            Some(unit_id) => {
+                self.selected_unit_id = Some(unit_id);
+                let state = self.game_states.get(&self.core.player_id());
+                let pf = self.pathfinders.get_mut(&self.core.player_id());
+                pf.fill_map(state, state.units.get(&unit_id));
+                let scene = self.scenes.get_mut(&self.core.player_id());
+                self.selection_manager.create_selection_marker(
+                    state, scene, unit_id);
+            },
+            None => {},
         }
     }
 
@@ -393,10 +398,10 @@ impl GameStateVisualizer {
 
     fn move_unit(&mut self) {
         let pos = self.map_pos_under_cursor.unwrap();
-        if self.selected_unit_id.is_none() {
-            return;
-        }
-        let unit_id = self.selected_unit_id.unwrap();
+        let unit_id = match self.selected_unit_id {
+            Some(unit_id) => unit_id,
+            None => return,
+        };
         if self.is_tile_occupied(pos) {
             return;
         }
@@ -433,18 +438,20 @@ impl GameStateVisualizer {
         if self.map_pos_under_cursor.is_some() {
             self.move_unit();
         }
-        if self.unit_under_cursor_id.is_some() {
-            let id = self.unit_under_cursor_id.unwrap();
-            let player_id = {
-                let state = self.game_states.get(&self.core.player_id());
-                let unit = state.units.get(&id);
-                unit.player_id
-            };
-            if player_id == self.core.player_id() {
-                self.select_unit();
-            } else {
-                self.attack_unit();
-            }
+        match self.unit_under_cursor_id {
+            Some(unit_under_cursor_id) => {
+                let player_id = {
+                    let state = self.game_states.get(&self.core.player_id());
+                    let unit = state.units.get(&unit_under_cursor_id);
+                    unit.player_id
+                };
+                if player_id == self.core.player_id() {
+                    self.select_unit();
+                } else {
+                    self.attack_unit();
+                }
+            },
+            None => {},
         }
     }
 
@@ -524,11 +531,13 @@ impl GameStateVisualizer {
         state.apply_event(self.event.get_ref());
         self.event_visualizer = None;
         self.event = None;
-        if self.selected_unit_id.is_some() {
-            let unit_id = self.selected_unit_id.unwrap();
-            let pf = self.pathfinders.get_mut(&self.core.player_id());
-            pf.fill_map(state, state.units.get(&unit_id));
-            self.selection_manager.move_selection_marker(state, scene);
+        match self.selected_unit_id {
+            Some(selected_unit_id) => {
+                let pf = self.pathfinders.get_mut(&self.core.player_id());
+                pf.fill_map(state, state.units.get(&selected_unit_id));
+                self.selection_manager.move_selection_marker(state, scene);
+            },
+            None => {},
         }
         self.picker.update_units(state);
     }
