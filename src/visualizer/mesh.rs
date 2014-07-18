@@ -44,13 +44,19 @@ impl Mesh {
     pub fn prepare(&mut self, shader: &Shader) {
         self.vao.bind();
         shader.activate();
-        if !self.texture_coords_vbo.is_none() {
-            self.texture_coords_vbo.get_ref().bind();
-            shader.enable_attr("in_texture_coordinates", 2);
+        match self.texture_coords_vbo {
+            Some(ref vbo) => {
+                vbo.bind();
+                shader.enable_attr("in_texture_coordinates", 2);
+            },
+            None => {},
         }
-        if !self.color_vbo.is_none() {
-            self.color_vbo.get_ref().bind();
-            shader.enable_attr("color", 3);
+        match self.color_vbo {
+            Some(ref vbo) => {
+                vbo.bind();
+                shader.enable_attr("color", 3);
+            },
+            None => {},
         }
         self.vertex_coords_vbo.bind();
         shader.enable_attr("in_vertex_coordinates", 3);
@@ -59,8 +65,9 @@ impl Mesh {
 
     pub fn draw(&self, shader: &Shader) {
         self.vao.bind();
-        if !self.texture.is_none() {
-            self.texture.unwrap().enable(shader);
+        match self.texture {
+            Some(ref texture) => texture.enable(shader),
+            None => {},
         }
         self.vao.draw_array(Triangles, self.length);
         self.vao.unbind();
