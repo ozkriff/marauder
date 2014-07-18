@@ -7,7 +7,9 @@ use std::collections::hashmap::HashMap;
 
 // TODO: why scene knows about other systems?
 pub static MAX_UNIT_NODE_ID: NodeId = NodeId{id: 1000};
-pub static SHELL_NODE_ID: NodeId = NodeId{id: MAX_UNIT_NODE_ID.id + 1};
+pub static MIN_MARKER_NODE_ID: NodeId = NodeId{id: MAX_UNIT_NODE_ID.id + 1};
+pub static MAX_MARKER_NODE_ID: NodeId = NodeId{id: MAX_UNIT_NODE_ID.id * 2};
+pub static SHELL_NODE_ID: NodeId = NodeId{id: MAX_MARKER_NODE_ID.id + 1};
 pub static SELECTION_NODE_ID: NodeId = NodeId{id: SHELL_NODE_ID.id + 1};
 
 #[deriving(PartialOrd, Ord, PartialEq, Eq, Hash)]

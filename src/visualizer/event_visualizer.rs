@@ -12,7 +12,7 @@ use visualizer::scene::{
     Scene,
     SceneNode,
     NodeId,
-    MAX_UNIT_NODE_ID,
+    MIN_MARKER_NODE_ID,
     SHELL_NODE_ID,
 };
 use visualizer::types::{MFloat, WorldPos, Time};
@@ -22,7 +22,7 @@ fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
 }
 
 fn marker_id(unit_id: UnitId) -> NodeId {
-    NodeId{id: MAX_UNIT_NODE_ID.id + unit_id.id}
+    NodeId{id: MIN_MARKER_NODE_ID.id + unit_id.id}
 }
 
 pub trait EventVisualizer {
