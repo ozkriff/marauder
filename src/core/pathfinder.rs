@@ -65,7 +65,7 @@ impl Pathfinder {
 
     fn process_neighbour_pos(
         &mut self,
-        _: &GameState,
+        state: &GameState,
         _: &Unit, // TODO: use unit`s type and action points later
         original_pos: MapPos,
         neighbour_pos: MapPos
@@ -73,7 +73,8 @@ impl Pathfinder {
         let old_cost = self.map.tile(original_pos).cost;
         let tile = self.map.tile_mut(neighbour_pos);
         let new_cost: MInt = old_cost + 1;
-        if tile.cost > new_cost {
+        let units_count = state.units_at(neighbour_pos).len();
+        if tile.cost > new_cost && units_count == 0 {
             self.queue.push(neighbour_pos);
             // update neighbour tile info
             tile.cost = new_cost;
