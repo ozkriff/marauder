@@ -1,5 +1,7 @@
 # See LICENSE file for copyright and license details.
 
+language: c
+
 install:
     # cargo
     - curl -O http://static.rust-lang.org/cargo-dist/cargo-nightly-linux.tar.gz
