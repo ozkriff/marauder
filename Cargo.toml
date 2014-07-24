@@ -19,7 +19,7 @@ git = "https://github.com/bjz/cgmath-rs"
 git = "https://github.com/ozkriff/error-context"
 
 [dependencies.stb_image]
-git = "https://github.com/ozkriff/rust-stb-image" # TODO: s/ozkriff/mozilla-servo/
+git = "https://github.com/mozilla-servo/rust-stb-image"
 
 [dependencies.stb_tt]
 git = "https://github.com/ozkriff/stb-tt-rs"
