@@ -10,7 +10,19 @@ use core::map::MapPosIter;
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
-use core::core;
+use core::core::{
+    Core,
+    Event,
+    UnitTypeId,
+    CommandCreateUnit,
+    CommandMove,
+    CommandAttackUnit,
+    CommandEndTurn,
+    EventCreateUnit,
+    EventMove,
+    EventAttackUnit,
+    EventEndTurn,
+};
 use core::fs::FileSystem;
 use visualizer::mgl;
 use visualizer::camera::Camera;
@@ -158,7 +170,7 @@ fn get_marker_mesh_id(
 
 fn get_unit_mesh_id (
     unit_type_visual_info: &UnitTypeVisualInfoManager,
-    unit_type_id: core::UnitTypeId,
+    unit_type_id: UnitTypeId,
 ) -> MeshId {
     unit_type_visual_info.get(unit_type_id).mesh_id
 }
@@ -183,8 +195,8 @@ pub struct GameStateVisualizer {
     selected_unit_id: Option<UnitId>,
     unit_under_cursor_id: Option<UnitId>,
     scenes: HashMap<PlayerId, Scene>,
-    core: core::Core,
-    event: Option<core::Event>,
+    core: Core,
+    event: Option<Event>,
     event_visualizer: Option<Box<EventVisualizer>>,
     game_states: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
@@ -198,7 +210,7 @@ impl GameStateVisualizer {
     pub fn new(fs: &FileSystem, context: &Context) -> GameStateVisualizer {
         set_error_context!("constructing GameStateVisualizer", "-");
         let players_count = 2;
-        let core = core::Core::new(fs);
+        let core = Core::new(fs);
         let map_size = core.map_size();
         let game_states = get_game_states(players_count);
         let picker = picker::TilePicker::new(
@@ -351,7 +363,7 @@ impl GameStateVisualizer {
     }
 
     fn end_turn(&mut self) {
-        self.core.do_command(core::CommandEndTurn);
+        self.core.do_command(CommandEndTurn);
         self.selected_unit_id = None;
         let scene = self.scenes.get_mut(&self.core.player_id());
         self.selection_manager.deselect(scene);
@@ -368,7 +380,7 @@ impl GameStateVisualizer {
                 if self.is_tile_occupied(pos) {
                     return;
                 }
-                let cmd = core::CommandCreateUnit(pos);
+                let cmd = CommandCreateUnit(pos);
                 self.core.do_command(cmd);
             },
             None => {},
@@ -383,7 +395,7 @@ impl GameStateVisualizer {
                 if attacker.attacked {
                     return;
                 }
-                let cmd = core::CommandAttackUnit(attacker_id, defender_id);
+                let cmd = CommandAttackUnit(attacker_id, defender_id);
                 self.core.do_command(cmd);
             },
             _ => {},
@@ -456,7 +468,7 @@ impl GameStateVisualizer {
         if path.len() < 2 {
             return;
         }
-        self.core.do_command(core::CommandMove(unit_id, path));
+        self.core.do_command(CommandMove(unit_id, path));
     }
 
     fn handle_mouse_button_event(&mut self, context: &Context) {
@@ -514,22 +526,22 @@ impl GameStateVisualizer {
 
     fn make_event_visualizer(
         &mut self,
-        event: &core::Event
+        event: &Event
     ) -> Box<EventVisualizer> {
         let player_id = self.core.player_id();
         let scene = self.scenes.get_mut(&player_id);
         let state = self.game_states.get(&player_id);
         match *event {
-            core::EventMove(ref unit_id, ref path) => {
+            EventMove(ref unit_id, ref path) => {
                 let type_id = state.units.get(unit_id).type_id;
                 let unit_type_visual_info = self.unit_type_visual_info.get(type_id);
                 EventMoveVisualizer::new(
                     scene, state, *unit_id, unit_type_visual_info, path.clone())
             },
-            core::EventEndTurn(_, _) => {
+            EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
             },
-            core::EventCreateUnit(id, ref pos, type_id, player_id) => {
+            EventCreateUnit(id, ref pos, type_id, player_id) => {
                 EventCreateUnitVisualizer::new(
                     &self.core,
                     scene,
@@ -541,7 +553,7 @@ impl GameStateVisualizer {
                     get_marker_mesh_id(&self.mesh_ids, player_id),
                 )
             },
-            core::EventAttackUnit(attacker_id, defender_id, killed) => {
+            EventAttackUnit(attacker_id, defender_id, killed) => {
                 EventAttackUnitVisualizer::new(
                     scene,
                     state,
@@ -554,7 +566,7 @@ impl GameStateVisualizer {
         }
     }
 
-    fn start_event_visualization(&mut self, event: core::Event) {
+    fn start_event_visualization(&mut self, event: Event) {
         let vis = self.make_event_visualizer(&event);
         self.event = Some(event);
         self.event_visualizer = Some(vis);
