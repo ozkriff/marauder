@@ -16,8 +16,11 @@ install:
     - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/rust-nightly-x86_64-unknown-linux-gnu/lib
     - rustc -v
 
-    # glfw
+    # some native deps
     - sudo apt-get install libXxf86vm-dev
+    - sudo apt-get install libxml2
+
+    # glfw
     - git clone https://github.com/glfw/glfw.git
     - cd glfw
     - git checkout 3.0.3
@@ -28,9 +31,6 @@ install:
 
     # target/data
     - git clone --depth=1 https://github.com/ozkriff/marauder-data target/data
-
-    - sudo apt-get install libXxf86vm-dev
-    - sudo apt-get install libxml2
 
 script:
     - cargo build
