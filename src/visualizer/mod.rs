@@ -19,5 +19,6 @@ pub mod context;
 pub mod state_visualizer;
 pub mod game_state_visualizer;
 pub mod menu_state_visualizer;
+pub mod unit_type_visual_info;
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

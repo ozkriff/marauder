@@ -16,6 +16,7 @@ use visualizer::scene::{
     SHELL_NODE_ID,
 };
 use visualizer::types::{MFloat, WorldPos, Time};
+use visualizer::unit_type_visual_info::{UnitTypeVisualInfo};
 
 fn unit_id_to_node_id(unit_id: UnitId) -> NodeId {
     NodeId{id: unit_id.id}
@@ -74,6 +75,7 @@ impl EventMoveVisualizer {
         scene: &mut Scene,
         _: &GameState,
         unit_id: UnitId,
+        unit_type_visual_info: &UnitTypeVisualInfo,
         path: Vec<MapPos>
     ) -> Box<EventVisualizer> {
         let mut world_path = Vec::new();
@@ -81,7 +83,7 @@ impl EventMoveVisualizer {
             let world_pos = geom::map_pos_to_world_pos(*map_pos);
             world_path.push(world_pos);
         }
-        let speed = 3.8; // TODO: Get from UnitType
+        let speed = unit_type_visual_info.move_speed;
         let node_id = unit_id_to_node_id(unit_id);
         let node = scene.nodes.get_mut(&node_id);
         node.rot = geom::get_rot_angle(
@@ -144,12 +146,15 @@ pub struct EventCreateUnitVisualizer {
     move: MoveHelper,
 }
 
+// TODO: use generic algorithm
 fn get_unit_scene_nodes(
+    core: &core::Core,
     type_id: core::UnitTypeId,
     mesh_id: MeshId,
 ) -> Vec<SceneNode> {
-    match type_id {
-        core::Tank => vec![
+    let count = core.get_unit_type(type_id).count;
+    match count {
+        1 => vec![
             SceneNode {
                 pos: WorldPos{v: Vector3{x: 0.0, y: 0.0, z: 0.0}},
                 rot: 0.0,
@@ -157,7 +162,7 @@ fn get_unit_scene_nodes(
                 children: vec![],
             },
         ],
-        core::Soldier => vec![
+        4 => vec![
             SceneNode {
                 pos: WorldPos{v: Vector3{x: 0.2, y: 0.2, z: 0.0}},
                 rot: 0.0,
@@ -183,11 +188,13 @@ fn get_unit_scene_nodes(
                 children: vec![],
             },
         ],
+        _ => fail!("TODO: not implemented"),
     }
 }
 
 impl EventCreateUnitVisualizer {
     pub fn new(
+        core: &core::Core,
         scene: &mut Scene,
         _: &GameState,
         id: UnitId,
@@ -205,7 +212,7 @@ impl EventCreateUnitVisualizer {
             pos: from,
             rot: rot,
             mesh_id: None,
-            children: get_unit_scene_nodes(type_id, mesh_id),
+            children: get_unit_scene_nodes(core, type_id, mesh_id),
         });
         scene.nodes.insert(marker_id(id), SceneNode {
             pos: WorldPos{v: to.v.add_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))},

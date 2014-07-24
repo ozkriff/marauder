@@ -19,6 +19,10 @@ use visualizer::picker;
 use visualizer::obj;
 use visualizer::mesh::{Mesh, MeshId};
 use visualizer::scene::{Scene, SceneNode};
+use visualizer::unit_type_visual_info::{
+    UnitTypeVisualInfo,
+    UnitTypeVisualInfoManager,
+};
 use visualizer::types::{
     WorldPos,
     VertexCoord,
@@ -141,13 +145,34 @@ fn get_max_camera_pos(map_size: &Size2<MInt>) -> WorldPos {
     WorldPos{v: Vector3{x: -pos.v.x, y: -pos.v.y, z: 0.0}}
 }
 
-pub struct GameStateVisualizer {
+fn get_marker_mesh_id(
+    mesh_ids: &MeshIdManager,
+    player_id: PlayerId,
+) -> MeshId {
+    match player_id.id {
+        0 => mesh_ids.marker_1_mesh_id,
+        1 => mesh_ids.marker_2_mesh_id,
+        n => fail!("Wrong player id: {}", n),
+    }
+}
+
+fn get_unit_mesh_id (
+    unit_type_visual_info: &UnitTypeVisualInfoManager,
+    unit_type_id: core::UnitTypeId,
+) -> MeshId {
+    unit_type_visual_info.get(unit_type_id).mesh_id
+}
+
+struct MeshIdManager {
     map_mesh_id: MeshId,
-    tank_mesh_id: MeshId,
-    soldier_mesh_id: MeshId,
     shell_mesh_id: MeshId,
     marker_1_mesh_id: MeshId,
     marker_2_mesh_id: MeshId,
+}
+
+pub struct GameStateVisualizer {
+    mesh_ids: MeshIdManager,
+    unit_type_visual_info: UnitTypeVisualInfoManager,
     meshes: Vec<Mesh>,
     map_text_mesh: Mesh,
     camera: Camera,
@@ -220,14 +245,30 @@ impl GameStateVisualizer {
         );
         let map_text_mesh = context.font_stash.borrow_mut().deref_mut()
             .get_mesh("test text", &context.shader);
-        let (commands_tx, commands_rx) = channel();
-        let vis = GameStateVisualizer {
+        // TODO: store this info in separate json
+        let mesh_ids = MeshIdManager {
             map_mesh_id: map_mesh_id,
-            tank_mesh_id: tank_mesh_id,
-            soldier_mesh_id: soldier_mesh_id,
             shell_mesh_id: shell_mesh_id,
             marker_1_mesh_id: marker_1_mesh_id,
             marker_2_mesh_id: marker_2_mesh_id,
+        };
+        let unit_type_visual_info = {
+            let mut m = UnitTypeVisualInfoManager::new();
+            // TODO: Add by name not by order
+            m.add_info(UnitTypeVisualInfo {
+                mesh_id: tank_mesh_id,
+                move_speed: 3.8,
+            });
+            m.add_info(UnitTypeVisualInfo {
+                mesh_id: soldier_mesh_id,
+                move_speed: 2.0,
+            });
+            m
+        };
+        let (commands_tx, commands_rx) = channel();
+        let vis = GameStateVisualizer {
+            unit_type_visual_info: unit_type_visual_info,
+            mesh_ids: mesh_ids,
             meshes: meshes,
             map_text_mesh: map_text_mesh,
             camera: camera,
@@ -284,7 +325,7 @@ impl GameStateVisualizer {
 
     fn draw_map(&mut self, context: &Context) {
         context.shader.uniform_mat4f(context.mvp_mat_id, &self.camera.mat());
-        self.meshes[self.map_mesh_id.id as uint].draw(&context.shader);
+        self.meshes[self.mesh_ids.map_mesh_id.id as uint].draw(&context.shader);
     }
 
     fn draw_3d_text(&mut self, context: &Context) {
@@ -480,29 +521,24 @@ impl GameStateVisualizer {
         let state = self.game_states.get(&player_id);
         match *event {
             core::EventMove(ref unit_id, ref path) => {
+                let type_id = state.units.get(unit_id).type_id;
+                let unit_type_visual_info = self.unit_type_visual_info.get(type_id);
                 EventMoveVisualizer::new(
-                    scene, state, *unit_id, path.clone())
+                    scene, state, *unit_id, unit_type_visual_info, path.clone())
             },
             core::EventEndTurn(_, _) => {
                 EventEndTurnVisualizer::new()
             },
             core::EventCreateUnit(id, ref pos, type_id, player_id) => {
-                let marker_mesh = match player_id.id {
-                    0 => self.marker_1_mesh_id,
-                    1 => self.marker_2_mesh_id,
-                    n => fail!("Wrong player id: {}", n),
-                };
                 EventCreateUnitVisualizer::new(
+                    &self.core,
                     scene,
                     state,
                     id,
                     type_id,
                     *pos,
-                    match type_id {
-                        core::Tank => self.tank_mesh_id,
-                        core::Soldier => self.soldier_mesh_id,
-                    },
-                    marker_mesh,
+                    get_unit_mesh_id(&self.unit_type_visual_info, type_id),
+                    get_marker_mesh_id(&self.mesh_ids, player_id),
                 )
             },
             core::EventAttackUnit(attacker_id, defender_id, killed) => {
@@ -512,7 +548,7 @@ impl GameStateVisualizer {
                     attacker_id,
                     defender_id,
                     killed,
-                    self.shell_mesh_id,
+                    self.mesh_ids.shell_mesh_id,
                 )
             },
         }

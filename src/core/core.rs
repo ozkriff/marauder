@@ -28,11 +28,27 @@ pub struct Player {
     pub id: PlayerId,
 }
 
-#[deriving(Clone)]
-pub enum UnitTypeId {
-    Tank,
-    Soldier,
+pub enum UnitClass {
+    Infantry,
+    Vehicle,
 }
+
+pub struct UnitType {
+    pub name: String,
+    pub class: UnitClass,
+    pub count: MInt,
+    pub size: MInt,
+    pub armor: MInt,
+    pub toughness: MInt,
+    pub weapon_skill: MInt,
+    // weapon stats (TODO: Move to other struct)
+    pub damage: MInt,
+    pub ap: MInt,
+    pub accuracy: MInt,
+}
+
+#[deriving(Clone)]
+pub struct UnitTypeId{pub id: MInt}
 
 pub struct Unit {
     pub id: UnitId,
@@ -50,6 +66,7 @@ pub struct Core {
     core_event_list: Vec<Event>,
     event_lists: HashMap<PlayerId, Vec<Event>>,
     map_size: Size2<MInt>,
+    unit_types: Vec<UnitType>,
 }
 
 fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
@@ -57,6 +74,36 @@ fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
     map.insert(PlayerId{id: 0}, Vec::new());
     map.insert(PlayerId{id: 1}, Vec::new());
     map
+}
+
+fn get_unit_types() -> Vec<UnitType> {
+    // TODO: read from json/toml config
+    vec![
+        UnitType {
+            name: "tank".to_string(),
+            class: Vehicle,
+            size: 6,
+            count: 1,
+            armor: 11,
+            toughness: 9,
+            weapon_skill: 5,
+            damage: 9,
+            ap: 9,
+            accuracy: 5,
+        },
+        UnitType {
+            name: "soldier".to_string(),
+            class: Infantry,
+            size: 4,
+            count: 4,
+            armor: 1,
+            toughness: 2,
+            weapon_skill: 5,
+            damage: 2,
+            ap: 1,
+            accuracy: 5,
+        },
+    ]
 }
 
 fn get_players_list() -> Vec<Player> {
@@ -78,12 +125,36 @@ impl Core {
             core_event_list: Vec::new(),
             event_lists: get_event_lists(),
             map_size: map_size,
+            unit_types: get_unit_types(),
         };
-        core.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, Tank, PlayerId{id: 0});
-        core.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, Soldier, PlayerId{id: 0});
-        core.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, Tank, PlayerId{id: 1});
-        core.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, Soldier, PlayerId{id: 1});
+        // TODO: Move to scenario.json
+        let tank_id = core.get_unit_type_id("tank");
+        let soldier_id = core.get_unit_type_id("soldier");
+        core.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, tank_id, PlayerId{id: 0});
+        core.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, soldier_id, PlayerId{id: 0});
+        core.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, tank_id, PlayerId{id: 1});
+        core.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, soldier_id, PlayerId{id: 1});
         core
+    }
+
+    fn get_unit_type_id_opt(&self, name: &str) -> Option<UnitTypeId> {
+        for (id, unit_type) in self.unit_types.iter().enumerate() {
+            if unit_type.name.as_slice() == name {
+                return Some(UnitTypeId{id: id as MInt});
+            }
+        }
+        None
+    }
+
+    pub fn get_unit_type<'a>(&'a self, unit_type_id: UnitTypeId) -> &'a UnitType {
+        &self.unit_types[unit_type_id.id as uint]
+    }
+
+    fn get_unit_type_id(&self, name: &str) -> UnitTypeId {
+        match self.get_unit_type_id_opt(name) {
+            Some(id) => id,
+            None => fail!("No unit type with name: \"{}\"", name),
+        }
     }
 
     fn get_new_unit_id(&self) -> UnitId {
@@ -111,20 +182,42 @@ impl Core {
     fn get_unit<'a>(&'a self, id: UnitId) -> &'a Unit {
         match self.game_state.units.find(&id) {
             Some(unit) => unit,
-            None => fail!("!"),
+            None => fail!("No unit with id = {}", id.id),
         }
     }
 
     fn hit_test(&self, attacker_id: UnitId, defender_id: UnitId) -> bool {
-        let attacker_type_id = self.get_unit(attacker_id).type_id;
-        let defender_type_id = self.get_unit(defender_id).type_id;
-        let required_points = match (attacker_type_id, defender_type_id) {
-            (Tank, Tank) => 5,
-            (Tank, Soldier) => 3,
-            (Soldier, Tank) => 7,
-            (Soldier, Soldier) => 5,
-        };
-        task_rng().gen_range(0i, 10 + 1) > required_points
+        fn test(needed: MInt) -> bool {
+            let real = task_rng().gen_range(-5i32, 5i32);
+            let result = real < needed;
+            println!("real:{} < needed:{} = {}", real, needed, result);
+            result
+        }
+        println!("");
+        let attacker = self.get_unit(attacker_id);
+        let defender = self.get_unit(defender_id);
+        let attacker_type = self.get_unit_type(attacker.type_id);
+        let defender_type = self.get_unit_type(defender.type_id);
+        let hit_test_v = -15 + defender_type.size
+            + attacker_type.accuracy + attacker_type.weapon_skill;
+        let pierce_test_v = 5 + -defender_type.armor + attacker_type.ap;
+        let wound_test_v = -defender_type.toughness + attacker_type.damage;
+        println!("hit_test = {}, pierce_test = {}, wound_test_v = {}",
+            hit_test_v, pierce_test_v, wound_test_v);
+        print!("hit test: ");
+        if !test(hit_test_v) {
+            return false;
+        }
+        print!("pierce test: ");
+        if !test(pierce_test_v) {
+            return false;
+        }
+        print!("wound test: ");
+        if !test(wound_test_v) {
+            return false;
+        }
+        println!("HIT!");
+        true
     }
 
     pub fn player_id(&self) -> PlayerId {
@@ -152,7 +245,7 @@ impl Core {
                 EventCreateUnit(
                     self.get_new_unit_id(),
                     pos,
-                    Tank, // TODO: replace Tank with ...
+                    UnitTypeId{id: 0}, // TODO: ?
                     self.current_player_id,
                 )
             },
