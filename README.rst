@@ -36,11 +36,7 @@ Download to 'data' directory::
 
 Run Marauder::
 
-    make run
-
-or::
-
-    ./target/marauder
+    cargo run
 
 
 How to Play
