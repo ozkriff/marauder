@@ -118,7 +118,7 @@ impl Pathfinder {
         self.clean_map();
         self.push_start_pos_to_queue(unit.pos);
         while self.queue.len() != 0 {
-            let pos = self.queue.shift().unwrap();
+            let pos = self.queue.remove(0).unwrap();
             self.try_to_push_neighbours(state, unit, pos);
         }
     }

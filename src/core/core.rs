@@ -226,7 +226,7 @@ impl Core {
 
     pub fn get_event(&mut self) -> Option<Event> {
         let list = self.event_lists.get_mut(&self.current_player_id);
-        list.shift()
+        list.remove(0)
     }
 
     fn command_to_event(&self, command: Command) -> Event {
