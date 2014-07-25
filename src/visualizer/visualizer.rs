@@ -112,7 +112,7 @@ impl Visualizer {
                 self.visualizers.push(visualizer as Box<StateVisualizer>);
             }
             Some(EndGame) => {
-                self.visualizers.pop();
+                let _ = self.visualizers.pop();
             },
             Some(QuitMenu) => {
                 self.should_close = true;

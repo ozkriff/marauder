@@ -54,7 +54,7 @@ impl EventVisualizer for EventMoveVisualizer {
         let node = scene.nodes.get_mut(&node_id);
         node.pos = pos;
         if self.move.is_finished() {
-            self.path.remove(0);
+            let _ = self.path.remove(0);
             if self.path.len() > 1 {
                 self.update_waypoint(node);
             }

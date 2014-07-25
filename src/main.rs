@@ -1,9 +1,9 @@
 // See LICENSE file for copyright and license details.
 
-#![deny(non_camel_case_types)]
-#![deny(non_uppercase_statics)]
-#![deny(unnecessary_qualification)]
-#![deny(unnecessary_typecast)]
+#![warn(unnecessary_qualification)]
+#![warn(unnecessary_typecast)]
+#![warn(non_uppercase_statics)]
+#![warn(unused_result)]
 
 #![feature(macro_rules)]
 #![feature(phase)]
