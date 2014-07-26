@@ -74,20 +74,22 @@ impl Pathfinder {
     fn process_neighbour_pos(
         &mut self,
         state: &GameState,
-        _: &Unit, // TODO: use unit`s type and action points later
+        unit: &Unit,
         original_pos: MapPos,
         neighbour_pos: MapPos
     ) {
         let old_cost = self.map.tile(original_pos).cost;
         let tile = self.map.tile_mut(neighbour_pos);
-        let new_cost: MInt = old_cost + 1;
+        let new_cost = old_cost + 1;
         let units_count = state.units_at(neighbour_pos).len();
-        if tile.cost > new_cost && units_count == 0 {
+        let max_movement_points = 5; // TODO: get from UnitType
+        if tile.cost > new_cost && units_count == 0
+            && new_cost < max_movement_points && !unit.moved
+        {
             self.queue.push(neighbour_pos);
-            // update neighbour tile info
             tile.cost = new_cost;
-            let dir = Dir::get_dir_from_to(neighbour_pos, original_pos);
-            tile.parent = Some(dir);
+            tile.parent = Some(Dir::get_dir_from_to(
+                neighbour_pos, original_pos));
         }
     }
 
