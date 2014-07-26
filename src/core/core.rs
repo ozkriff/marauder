@@ -286,7 +286,7 @@ impl Core {
                 EventCreateUnit(
                     self.get_new_unit_id(),
                     pos,
-                    UnitTypeId{id: 0}, // TODO: ?
+                    self.get_unit_type_id("soldier"),
                     self.current_player_id,
                 )
             },
