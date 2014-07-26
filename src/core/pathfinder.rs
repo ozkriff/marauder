@@ -6,8 +6,8 @@ use core::game_state::GameState;
 use core::dir::Dir;
 
 struct Tile {
-    cost: MInt,
-    parent: Option<Dir>,
+    pub cost: MInt,
+    pub parent: Option<Dir>,
 }
 
 struct Map {
@@ -20,18 +20,22 @@ fn max_cost() -> MInt {
 }
 
 impl<'a> Map {
-    fn tile_mut(&'a mut self, pos: MapPos) -> &'a mut Tile {
+    pub fn tile_mut(&'a mut self, pos: MapPos) -> &'a mut Tile {
         self.tiles.get_mut((pos.v.x + pos.v.y * self.size.w) as uint)
     }
 
-    fn tile(&'a self, pos: MapPos) -> &'a Tile {
+    pub fn tile(&'a self, pos: MapPos) -> &'a Tile {
         &self.tiles[(pos.v.x + pos.v.y * self.size.w) as uint]
     }
 
-    fn is_inboard(&self, pos: MapPos) -> bool {
+    pub fn is_inboard(&self, pos: MapPos) -> bool {
         let x = pos.v.x;
         let y = pos.v.y;
         x >= 0 && y >= 0 && x < self.size.w && y < self.size.h
+    }
+
+    pub fn get_size(&self) -> Size2<MInt> {
+        self.size
     }
 }
 
@@ -61,6 +65,10 @@ impl Pathfinder {
                 tiles: create_tiles(tiles_count),
             },
         }
+    }
+
+    pub fn get_map(&self) -> &Map {
+        &self.map
     }
 
     fn process_neighbour_pos(

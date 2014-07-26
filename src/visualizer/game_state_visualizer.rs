@@ -24,6 +24,7 @@ use core::core::{
     EventEndTurn,
 };
 use core::fs::FileSystem;
+use core::dir::{Dir};
 use visualizer::mgl;
 use visualizer::camera::Camera;
 use visualizer::geom;
@@ -107,11 +108,34 @@ fn get_pathfinders(
     m
 }
 
+fn build_walkable_mesh(pathfinder: &Pathfinder, shader: &Shader) -> Mesh {
+    let map = pathfinder.get_map();
+    let map_size = map.get_size();
+    let mut vertex_data = Vec::new();
+    for tile_pos in MapPosIter::new(map_size) {
+        match map.tile(tile_pos).parent {
+            Some(parent_dir) => {
+                let tile_pos_to = Dir::get_neighbour_pos(tile_pos, parent_dir);
+                let world_pos_from = geom::map_pos_to_world_pos(tile_pos);
+                let world_pos_to = geom::map_pos_to_world_pos(tile_pos_to);
+                vertex_data.push(VertexCoord{v: geom::lift(world_pos_from.v)});
+                vertex_data.push(VertexCoord{v: geom::lift(world_pos_to.v)});
+            },
+            None => {},
+        }
+    }
+    let mut mesh = Mesh::new(vertex_data.as_slice());
+    mesh.set_mode(mgl::Lines);
+    mesh.prepare(shader);
+    mesh
+}
+
 fn get_map_mesh(fs: &FileSystem, map_size: Size2<MInt>, shader: &Shader) -> Mesh {
     let mut vertex_data = Vec::new();
     let mut tex_data = Vec::new();
     for tile_pos in MapPosIter::new(map_size) {
         let pos = geom::map_pos_to_world_pos(tile_pos);
+        // TODO: range(0, 6) -> some dir iterator
         for num in range(0i32, 6) {
             let vertex = geom::index_to_hex_vertex(num);
             let next_vertex = geom::index_to_hex_vertex(num + 1);
@@ -186,6 +210,7 @@ pub struct GameStateVisualizer {
     mesh_ids: MeshIdManager,
     unit_type_visual_info: UnitTypeVisualInfoManager,
     meshes: Vec<Mesh>,
+    walkable_mesh: Option<Mesh>, // TODO: move to 'meshes'
     map_text_mesh: Mesh,
     camera: Camera,
     commands_rx: Receiver<StateChangeCommand>,
@@ -279,6 +304,7 @@ impl GameStateVisualizer {
         };
         let (commands_tx, commands_rx) = channel();
         let vis = GameStateVisualizer {
+            walkable_mesh: None,
             unit_type_visual_info: unit_type_visual_info,
             mesh_ids: mesh_ids,
             meshes: meshes,
@@ -353,6 +379,13 @@ impl GameStateVisualizer {
         context.shader.uniform_color(context.basic_color_id, mgl::WHITE);
         self.draw_scene_nodes(context);
         self.draw_map(context);
+        match self.walkable_mesh {
+            Some(ref walkable_mesh) => {
+                context.shader.uniform_color(context.basic_color_id, mgl::BLUE);
+                walkable_mesh.draw(&context.shader);
+            },
+            None => {},
+        }
         match self.event_visualizer {
             Some(ref mut event_visualizer) => {
                 let scene = self.scenes.get_mut(&self.core.player_id());
@@ -402,13 +435,14 @@ impl GameStateVisualizer {
        }
     }
 
-    fn select_unit(&mut self) {
+    fn select_unit(&mut self, context: &Context) {
         match self.unit_under_cursor_id {
             Some(unit_id) => {
                 self.selected_unit_id = Some(unit_id);
                 let state = self.game_states.get(&self.core.player_id());
                 let pf = self.pathfinders.get_mut(&self.core.player_id());
                 pf.fill_map(state, state.units.get(&unit_id));
+                self.walkable_mesh = Some(build_walkable_mesh(pf, &context.shader));
                 let scene = self.scenes.get_mut(&self.core.player_id());
                 self.selection_manager.create_selection_marker(
                     state, scene, unit_id);
@@ -499,7 +533,7 @@ impl GameStateVisualizer {
                     unit.player_id
                 };
                 if player_id == self.core.player_id() {
-                    self.select_unit();
+                    self.select_unit(context);
                 } else {
                     self.attack_unit();
                 }
@@ -572,7 +606,7 @@ impl GameStateVisualizer {
         self.event_visualizer = Some(vis);
     }
 
-    fn end_event_visualization(&mut self) {
+    fn end_event_visualization(&mut self, context: &Context) {
         let scene = self.scenes.get_mut(&self.core.player_id());
         let state = self.game_states.get_mut(&self.core.player_id());
         self.event_visualizer.get_mut_ref().end(scene, state);
@@ -583,6 +617,8 @@ impl GameStateVisualizer {
             Some(selected_unit_id) => {
                 let pf = self.pathfinders.get_mut(&self.core.player_id());
                 pf.fill_map(state, state.units.get(&selected_unit_id));
+                self.walkable_mesh = Some(
+                    build_walkable_mesh(pf, &context.shader));
                 self.selection_manager.move_selection_marker(state, scene);
             },
             None => {},
@@ -592,14 +628,14 @@ impl GameStateVisualizer {
 }
 
 impl StateVisualizer for GameStateVisualizer {
-    fn logic(&mut self) {
+    fn logic(&mut self, context: &Context) {
         if self.event_visualizer.is_none() {
             match self.core.get_event() {
                 Some(e) => self.start_event_visualization(e),
                 None => {},
             }
         } else if self.event_visualizer.get_ref().is_finished() {
-            self.end_event_visualization();
+            self.end_event_visualization(context);
         }
     }
 

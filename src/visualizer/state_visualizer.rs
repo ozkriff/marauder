@@ -11,7 +11,7 @@ pub enum StateChangeCommand {
 }
 
 pub trait StateVisualizer {
-    fn logic(&mut self);
+    fn logic(&mut self, context: &Context);
     fn draw(&mut self, context: &Context, dtime: Time);
     fn handle_event(&mut self, context: &Context, event: glfw::WindowEvent);
     fn get_command(&self) -> Option<StateChangeCommand>;

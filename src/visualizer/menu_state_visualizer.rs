@@ -61,7 +61,7 @@ impl MenuStateVisualizer {
 }
 
 impl StateVisualizer for MenuStateVisualizer {
-    fn logic(&mut self) {}
+    fn logic(&mut self, _: &Context) {}
 
     fn draw(&mut self, context: &Context, _: Time) {
         use glfw::Context;

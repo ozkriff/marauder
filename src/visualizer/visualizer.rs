@@ -133,7 +133,7 @@ impl Visualizer {
                 visualizer.handle_event(&self.context, *event);
                 self.context.handle_event(*event);
             }
-            visualizer.logic();
+            visualizer.logic(&self.context);
             visualizer.draw(&self.context, self.dtime);
         }
         self.handle_cmd();

@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use core::types::MInt;
-use visualizer::mgl::{Vbo, Vao, Triangles};
+use visualizer::mgl::{Vbo, Vao, MeshRenderMode, Triangles};
 use visualizer::types::{Color3, VertexCoord, TextureCoord};
 use visualizer::shader::Shader;
 use visualizer::texture::Texture;
@@ -15,6 +15,7 @@ pub struct Mesh {
     texture: Option<Texture>,
     length: MInt,
     vao: Vao,
+    mode: MeshRenderMode,
 }
 
 impl Mesh {
@@ -27,7 +28,12 @@ impl Mesh {
             texture: None,
             length: length,
             vao: Vao::new(),
+            mode: Triangles,
         }
+    }
+
+    pub fn set_mode(&mut self, mode: MeshRenderMode) {
+        self.mode = mode;
     }
 
     pub fn set_color(&mut self, data: &[Color3]) {
@@ -69,7 +75,7 @@ impl Mesh {
             Some(ref texture) => texture.enable(shader),
             None => {},
         }
-        self.vao.draw_array(Triangles, self.length);
+        self.vao.draw_array(self.mode, self.length);
         self.vao.unbind();
     }
 }

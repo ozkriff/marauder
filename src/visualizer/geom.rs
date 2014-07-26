@@ -11,6 +11,14 @@ pub static HEX_EX_RADIUS: MFloat = 1.0;
 // (pow(1.0, 2) - pow(0.5, 2)).sqrt()
 pub static HEX_IN_RADIUS: MFloat = 0.866025403784 * HEX_EX_RADIUS;
 
+pub static MINIMAL_LIFT_HEIGHT: MFloat = 0.01;
+
+pub fn lift(v: Vector3<MFloat>) -> Vector3<MFloat> {
+    let mut v = v;
+    v.z += MINIMAL_LIFT_HEIGHT;
+    v
+}
+
 pub fn map_pos_to_world_pos(i: MapPos) -> WorldPos {
     let v = Vector2 {
         x: (i.v.x as MFloat) * HEX_IN_RADIUS * 2.0,
