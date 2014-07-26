@@ -146,49 +146,31 @@ pub struct EventCreateUnitVisualizer {
     move: MoveHelper,
 }
 
-// TODO: use generic algorithm
 fn get_unit_scene_nodes(
     core: &core::Core,
     type_id: core::UnitTypeId,
     mesh_id: MeshId,
 ) -> Vec<SceneNode> {
     let count = core.get_unit_type(type_id).count;
-    match count {
-        1 => vec![
-            SceneNode {
-                pos: WorldPos{v: Vector3{x: 0.0, y: 0.0, z: 0.0}},
+    let mut vec = Vec::new();
+    if count == 1 {
+        vec![SceneNode {
+            pos: WorldPos{v: Vector3{x: 0.0, y: 0.0, z: 0.0}},
+            rot: 0.0,
+            mesh_id: Some(mesh_id),
+            children: vec![],
+        }]
+    } else {
+        for i in range(0, count) {
+            let pos = geom::index_to_circle_vertex(count, i).v.mul_s(0.5f32);
+            vec.push(SceneNode {
+                pos: WorldPos{v: pos},
                 rot: 0.0,
                 mesh_id: Some(mesh_id),
                 children: vec![],
-            },
-        ],
-        4 => vec![
-            SceneNode {
-                pos: WorldPos{v: Vector3{x: 0.2, y: 0.2, z: 0.0}},
-                rot: 0.0,
-                mesh_id: Some(mesh_id),
-                children: vec![],
-            },
-            SceneNode {
-                pos: WorldPos{v: Vector3{x: 0.2, y: -0.2, z: 0.0}},
-                rot: 0.0,
-                mesh_id: Some(mesh_id),
-                children: vec![],
-            },
-            SceneNode {
-                pos: WorldPos{v: Vector3{x: -0.2, y: 0.2, z: 0.0}},
-                rot: 0.0,
-                mesh_id: Some(mesh_id),
-                children: vec![],
-            },
-            SceneNode {
-                pos: WorldPos{v: Vector3{x: -0.2, y: -0.2, z: 0.0}},
-                rot: 0.0,
-                mesh_id: Some(mesh_id),
-                children: vec![],
-            },
-        ],
-        _ => fail!("TODO: not implemented"),
+            });
+        }
+        vec
     }
 }
 
