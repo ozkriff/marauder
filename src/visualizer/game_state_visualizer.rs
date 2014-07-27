@@ -400,6 +400,7 @@ impl GameStateVisualizer {
         self.selected_unit_id = None;
         let scene = self.scenes.get_mut(&self.core.player_id());
         self.selection_manager.deselect(scene);
+        self.walkable_mesh = None;
     }
 
     fn is_tile_occupied(&self, pos: MapPos) -> bool {
