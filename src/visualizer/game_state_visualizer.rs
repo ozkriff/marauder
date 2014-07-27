@@ -494,7 +494,7 @@ impl GameStateVisualizer {
         }
         let state = self.game_states.get(&self.core.player_id());
         let unit = state.units.get(&unit_id);
-        if unit.moved {
+        if unit.move_points == 0 {
             return;
         }
         let pf = self.pathfinders.get_mut(&self.core.player_id());
@@ -610,7 +610,7 @@ impl GameStateVisualizer {
         let scene = self.scenes.get_mut(&self.core.player_id());
         let state = self.game_states.get_mut(&self.core.player_id());
         self.event_visualizer.get_mut_ref().end(scene, state);
-        state.apply_event(self.event.get_ref());
+        state.apply_event(self.core.object_types(), self.event.get_ref());
         self.event_visualizer = None;
         self.event = None;
         match self.selected_unit_id {

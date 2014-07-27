@@ -82,9 +82,8 @@ impl Pathfinder {
         let tile = self.map.tile_mut(neighbour_pos);
         let new_cost = old_cost + 1;
         let units_count = state.units_at(neighbour_pos).len();
-        let max_movement_points = 5; // TODO: get from UnitType
         if tile.cost > new_cost && units_count == 0
-            && new_cost < max_movement_points && !unit.moved
+            && new_cost <= unit.move_points
         {
             self.queue.push(neighbour_pos);
             tile.cost = new_cost;

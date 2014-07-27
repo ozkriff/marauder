@@ -2,6 +2,7 @@
 
 use std::collections::hashmap::HashMap;
 use core::core::{
+    ObjectTypes,
     Unit,
     Event,
     EventMove,
@@ -32,35 +33,38 @@ impl<'a> GameState {
         units
     }
 
-    fn refresh_units(&mut self, player_id: PlayerId) {
+    fn refresh_units(&mut self, object_types: &ObjectTypes, player_id: PlayerId) {
         for (_, unit) in self.units.mut_iter() {
             if unit.player_id == player_id {
-                unit.moved = false;
+                unit.move_points
+                    = object_types.get_unit_type(unit.type_id).move_points;
                 unit.attacked = false;
             }
         }
     }
 
-    pub fn apply_event(&mut self, event: &Event) {
+    pub fn apply_event(&mut self, object_types: &ObjectTypes, event: &Event) {
         match *event {
             EventMove(id, ref path) => {
                 let pos = *path.last().unwrap();
                 let unit = self.units.get_mut(&id);
                 unit.pos = pos;
-                assert!(!unit.moved);
-                unit.moved = true;
+                assert!(unit.move_points > 0);
+                unit.move_points = 0;
             },
             EventEndTurn(_, new_player_id) => {
-                self.refresh_units(new_player_id);
+                self.refresh_units(object_types, new_player_id);
             },
             EventCreateUnit(id, pos, type_id, player_id) => {
                 assert!(self.units.find(&id).is_none());
+                let move_points
+                    = object_types.get_unit_type(type_id).move_points;
                 self.units.insert(id, Unit {
                     id: id,
                     pos: pos,
                     player_id: player_id,
                     type_id: type_id,
-                    moved: false,
+                    move_points: move_points,
                     attacked: false,
                 });
             },

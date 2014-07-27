@@ -52,6 +52,7 @@ pub struct UnitType {
     pub toughness: MInt,
     pub weapon_skill: MInt,
     pub weapon_type_id: WeaponTypeId,
+    pub move_points: MInt,
 }
 
 #[deriving(Clone)]
@@ -62,64 +63,24 @@ pub struct Unit {
     pub pos: MapPos,
     pub player_id: PlayerId,
     pub type_id: UnitTypeId,
-    pub moved: bool,
+    pub move_points: MInt,
     pub attacked: bool,
 }
 
-pub struct Core {
-    game_state: GameState,
-    players: Vec<Player>,
-    current_player_id: PlayerId,
-    core_event_list: Vec<Event>,
-    event_lists: HashMap<PlayerId, Vec<Event>>,
-    map_size: Size2<MInt>,
+pub struct ObjectTypes {
     unit_types: Vec<UnitType>,
     weapon_types: Vec<WeaponType>,
 }
 
-fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
-    let mut map = HashMap::new();
-    map.insert(PlayerId{id: 0}, Vec::new());
-    map.insert(PlayerId{id: 1}, Vec::new());
-    map
-}
-
-fn get_players_list() -> Vec<Player> {
-    vec!(
-        Player{id: PlayerId{id: 0}},
-        Player{id: PlayerId{id: 1}},
-    )
-}
-
-impl Core {
-    pub fn new(fs: &FileSystem) -> Core {
-        set_error_context!("constructing Core", "-");
-        let config = Config::new(&fs.get(&Path::new("data/conf_core.json")));
-        let map_size = config.get("map_size");
-        let mut core = Core {
-            game_state: GameState::new(),
-            players: get_players_list(),
-            current_player_id: PlayerId{id: 0},
-            core_event_list: Vec::new(),
-            event_lists: get_event_lists(),
-            map_size: map_size,
+impl ObjectTypes {
+    pub fn new() -> ObjectTypes {
+        let mut object_types = ObjectTypes {
             unit_types: vec![],
             weapon_types: vec![],
         };
-        core.get_weapon_types();
-        core.get_unit_types();
-        core.get_units();
-        core
-    }
-
-    // TODO: Move to scenario.json
-    fn get_units(&mut self) {
-        let tank_id = self.get_unit_type_id("tank");
-        let soldier_id = self.get_unit_type_id("soldier");
-        self.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, tank_id, PlayerId{id: 0});
-        self.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, soldier_id, PlayerId{id: 0});
-        self.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, tank_id, PlayerId{id: 1});
-        self.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, soldier_id, PlayerId{id: 1});
+        object_types.get_weapon_types();
+        object_types.get_unit_types();
+        object_types
     }
 
     // TODO: read from json/toml config
@@ -151,6 +112,7 @@ impl Core {
             toughness: 9,
             weapon_skill: 5,
             weapon_type_id: cannon_id,
+            move_points: 5,
         });
         self.unit_types.push(UnitType {
             name: "soldier".to_string(),
@@ -161,6 +123,7 @@ impl Core {
             toughness: 2,
             weapon_skill: 5,
             weapon_type_id: rifle_id,
+            move_points: 3,
         });
     }
 
@@ -190,7 +153,64 @@ impl Core {
                 return WeaponTypeId{id: id as MInt};
             }
         }
-        fail!("No weapon tpe with name \"{}\"", name);
+        fail!("No weapon type with name \"{}\"", name);
+    }
+}
+
+pub struct Core {
+    game_state: GameState,
+    players: Vec<Player>,
+    current_player_id: PlayerId,
+    core_event_list: Vec<Event>,
+    event_lists: HashMap<PlayerId, Vec<Event>>,
+    map_size: Size2<MInt>,
+    object_types: ObjectTypes,
+}
+
+fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
+    let mut map = HashMap::new();
+    map.insert(PlayerId{id: 0}, Vec::new());
+    map.insert(PlayerId{id: 1}, Vec::new());
+    map
+}
+
+fn get_players_list() -> Vec<Player> {
+    vec!(
+        Player{id: PlayerId{id: 0}},
+        Player{id: PlayerId{id: 1}},
+    )
+}
+
+impl Core {
+    pub fn new(fs: &FileSystem) -> Core {
+        set_error_context!("constructing Core", "-");
+        let config = Config::new(&fs.get(&Path::new("data/conf_core.json")));
+        let map_size = config.get("map_size");
+        let mut core = Core {
+            game_state: GameState::new(),
+            players: get_players_list(),
+            current_player_id: PlayerId{id: 0},
+            core_event_list: Vec::new(),
+            event_lists: get_event_lists(),
+            map_size: map_size,
+            object_types: ObjectTypes::new(),
+        };
+        core.get_units();
+        core
+    }
+
+    pub fn object_types(&self) -> &ObjectTypes {
+        &self.object_types
+    }
+
+    // TODO: Move to scenario.json
+    fn get_units(&mut self) {
+        let tank_id = self.object_types.get_unit_type_id("tank");
+        let soldier_id = self.object_types.get_unit_type_id("soldier");
+        self.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, tank_id, PlayerId{id: 0});
+        self.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, soldier_id, PlayerId{id: 0});
+        self.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, tank_id, PlayerId{id: 1});
+        self.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, soldier_id, PlayerId{id: 1});
     }
 
     fn get_new_unit_id(&self) -> UnitId {
@@ -223,7 +243,7 @@ impl Core {
     }
 
     pub fn get_weapon_type(&self, weapon_type_id: WeaponTypeId) -> &WeaponType {
-        &self.weapon_types[weapon_type_id.id as uint]
+        &self.object_types.weapon_types[weapon_type_id.id as uint]
     }
 
     fn hit_test(&self, attacker_id: UnitId, defender_id: UnitId) -> bool {
@@ -236,8 +256,8 @@ impl Core {
         println!("");
         let attacker = self.get_unit(attacker_id);
         let defender = self.get_unit(defender_id);
-        let attacker_type = self.get_unit_type(attacker.type_id);
-        let defender_type = self.get_unit_type(defender.type_id);
+        let attacker_type = self.object_types.get_unit_type(attacker.type_id);
+        let defender_type = self.object_types.get_unit_type(defender.type_id);
         let weapon_type = self.get_weapon_type(attacker_type.weapon_type_id);
         let hit_test_v = -15 + defender_type.size
             + weapon_type.accuracy + attacker_type.weapon_skill;
@@ -286,7 +306,7 @@ impl Core {
                 EventCreateUnit(
                     self.get_new_unit_id(),
                     pos,
-                    self.get_unit_type_id("soldier"),
+                    self.object_types.get_unit_type_id("soldier"),
                     self.current_player_id,
                 )
             },
@@ -333,7 +353,7 @@ impl Core {
         while self.core_event_list.len() != 0 {
             let event = self.core_event_list.pop().unwrap();
             self.apply_event(&event);
-            self.game_state.apply_event(&event);
+            self.game_state.apply_event(&self.object_types, &event);
             for player in self.players.iter() {
                 let event_list = self.event_lists.get_mut(&player.id);
                 // TODO: per player event filter
