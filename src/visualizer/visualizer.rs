@@ -54,6 +54,7 @@ impl Visualizer {
         glfw.make_context_current(Some(&win));
         mgl::load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
         mgl::init_opengl();
+        mgl::set_viewport(win_size);
         win.set_all_polling(true);
         let font_size = config.get("font_size");
         let font_stash = FontStash::new(
