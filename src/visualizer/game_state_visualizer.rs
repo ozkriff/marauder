@@ -311,7 +311,7 @@ impl GameStateVisualizer {
         let vis = GameStateVisualizer {
             walkable_mesh: None,
             unit_type_visual_info: get_unit_type_visual_info(
-                fs, context, &mut meshes);
+                fs, context, &mut meshes),
             mesh_ids: mesh_ids,
             meshes: meshes,
             map_text_mesh: map_text_mesh,
