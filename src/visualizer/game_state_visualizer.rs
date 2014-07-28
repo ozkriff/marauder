@@ -231,6 +231,28 @@ pub struct GameStateVisualizer {
     selection_manager: SelectionManager,
 }
 
+fn get_unit_type_visual_info(
+    fs: &FileSystem,
+    context: &Context,
+    meshes: &mut Vec<Mesh>,
+) -> UnitTypeVisualInfoManager {
+    let tank_mesh_id = add_mesh(
+        meshes, load_unit_mesh(fs, &context.shader, "tank"));
+    let soldier_mesh_id = add_mesh(
+        meshes, load_unit_mesh(fs, &context.shader, "soldier"));
+    let mut unit_type_visual_info = UnitTypeVisualInfoManager::new();
+    // TODO: Add by name not by order
+    unit_type_visual_info.add_info(UnitTypeVisualInfo {
+        mesh_id: tank_mesh_id,
+        move_speed: 3.8,
+    });
+    unit_type_visual_info.add_info(UnitTypeVisualInfo {
+        mesh_id: soldier_mesh_id,
+        move_speed: 2.0,
+    });
+    unit_type_visual_info
+}
+
 impl GameStateVisualizer {
     pub fn new(fs: &FileSystem, context: &Context) -> GameStateVisualizer {
         set_error_context!("constructing GameStateVisualizer", "-");
@@ -246,10 +268,6 @@ impl GameStateVisualizer {
         let mut meshes = Vec::new();
         let map_mesh_id = add_mesh(
             &mut meshes, get_map_mesh(fs, map_size, &context.shader));
-        let tank_mesh_id = add_mesh(
-            &mut meshes, load_unit_mesh(fs, &context.shader, "tank"));
-        let soldier_mesh_id = add_mesh(
-            &mut meshes, load_unit_mesh(fs, &context.shader, "soldier"));
         let selection_marker_mesh_id = add_mesh(
             &mut meshes, get_selection_mesh(fs, &context.shader));
         let shell_mesh_id = add_mesh(
@@ -289,23 +307,11 @@ impl GameStateVisualizer {
             marker_1_mesh_id: marker_1_mesh_id,
             marker_2_mesh_id: marker_2_mesh_id,
         };
-        let unit_type_visual_info = {
-            let mut m = UnitTypeVisualInfoManager::new();
-            // TODO: Add by name not by order
-            m.add_info(UnitTypeVisualInfo {
-                mesh_id: tank_mesh_id,
-                move_speed: 3.8,
-            });
-            m.add_info(UnitTypeVisualInfo {
-                mesh_id: soldier_mesh_id,
-                move_speed: 2.0,
-            });
-            m
-        };
         let (commands_tx, commands_rx) = channel();
         let vis = GameStateVisualizer {
             walkable_mesh: None,
-            unit_type_visual_info: unit_type_visual_info,
+            unit_type_visual_info: get_unit_type_visual_info(
+                fs, context, &mut meshes);
             mesh_ids: mesh_ids,
             meshes: meshes,
             map_text_mesh: map_text_mesh,
