@@ -56,19 +56,20 @@ impl MeshRenderMode {
     }
 }
 
+// TODO: replace with something from cgmath-rs
 pub fn tr(m: Matrix4<MFloat>, v: Vector3<MFloat>) -> Matrix4<MFloat> {
     let mut t = Matrix4::<MFloat>::identity();
-    *t.mut_cr(3, 0) = v.x;
-    *t.mut_cr(3, 1) = v.y;
-    *t.mut_cr(3, 2) = v.z;
+    t[3][0] = v.x;
+    t[3][1] = v.y;
+    t[3][2] = v.z;
     m.mul_m(&t)
 }
 
 pub fn scale(m: Matrix4<MFloat>, scale: MFloat) -> Matrix4<MFloat> {
     let mut t = Matrix4::<MFloat>::identity();
-    *t.mut_cr(0, 0) = scale;
-    *t.mut_cr(1, 1) = scale;
-    *t.mut_cr(2, 2) = scale;
+    t[0][0] = scale;
+    t[1][1] = scale;
+    t[2][2] = scale;
     m.mul_m(&t)
 }
 
