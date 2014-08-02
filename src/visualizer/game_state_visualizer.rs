@@ -6,7 +6,7 @@ use glfw;
 use cgmath::vector::{Vector3, Vector2};
 use cgmath::matrix::{Matrix4};
 use error_context;
-use core::map::MapPosIter;
+use core::map::{MapPosIter, distance};
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::game_state::GameState;
 use core::pathfinder::Pathfinder;
@@ -435,6 +435,17 @@ impl GameStateVisualizer {
                 if attacker.attacked {
                     return;
                 }
+                let defender = state.units.get(&defender_id);
+                let max_distance = {
+                    let attacker_type = self.core.object_types()
+                        .get_unit_type(attacker.type_id);
+                    let weapon_type = self.core.get_weapon_type(
+                        attacker_type.weapon_type_id);
+                    weapon_type.max_distance
+                };
+                if distance(attacker.pos, defender.pos) > max_distance {
+                    return;
+                }
                 let cmd = CommandAttackUnit(attacker_id, defender_id);
                 self.core.do_command(cmd);
             },
@@ -453,6 +464,7 @@ impl GameStateVisualizer {
                 let scene = self.scenes.get_mut(&self.core.player_id());
                 self.selection_manager.create_selection_marker(
                     state, scene, unit_id);
+                // TODO: highlight potential targets
             },
             None => {},
         }

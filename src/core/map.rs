@@ -1,5 +1,6 @@
 // See LICENSE file for copyright and license details.
 
+use std::num::{abs};
 use cgmath::vector::Vector2;
 use core::types::{Size2, MInt, MapPos};
 
@@ -31,6 +32,14 @@ impl Iterator<MapPos> for MapPosIter {
         }
         current_pos
     }
+}
+
+pub fn distance(from: MapPos, to: MapPos) -> MInt {
+    let to = to.v;
+    let from = from.v;
+    let dx = (to.x + to.y / 2) - (from.x + from.y / 2);
+    let dy = to.y - from.y;
+    (abs(dx) + abs(dy) + abs(dx - dy)) / 2
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

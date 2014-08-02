@@ -8,6 +8,7 @@ use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::conf::Config;
 use core::game_state::GameState;
 use core::fs::FileSystem;
+use core::map::{distance};
 
 pub enum Command {
     CommandMove(UnitId, Vec<MapPos>),
@@ -38,6 +39,7 @@ pub struct WeaponType {
     pub damage: MInt,
     pub ap: MInt,
     pub accuracy: MInt,
+    pub max_distance: MInt,
 }
 
 #[deriving(Clone)]
@@ -90,12 +92,14 @@ impl ObjectTypes {
             damage: 9,
             ap: 9,
             accuracy: 5,
+            max_distance: 5,
         });
         self.weapon_types.push(WeaponType {
             name: "rifle".to_string(),
             damage: 2,
             ap: 1,
             accuracy: 5,
+            max_distance: 3,
         });
     }
 
@@ -259,6 +263,9 @@ impl Core {
         let attacker_type = self.object_types.get_unit_type(attacker.type_id);
         let defender_type = self.object_types.get_unit_type(defender.type_id);
         let weapon_type = self.get_weapon_type(attacker_type.weapon_type_id);
+        if distance(attacker.pos, defender.pos) > weapon_type.max_distance {
+            return false;
+        }
         let hit_test_v = -15 + defender_type.size
             + weapon_type.accuracy + attacker_type.weapon_skill;
         let pierce_test_v = 5 + -defender_type.armor + weapon_type.ap;
@@ -290,7 +297,27 @@ impl Core {
         list.remove(0)
     }
 
-    fn command_to_event(&self, command: Command) -> Event {
+    fn command_attack_unit_to_event(
+        &self,
+        attacker_id: UnitId,
+        defender_id: UnitId
+    ) -> Option<Event> {
+        let attacker = self.game_state.units.get(&attacker_id);
+        let defender = self.game_state.units.get(&defender_id);
+        let attacker_type = self.object_types.get_unit_type(attacker.type_id);
+        let weapon_type = self.get_weapon_type(attacker_type.weapon_type_id);
+        if distance(attacker.pos, defender.pos) <= weapon_type.max_distance {
+            Some(EventAttackUnit(
+                attacker_id,
+                defender_id,
+                self.hit_test(attacker_id, defender_id),
+            ))
+        } else {
+            None
+        }
+    }
+
+    fn command_to_event(&self, command: Command) -> Option<Event> {
         match command {
             CommandEndTurn => {
                 let old_id = self.current_player_id.id;
@@ -300,32 +327,30 @@ impl Core {
                 } else {
                     old_id + 1
                 };
-                EventEndTurn(PlayerId{id: old_id}, PlayerId{id: new_id})
+                Some(EventEndTurn(PlayerId{id: old_id}, PlayerId{id: new_id}))
             },
             CommandCreateUnit(pos) => {
-                EventCreateUnit(
+                Some(EventCreateUnit(
                     self.get_new_unit_id(),
                     pos,
                     self.object_types.get_unit_type_id("soldier"),
                     self.current_player_id,
-                )
+                ))
             },
             CommandMove(unit_id, path) => {
-                EventMove(unit_id, path)
+                Some(EventMove(unit_id, path))
             },
             CommandAttackUnit(attacker_id, defender_id) => {
-                EventAttackUnit(
-                    attacker_id,
-                    defender_id,
-                    self.hit_test(attacker_id, defender_id),
-                )
+                self.command_attack_unit_to_event(attacker_id, defender_id)
             },
         }
     }
 
     pub fn do_command(&mut self, command: Command) {
-        let event = self.command_to_event(command);
-        self.do_core_event(event);
+        match self.command_to_event(command) {
+            Some(event) => self.do_core_event(event),
+            None => {},
+        }
     }
 
     fn do_core_event(&mut self, core_event: Event) {
