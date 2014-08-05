@@ -1,24 +1,10 @@
 # See LICENSE file for copyright and license details.
 
-language: c
+language: rust
 
 install:
-    # cargo
-    - curl -O http://static.rust-lang.org/cargo-dist/cargo-nightly-linux.tar.gz
-    - tar xf cargo-nightly-linux.tar.gz
-    - export PATH=$PATH:$(pwd)/cargo-nightly/bin
-    - cargo --version
-
-    # rustc
-    - wget http://static.rust-lang.org/dist/rust-nightly-x86_64-unknown-linux-gnu.tar.gz
-    - tar xzf rust-nightly-x86_64-unknown-linux-gnu.tar.gz
-    - export PATH=$PATH:$(pwd)/rust-nightly-x86_64-unknown-linux-gnu/bin
-    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/rust-nightly-x86_64-unknown-linux-gnu/lib
-    - rustc -v
-
     # some native deps
     - sudo apt-get install libXxf86vm-dev
-    - sudo apt-get install libxml2
 
     # glfw
     - git clone https://github.com/glfw/glfw.git
@@ -31,8 +17,5 @@ install:
 
     # target/data
     - git clone --depth=1 https://github.com/ozkriff/marauder-data target/data
-
-script:
-    - cargo build
 
 # vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
