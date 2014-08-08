@@ -27,3 +27,6 @@ git = "https://github.com/mozilla-servo/rust-stb-image"
 
 [dependencies.stb_tt]
 git = "https://github.com/ozkriff/stb-tt-rs"
+
+[dependencies.libglfw]
+git = "https://github.com/csherratt/glfw.git"
