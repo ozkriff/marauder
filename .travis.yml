@@ -3,7 +3,19 @@
 language: rust
 
 install:
+    # some native deps
     - sudo apt-get install libXxf86vm-dev
+
+    # glfw
+    - git clone https://github.com/glfw/glfw.git
+    - cd glfw
+    - git checkout 3.0.3
+    - cmake -DBUILD_SHARED_LIBS=ON .
+    - make
+    - sudo make install
+    - cd ..
+
+    # target/data
     - git clone --depth=1 https://github.com/ozkriff/marauder-data target/data
 
 # vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
