@@ -18,4 +18,7 @@ install:
     # target/data
     - git clone --depth=1 https://github.com/ozkriff/marauder-data target/data
 
+script:
+    - cargo build
+
 # vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:
