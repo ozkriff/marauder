@@ -4,7 +4,7 @@ use std::str::Words;
 use std::str::CharSplits;
 use std::from_str::FromStr;
 use std::io::{BufferedReader, File};
-use cgmath::vector::{Vector3, Vector2};
+use cgmath::{Vector3, Vector2};
 use error_context;
 use core::types::{MInt};
 use visualizer::types::{VertexCoord, TextureCoord, Normal};

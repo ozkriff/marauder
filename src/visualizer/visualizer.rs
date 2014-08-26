@@ -3,7 +3,7 @@
 use std::cell::RefCell;
 use time::precise_time_ns;
 use glfw;
-use cgmath::vector::{Vector2};
+use cgmath::{Vector2};
 use core::types::{Size2, MInt};
 use core::conf::Config;
 use core::fs::FileSystem;

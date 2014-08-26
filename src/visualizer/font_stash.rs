@@ -3,7 +3,7 @@
 use std::cmp;
 use std::collections::hashmap::HashMap;
 use stb_tt;
-use cgmath::vector::{Vector3, Vector2};
+use cgmath::{Vector3, Vector2};
 use core::types::{Size2, MInt};
 use core::misc::add_quad_to_vec;
 use visualizer::texture::Texture;

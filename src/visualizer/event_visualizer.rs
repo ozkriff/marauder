@@ -2,7 +2,7 @@
 
 use std::rand;
 use std::rand::Rng;
-use cgmath::vector::{Vector3, Vector, EuclideanVector};
+use cgmath::{Vector3, Vector, EuclideanVector};
 use visualizer::geom;
 use core::types::{MapPos, UnitId};
 use core::game_state::GameState;
@@ -286,12 +286,12 @@ impl EventAttackUnitVisualizer {
         shell_mesh_id: MeshId
     ) -> Box<EventVisualizer> {
         let node_id = unit_id_to_node_id(defender_id);
-        let from = scene.nodes.get(&node_id).pos;
+        let from = scene.nodes[node_id].pos;
         let to = WorldPos{v: from.v.sub_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))};
         let move = MoveHelper::new(from, to, 1.0);
         let shell_move = {
-            let from = scene.nodes.get(&unit_id_to_node_id(attacker_id)).pos;
-            let to = scene.nodes.get(&unit_id_to_node_id(defender_id)).pos;
+            let from = scene.nodes[unit_id_to_node_id(attacker_id)].pos;
+            let to = scene.nodes[unit_id_to_node_id(defender_id)].pos;
             scene.nodes.insert(SHELL_NODE_ID, SceneNode {
                 pos: from,
                 rot: 0.0,

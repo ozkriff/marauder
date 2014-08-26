@@ -1,9 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::projection;
-use cgmath::angle;
-use cgmath::matrix::Matrix4;
-use cgmath::vector::Vector3;
+use cgmath::{perspective, deg, Matrix4, Vector3};
 use core::types::{MInt, Size2};
 use core::misc::{clamp, deg_to_rad};
 use visualizer::mgl;
@@ -19,11 +16,11 @@ pub struct Camera {
 }
 
 fn get_projection_mat(win_size: Size2<MInt>) -> Matrix4<MFloat> {
-    let fov = angle::deg(45.0f32);
+    let fov = deg(45.0f32);
     let ratio = win_size.w as MFloat / win_size.h as MFloat;
     let display_range_min = 0.1;
     let display_range_max = 100.0;
-    projection::perspective(
+    perspective(
         fov, ratio, display_range_min, display_range_max)
 }
 

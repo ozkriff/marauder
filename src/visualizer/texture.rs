@@ -4,7 +4,7 @@ use std;
 use gl;
 use gl::types::{GLint, GLuint, GLsizei};
 use stb_image::image;
-use cgmath::vector::{Vector2};
+use cgmath::{Vector2};
 use error_context;
 use visualizer::shader::Shader;
 use core::types::{Size2, MInt};

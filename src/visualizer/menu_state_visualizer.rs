@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use glfw;
-use cgmath::vector::Vector2;
+use cgmath::{Vector2};
 use visualizer::mgl;
 use visualizer::types::{Time, ScreenPos};
 use visualizer::gui::{ButtonManager, Button, ButtonId};

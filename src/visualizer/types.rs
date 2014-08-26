@@ -2,7 +2,7 @@
 
 use gl::types::{GLfloat, GLuint};
 use core::types::{MInt};
-use cgmath::vector::{Vector3, Vector2};
+use cgmath::{Vector3, Vector2};
 
 pub struct Color3 {
     pub r: MFloat,

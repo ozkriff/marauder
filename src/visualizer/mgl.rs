@@ -5,16 +5,13 @@
 use std;
 use gl;
 use gl::types::{GLuint, GLsizeiptr};
-use cgmath::matrix::{Matrix, Matrix4, Matrix3, ToMatrix4};
-use cgmath::array::Array2;
-use cgmath::vector::{Vector3};
-use cgmath::angle;
-use cgmath::projection;
+use cgmath::{Matrix, Matrix4, Matrix3, ToMatrix4};
+use cgmath::{Vector3, rad, ortho};
 use core::misc::deg_to_rad;
 use core::types::{Size2, MInt};
 use visualizer::types::{MFloat, Color3, Color4, ScreenPos};
 
-pub use load_gl_funcs_with = gl::load_with;
+pub use gl::load_with as load_gl_funcs_with;
 
 pub static GREY_3: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
 pub static BLACK_3: Color3 = Color3{r: 0.0, g: 0.0, b: 0.0};
@@ -74,13 +71,13 @@ pub fn scale(m: Matrix4<MFloat>, scale: MFloat) -> Matrix4<MFloat> {
 }
 
 pub fn rot_x(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
-    let rad = angle::rad(deg_to_rad(angle));
+    let rad = rad(deg_to_rad(angle));
     let r = Matrix3::from_angle_x(rad).to_matrix4();
     m.mul_m(&r)
 }
 
 pub fn rot_z(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
-    let rad = angle::rad(deg_to_rad(angle));
+    let rad = rad(deg_to_rad(angle));
     let r = Matrix3::from_angle_z(rad).to_matrix4();
     m.mul_m(&r)
 }
@@ -213,7 +210,7 @@ pub fn get_2d_screen_matrix(win_size: Size2<MInt>) -> Matrix4<MFloat> {
     let top = win_size.h as MFloat;
     let near = -1.0;
     let far = 1.0;
-    projection::ortho(left, right, bottom, top, near, far)
+    ortho(left, right, bottom, top, near, far)
 }
 
 // vim: set tabstop=4 shiftwidth=4 softtabstop=4 expandtab:

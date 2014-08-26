@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::num::{abs};
-use cgmath::vector::Vector2;
+use cgmath::{Vector2};
 use core::types::{Size2, MInt, MapPos};
 
 pub struct MapPosIter {

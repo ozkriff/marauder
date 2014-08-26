@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::{Vector2};
+use cgmath::{Vector2};
 use core::map::MapPosIter;
 use core::types::{MInt, Size2, MapPos, UnitId};
 use core::fs::FileSystem;

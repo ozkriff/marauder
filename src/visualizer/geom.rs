@@ -2,7 +2,7 @@
 
 use std::f32::consts::{PI, FRAC_PI_2};
 use std::num::{pow, abs};
-use cgmath::vector::{Vector2, Vector3, Vector};
+use cgmath::{Vector2, Vector3, Vector};
 use core::types::{MInt, MapPos};
 use core::misc::{rad_to_deg};
 use visualizer::types::{WorldPos, MFloat, VertexCoord};

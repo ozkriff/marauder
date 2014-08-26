@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::Vector2;
+use cgmath::{Vector2};
 use std::cmp::Ord;
 
 #[deriving(Decodable)]

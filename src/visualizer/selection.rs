@@ -1,6 +1,6 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::vector::Vector2;
+use cgmath::{Vector2};
 use core::types::UnitId;
 use core::game_state::GameState;
 use core::misc::add_quad_to_vec;
@@ -35,7 +35,7 @@ impl SelectionManager {
 
     fn get_pos(&self, state: &GameState) -> WorldPos {
         let unit_id = self.unit_id.unwrap();
-        let map_pos = state.units.get(&unit_id).pos;
+        let map_pos = state.units[unit_id].pos;
         WorldPos{v: geom::lift(geom::map_pos_to_world_pos(map_pos).v)}
     }
 

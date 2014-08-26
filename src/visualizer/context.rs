@@ -2,7 +2,7 @@
 
 use std::cell::RefCell;
 use glfw;
-use cgmath::vector::Vector2;
+use cgmath::{Vector2};
 use core::types::{Size2, MInt};
 use core::conf::Config;
 use visualizer::types::{MatId, ColorId, ScreenPos};

@@ -2,7 +2,7 @@
 
 use std::rand::{task_rng, Rng};
 use std::collections::hashmap::HashMap;
-use cgmath::vector::Vector2;
+use cgmath::{Vector2};
 use error_context;
 use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
 use core::conf::Config;
@@ -302,8 +302,8 @@ impl Core {
         attacker_id: UnitId,
         defender_id: UnitId
     ) -> Option<Event> {
-        let attacker = self.game_state.units.get(&attacker_id);
-        let defender = self.game_state.units.get(&defender_id);
+        let attacker = &self.game_state.units[attacker_id];
+        let defender = &self.game_state.units[defender_id];
         let attacker_type = self.object_types.get_unit_type(attacker.type_id);
         let weapon_type = self.get_weapon_type(attacker_type.weapon_type_id);
         if distance(attacker.pos, defender.pos) <= weapon_type.max_distance {

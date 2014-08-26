@@ -1,7 +1,7 @@
 // See LICENSE file for copyright and license details.
 
 use std::collections::hashmap::HashMap;
-use cgmath::vector::Vector3;
+use cgmath::{Vector3};
 use core::types::{MInt, Size2};
 use visualizer::types::{MFloat, ScreenPos};
 use visualizer::shader::Shader;

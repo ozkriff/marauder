@@ -3,8 +3,7 @@
 use std;
 use gl;
 use gl::types::{GLint, GLchar, GLuint, GLenum};
-use cgmath::matrix::Matrix4;
-use cgmath::array::Array2;
+use cgmath::{Matrix4, Array2};
 use error_context;
 use core::types::MInt;
 use core::misc::read_file;
