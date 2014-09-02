@@ -77,7 +77,7 @@ impl EventMoveVisualizer {
         unit_id: UnitId,
         unit_type_visual_info: &UnitTypeVisualInfo,
         path: Vec<MapPos>
-    ) -> Box<EventVisualizer> {
+    ) -> Box<EventVisualizer+'static> {
         let mut world_path = Vec::new();
         for map_pos in path.iter() {
             let world_pos = geom::map_pos_to_world_pos(*map_pos);
@@ -126,7 +126,7 @@ impl EventMoveVisualizer {
 pub struct EventEndTurnVisualizer;
 
 impl EventEndTurnVisualizer {
-    pub fn new() -> Box<EventVisualizer> {
+    pub fn new() -> Box<EventVisualizer+'static> {
         box EventEndTurnVisualizer as Box<EventVisualizer>
     }
 }
@@ -184,7 +184,7 @@ impl EventCreateUnitVisualizer {
         pos: MapPos,
         mesh_id: MeshId,
         marker_mesh_id: MeshId
-    ) -> Box<EventVisualizer> {
+    ) -> Box<EventVisualizer+'static> {
         let node_id = unit_id_to_node_id(id);
         let world_pos = geom::map_pos_to_world_pos(pos);
         let to = world_pos;
@@ -284,7 +284,7 @@ impl EventAttackUnitVisualizer {
         defender_id: UnitId,
         killed: bool,
         shell_mesh_id: MeshId
-    ) -> Box<EventVisualizer> {
+    ) -> Box<EventVisualizer+'static> {
         let node_id = unit_id_to_node_id(defender_id);
         let from = scene.nodes[node_id].pos;
         let to = WorldPos{v: from.v.sub_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))};

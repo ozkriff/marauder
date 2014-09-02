@@ -221,7 +221,7 @@ pub struct GameStateVisualizer {
     scenes: HashMap<PlayerId, Scene>,
     core: Core,
     event: Option<Event>,
-    event_visualizer: Option<Box<EventVisualizer>>,
+    event_visualizer: Option<Box<EventVisualizer+'static>>,
     game_states: HashMap<PlayerId, GameState>,
     pathfinders: HashMap<PlayerId, Pathfinder>,
     button_manager: ButtonManager,
@@ -579,7 +579,7 @@ impl GameStateVisualizer {
     fn make_event_visualizer(
         &mut self,
         event: &Event
-    ) -> Box<EventVisualizer> {
+    ) -> Box<EventVisualizer+'static> {
         let player_id = self.core.player_id();
         let scene = self.scenes.get_mut(&player_id);
         let state = &self.game_states[player_id];
@@ -627,8 +627,8 @@ impl GameStateVisualizer {
     fn end_event_visualization(&mut self, context: &Context) {
         let scene = self.scenes.get_mut(&self.core.player_id());
         let state = self.game_states.get_mut(&self.core.player_id());
-        self.event_visualizer.get_mut_ref().end(scene, state);
-        state.apply_event(self.core.object_types(), self.event.get_ref());
+        self.event_visualizer.as_mut().unwrap().end(scene, state);
+        state.apply_event(self.core.object_types(), self.event.as_ref().unwrap());
         self.event_visualizer = None;
         self.event = None;
         match self.selected_unit_id {
@@ -652,7 +652,7 @@ impl StateVisualizer for GameStateVisualizer {
                 Some(e) => self.start_event_visualization(e),
                 None => {},
             }
-        } else if self.event_visualizer.get_ref().is_finished() {
+        } else if self.event_visualizer.as_ref().unwrap().is_finished() {
             self.end_event_visualization(context);
         }
     }
