@@ -2,6 +2,7 @@
 
 use std::f32::consts::PI;
 use std::io::File;
+use std::io::fs::PathExtensions;
 use visualizer::types::MFloat;
 
 pub fn clamp<T: Float>(n: T, min: T, max: T) -> T {
