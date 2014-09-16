@@ -52,7 +52,7 @@ impl Visualizer {
         let win_size = config.get::<Size2<MInt>>("screen_size");
         let (win, events) = create_win(&glfw, win_size);
         glfw.make_context_current(Some(&win));
-        mgl::load_gl_funcs_with(|procname| glfw.get_proc_address(procname));
+        mgl::load_gl_funcs_with(|procname| win.get_proc_address(procname));
         mgl::init_opengl();
         mgl::set_viewport(win_size);
         win.set_all_polling(true);
