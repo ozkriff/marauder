@@ -34,7 +34,7 @@ impl<'a> GameState {
     }
 
     fn refresh_units(&mut self, object_types: &ObjectTypes, player_id: PlayerId) {
-        for (_, unit) in self.units.mut_iter() {
+        for (_, unit) in self.units.iter_mut() {
             if unit.player_id == player_id {
                 unit.move_points
                     = object_types.get_unit_type(unit.type_id).move_points;

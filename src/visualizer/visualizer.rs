@@ -126,7 +126,7 @@ impl Visualizer {
     pub fn tick(&mut self) {
         {
             let events = self.get_events();
-            let visualizer = match self.visualizers.mut_last() {
+            let visualizer = match self.visualizers.last_mut() {
                 Some(visualizer) => visualizer,
                 None => fail!("No state visualizer"),
             };

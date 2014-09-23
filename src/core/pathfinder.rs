@@ -93,7 +93,7 @@ impl Pathfinder {
     }
 
     fn clean_map(&mut self) {
-        for tile in self.map.tiles.mut_iter() {
+        for tile in self.map.tiles.iter_mut() {
             tile.cost = max_cost();
             tile.parent = None;
         }

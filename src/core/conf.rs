@@ -5,7 +5,7 @@ use error_context;
 use core::misc::read_file;
 
 pub struct Config {
-    json: json::Object,
+    json: json::JsonObject,
 }
 
 fn decode<A: Decodable<json::Decoder, json::DecoderError>>(json_obj: json::Json) -> A {
