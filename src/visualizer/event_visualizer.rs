@@ -35,7 +35,7 @@ pub trait EventVisualizer {
 pub struct EventMoveVisualizer {
     unit_id: UnitId,
     path: Vec<WorldPos>,
-    move: MoveHelper,
+    move_helper: MoveHelper,
     speed: MFloat,
 }
 
@@ -45,7 +45,7 @@ impl EventVisualizer for EventMoveVisualizer {
     }
 
     fn draw(&mut self, scene: &mut Scene, dtime: Time) {
-        let pos = self.move.step(dtime);
+        let pos = self.move_helper.step(dtime);
         {
             let marker_node = scene.nodes.get_mut(&marker_id(self.unit_id));
             marker_node.pos.v = pos.v.add_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0));
@@ -53,7 +53,7 @@ impl EventVisualizer for EventMoveVisualizer {
         let node_id = unit_id_to_node_id(self.unit_id);
         let node = scene.nodes.get_mut(&node_id);
         node.pos = pos;
-        if self.move.is_finished() {
+        if self.move_helper.is_finished() {
             let _ = self.path.remove(0);
             if self.path.len() > 1 {
                 self.update_waypoint(node);
@@ -88,12 +88,12 @@ impl EventMoveVisualizer {
         let node = scene.nodes.get_mut(&node_id);
         node.rot = geom::get_rot_angle(
             world_path[0], world_path[1]);
-        let move = MoveHelper::new(
+        let move_helper = MoveHelper::new(
             world_path[0], world_path[1], speed);
         let mut vis = box EventMoveVisualizer {
             unit_id: unit_id,
             path: world_path,
-            move: move,
+            move_helper: move_helper,
             speed: speed,
         };
         vis.update_waypoint(node);
@@ -101,7 +101,7 @@ impl EventMoveVisualizer {
     }
 
     fn update_waypoint(&mut self, node: &mut SceneNode) {
-        self.move = MoveHelper::new(
+        self.move_helper = MoveHelper::new(
             self.current_waypoint(),
             self.next_waypoint(),
             self.speed,
@@ -143,7 +143,7 @@ impl EventVisualizer for EventEndTurnVisualizer {
 
 pub struct EventCreateUnitVisualizer {
     id: UnitId,
-    move: MoveHelper,
+    move_helper: MoveHelper,
 }
 
 fn get_unit_scene_nodes(
@@ -202,23 +202,23 @@ impl EventCreateUnitVisualizer {
             mesh_id: Some(marker_mesh_id),
             children: Vec::new(),
         });
-        let move = MoveHelper::new(from, to, 1.0);
+        let move_helper = MoveHelper::new(from, to, 1.0);
         box EventCreateUnitVisualizer {
             id: id,
-            move: move,
+            move_helper: move_helper,
         } as Box<EventVisualizer>
     }
 }
 
 impl EventVisualizer for EventCreateUnitVisualizer {
     fn is_finished(&self) -> bool {
-        self.move.is_finished()
+        self.move_helper.is_finished()
     }
 
     fn draw(&mut self, scene: &mut Scene, dtime: Time) {
         let node_id = unit_id_to_node_id(self.id);
         let node = scene.nodes.get_mut(&node_id);
-        node.pos = self.move.step(dtime);
+        node.pos = self.move_helper.step(dtime);
     }
 
     fn end(&mut self, _: &mut Scene, _: &GameState) {}
@@ -272,7 +272,7 @@ fn vec3_z(z: MFloat) -> Vector3<MFloat> {
 pub struct EventAttackUnitVisualizer {
     defender_id: UnitId,
     killed: bool,
-    move: MoveHelper,
+    move_helper: MoveHelper,
     shell_move: MoveHelper,
 }
 
@@ -288,7 +288,7 @@ impl EventAttackUnitVisualizer {
         let node_id = unit_id_to_node_id(defender_id);
         let from = scene.nodes[node_id].pos;
         let to = WorldPos{v: from.v.sub_v(&vec3_z(geom::HEX_EX_RADIUS / 2.0))};
-        let move = MoveHelper::new(from, to, 1.0);
+        let move_helper = MoveHelper::new(from, to, 1.0);
         let shell_move = {
             let from = scene.nodes[unit_id_to_node_id(attacker_id)].pos;
             let to = scene.nodes[unit_id_to_node_id(defender_id)].pos;
@@ -303,7 +303,7 @@ impl EventAttackUnitVisualizer {
         box EventAttackUnitVisualizer {
             defender_id: defender_id,
             killed: killed,
-            move: move,
+            move_helper: move_helper,
             shell_move: shell_move,
         } as Box<EventVisualizer>
     }
@@ -312,7 +312,7 @@ impl EventAttackUnitVisualizer {
 impl EventVisualizer for EventAttackUnitVisualizer {
     fn is_finished(&self) -> bool {
         if self.killed {
-            self.move.is_finished()
+            self.move_helper.is_finished()
         } else {
             self.shell_move.is_finished()
         }
@@ -323,7 +323,7 @@ impl EventVisualizer for EventAttackUnitVisualizer {
         if self.killed {
             if self.shell_move.is_finished() {
                 let node_id = unit_id_to_node_id(self.defender_id);
-                scene.nodes.get_mut(&node_id).pos = self.move.step(dtime);
+                scene.nodes.get_mut(&node_id).pos = self.move_helper.step(dtime);
             }
         }
     }

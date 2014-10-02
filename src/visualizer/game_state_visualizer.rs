@@ -472,10 +472,10 @@ impl GameStateVisualizer {
     fn handle_key_event(&mut self, _: &Context, key: glfw::Key) {
         match key {
             glfw::KeyEscape | glfw::KeyQ => self.commands_tx.send(EndGame),
-            glfw::KeyUp | glfw::KeyW => self.camera.move(270.0, 0.1),
-            glfw::KeyDown | glfw::KeyS => self.camera.move(90.0, 0.1),
-            glfw::KeyRight | glfw::KeyD => self.camera.move(0.0, 0.1),
-            glfw::KeyLeft | glfw::KeyA => self.camera.move(180.0, 0.1),
+            glfw::KeyUp | glfw::KeyW => self.camera.move_camera(270.0, 0.1),
+            glfw::KeyDown | glfw::KeyS => self.camera.move_camera(90.0, 0.1),
+            glfw::KeyRight | glfw::KeyD => self.camera.move_camera(0.0, 0.1),
+            glfw::KeyLeft | glfw::KeyA => self.camera.move_camera(180.0, 0.1),
             glfw::KeyMinus => self.camera.change_zoom(1.3),
             glfw::KeyEqual => self.camera.change_zoom(0.7),
             _ => {},

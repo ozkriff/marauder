@@ -79,7 +79,7 @@ impl Camera {
         self.zoom = clamp(self.zoom, 5.0, 40.0);
     }
 
-    pub fn move(&mut self, angle: MFloat, speed: MFloat) {
+    pub fn move_camera(&mut self, angle: MFloat, speed: MFloat) {
         let speed_in_radians = deg_to_rad(self.z_angle - angle);
         let dx = speed_in_radians.sin();
         let dy = speed_in_radians.cos();

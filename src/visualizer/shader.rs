@@ -92,7 +92,7 @@ fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
             verify!(gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len));
             // subtract 1 to skip the trailing null character
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
-            verify!(gl::GetShaderInfoLog(shader, len, std::ptr::mut_null(),
+            verify!(gl::GetShaderInfoLog(shader, len, std::ptr::null_mut(),
                 buf.as_mut_ptr() as *mut GLchar));
             fail!(
                 "compile_shader: {}",
@@ -116,7 +116,7 @@ fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
             verify!(gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len));
             // subtract 1 to skip the trailing null character
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
-            verify!(gl::GetProgramInfoLog(program, len, std::ptr::mut_null(),
+            verify!(gl::GetProgramInfoLog(program, len, std::ptr::null_mut(),
                 buf.as_mut_ptr() as *mut GLchar));
             fail!(
                 "link_program: {}",
