@@ -372,7 +372,7 @@ impl GameStateVisualizer {
     }
 
     fn draw_3d_text(&mut self, context: &Context) {
-        let mut font_stash = context.font_stash.borrow_mut();
+        let font_stash = context.font_stash.borrow_mut();
         let m = self.camera.mat();
         let m = mgl::scale(m, 1.0 / font_stash.get_size());
         let m = mgl::rot_x(m, 90.0);

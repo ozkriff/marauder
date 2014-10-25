@@ -12,9 +12,9 @@ use visualizer::mesh::Mesh;
 use visualizer::types::{Color3, MFloat, MatId, VertexCoord, ScreenPos};
 use visualizer::shader::Shader;
 
-static PICK_CODE_NOTHING: MInt = 0;
-static PICK_CODE_MAP_POS: MInt = 1;
-static PICK_CODE_UNIT: MInt = 2;
+const PICK_CODE_NOTHING: MInt = 0;
+const PICK_CODE_MAP_POS: MInt = 1;
+const PICK_CODE_UNIT: MInt = 2;
 
 fn i_to_f(n: MInt) -> f32 {
     n as MFloat / 255.0

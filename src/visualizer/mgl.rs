@@ -13,11 +13,11 @@ use visualizer::types::{MFloat, Color3, Color4, ScreenPos};
 
 pub use gl::load_with as load_gl_funcs_with;
 
-pub static GREY_3: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
-pub static BLACK_3: Color3 = Color3{r: 0.0, g: 0.0, b: 0.0};
-pub static WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
-pub static BLUE: Color4 = Color4{r: 0.0, g: 0.0, b: 1.0, a: 1.0};
-pub static BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
+pub const GREY_3: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
+pub const BLACK_3: Color3 = Color3{r: 0.0, g: 0.0, b: 0.0};
+pub const WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
+pub const BLUE: Color4 = Color4{r: 0.0, g: 0.0, b: 1.0, a: 1.0};
+pub const BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
 
 macro_rules! verify(
     ($e: expr) => ({

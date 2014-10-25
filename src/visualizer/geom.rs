@@ -7,11 +7,11 @@ use core::types::{MInt, MapPos};
 use core::misc::{rad_to_deg};
 use visualizer::types::{WorldPos, MFloat, VertexCoord};
 
-pub static HEX_EX_RADIUS: MFloat = 1.0;
+pub const HEX_EX_RADIUS: MFloat = 1.0;
 // (pow(1.0, 2) - pow(0.5, 2)).sqrt()
-pub static HEX_IN_RADIUS: MFloat = 0.866025403784 * HEX_EX_RADIUS;
+pub const HEX_IN_RADIUS: MFloat = 0.866025403784 * HEX_EX_RADIUS;
 
-pub static MINIMAL_LIFT_HEIGHT: MFloat = 0.01;
+pub const MINIMAL_LIFT_HEIGHT: MFloat = 0.01;
 
 pub fn lift(v: Vector3<MFloat>) -> Vector3<MFloat> {
     let mut v = v;

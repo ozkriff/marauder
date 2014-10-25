@@ -12,7 +12,7 @@ pub enum Dir {
   NorthWest,
 }
 
-static DIR_TO_POS_DIFF: [[Vector2<MInt>, ..6], ..2] = [
+const DIR_TO_POS_DIFF: [[Vector2<MInt>, ..6], ..2] = [
     [
         Vector2{x: 1, y: -1},
         Vector2{x: 1, y: 0},
