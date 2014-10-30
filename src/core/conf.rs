@@ -19,8 +19,8 @@ impl Config {
         set_error_context!("parsing config", path.as_str().unwrap());
         let json = match json::from_str(read_file(path).as_slice()) {
             Ok(json::Object(obj)) => obj,
-            Err(msg) => fail!("Config parsing error: {}", msg),
-            some_error => fail!("Unknown config parsing error: {}", some_error),
+            Err(msg) => panic!("Config parsing error: {}", msg),
+            some_error => panic!("Unknown config parsing error: {}", some_error),
         };
         Config {
             json: json,
@@ -31,7 +31,7 @@ impl Config {
         let owned_name_str = name.into_string();
         decode(match self.json.find(&owned_name_str) {
             Some(val) => val.clone(),
-            None => fail!("No field '{}", name),
+            None => panic!("No field '{}", name),
         })
     }
 }

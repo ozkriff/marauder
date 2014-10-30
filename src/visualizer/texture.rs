@@ -64,8 +64,8 @@ impl Texture {
 fn load_image(path: &Path) -> image::Image<u8> {
     match image::load(path) {
         image::ImageU8(image) => image,
-        image::Error(message) => fail!("{}", message),
-        _ => fail!("Unknown image format"),
+        image::Error(message) => panic!("{}", message),
+        _ => panic!("Unknown image format"),
     }
 }
 
@@ -113,7 +113,7 @@ fn load_texture(path: &Path) -> Texture {
     let format = match image.depth {
         4 => gl::RGBA,
         3 => gl::RGB,
-        n => fail!("wrong depth: {}", n),
+        n => panic!("wrong depth: {}", n),
     };
     unsafe {
         let level = 0;
