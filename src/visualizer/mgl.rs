@@ -31,9 +31,9 @@ macro_rules! verify(
                 gl::INVALID_VALUE =>                 "GL_INVALID_VALUE",
                 gl::NO_ERROR =>                      "GL_NO_ERROR",
                 gl::OUT_OF_MEMORY =>                 "GL_OUT_OF_MEMORY",
-                _ => fail!("Bad gl error code: {}", error_code),
+                _ => panic!("Bad gl error code: {}", error_code),
             };
-            fail!("gl error: {}({})", description, error_code);
+            panic!("gl error: {}({})", description, error_code);
         }
         result
     })

@@ -104,7 +104,7 @@ impl Visualizer {
     fn handle_cmd(&mut self) {
         let cmd = match self.visualizers.last() {
             Some(visualizer) => visualizer.get_command(),
-            None => fail!("No state visualizer"),
+            None => panic!("No state visualizer"),
         };
         match cmd {
             Some(StartGame) => {
@@ -128,7 +128,7 @@ impl Visualizer {
             let events = self.get_events();
             let visualizer = match self.visualizers.last_mut() {
                 Some(visualizer) => visualizer,
-                None => fail!("No state visualizer"),
+                None => panic!("No state visualizer"),
             };
             for event in events.iter() {
                 visualizer.handle_event(&self.context, *event);

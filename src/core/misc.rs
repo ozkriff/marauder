@@ -23,15 +23,15 @@ pub fn rad_to_deg(n: MFloat) -> MFloat {
 
 pub fn read_file(path: &Path) -> String {
     if !path.exists() {
-        fail!("Path does not exists: {}", path.display());
+        panic!("Path does not exists: {}", path.display());
     }
     let bytes = match File::open(path).read_to_end() {
         Ok(bytes) => bytes,
-        Err(msg) => fail!("Can not read from file {}: {}", path.display(), msg),
+        Err(msg) => panic!("Can not read from file {}: {}", path.display(), msg),
     };
     match String::from_utf8(bytes) {
         Ok(s) => s,
-        Err(msg) => fail!("Not valid utf8 in file {}: {}", path.display(), msg),
+        Err(msg) => panic!("Not valid utf8 in file {}: {}", path.display(), msg),
     }
 }
 

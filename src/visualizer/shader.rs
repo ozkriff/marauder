@@ -94,7 +94,7 @@ fn compile_shader(src: &str, shader_type: GLenum) -> GLuint {
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             verify!(gl::GetShaderInfoLog(shader, len, std::ptr::null_mut(),
                 buf.as_mut_ptr() as *mut GLchar));
-            fail!(
+            panic!(
                 "compile_shader: {}",
                 std::str::raw::from_utf8(buf.as_slice())
             );
@@ -118,7 +118,7 @@ fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
             let mut buf = Vec::from_elem(len as uint - 1, 0u8);
             verify!(gl::GetProgramInfoLog(program, len, std::ptr::null_mut(),
                 buf.as_mut_ptr() as *mut GLchar));
-            fail!(
+            panic!(
                 "link_program: {}",
                 std::str::raw::from_utf8(buf.as_slice())
             );

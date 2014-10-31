@@ -187,7 +187,7 @@ fn get_marker_mesh_id(
     match player_id.id {
         0 => mesh_ids.marker_1_mesh_id,
         1 => mesh_ids.marker_2_mesh_id,
-        n => fail!("Wrong player id: {}", n),
+        n => panic!("Wrong player id: {}", n),
     }
 }
 

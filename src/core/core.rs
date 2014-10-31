@@ -147,7 +147,7 @@ impl ObjectTypes {
     fn get_unit_type_id(&self, name: &str) -> UnitTypeId {
         match self.get_unit_type_id_opt(name) {
             Some(id) => id,
-            None => fail!("No unit type with name: \"{}\"", name),
+            None => panic!("No unit type with name: \"{}\"", name),
         }
     }
 
@@ -157,7 +157,7 @@ impl ObjectTypes {
                 return WeaponTypeId{id: id as MInt};
             }
         }
-        fail!("No weapon type with name \"{}\"", name);
+        panic!("No weapon type with name \"{}\"", name);
     }
 }
 
@@ -242,7 +242,7 @@ impl Core {
     fn get_unit<'a>(&'a self, id: UnitId) -> &'a Unit {
         match self.game_state.units.find(&id) {
             Some(unit) => unit,
-            None => fail!("No unit with id = {}", id.id),
+            None => panic!("No unit with id = {}", id.id),
         }
     }
 

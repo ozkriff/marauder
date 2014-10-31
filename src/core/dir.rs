@@ -65,7 +65,7 @@ impl Dir {
                 return Dir::from_int(i as MInt);
             }
         }
-        fail!("impossible positions: {}, {}", from, to);
+        panic!("impossible positions: {}, {}", from, to);
     }
 
     pub fn get_neighbour_pos(pos: MapPos, dir: Dir) -> MapPos {
