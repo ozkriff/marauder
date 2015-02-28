@@ -4,6 +4,8 @@ Marauder
 Status
 ======
 
+[ABANDONED, see https://github.com/ozkriff/zoc.]
+
 |travis-img|
 
 
