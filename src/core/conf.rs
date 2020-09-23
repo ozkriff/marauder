@@ -7,12 +7,6 @@ pub struct Config {
     json: serde_json::Value,
 }
 
-// fn decode<A: Decodable<json::Decoder, json::DecoderError>>(json_obj: json::Json) -> A {
-//     let mut decoder = json::Decoder::new(json_obj);
-//     let decoded: A = Decodable::decode(&mut decoder).unwrap();
-//     decoded
-// }
-
 impl Config {
     pub fn new(path: &Path) -> Config {
         // set_error_context!("parsing config", path.as_str().unwrap());

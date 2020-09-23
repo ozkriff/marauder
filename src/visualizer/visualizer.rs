@@ -43,13 +43,7 @@ impl Visualizer {
         let fs = FileSystem::new();
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         let config = Config::new(&fs.get(&Path::new("data/conf_visualizer.json")));
-        // let win_size = config.get::<Size2<MInt>>("screen_size");
-        // TODO: fix cast Value::Object -> Size2<MInt>
-        let win_size = config.get("screen_size");
-        let win_size = Size2 {
-            w: win_size["w"].as_i64().unwrap() as MInt,
-            h: win_size["h"].as_i64().unwrap() as MInt,
-        };
+        let win_size: Size2<MInt> = serde_json::from_value(config.get("screen_size").clone()).unwrap();
         let (mut win, events) = create_win(&glfw, win_size);
         glfw.make_context_current(Some(&win));
         gl::load_with(|procname| win.get_proc_address(procname));

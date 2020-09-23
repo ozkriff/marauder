@@ -7,9 +7,9 @@ authors = [
 ]
 edition = "2018"
 
-#[[bin]]
-#name = "marauder"
-#test = false
+[[bin]]
+name = "marauder"
+test = false
 
 [dependencies]
 gl = "0.14.0"

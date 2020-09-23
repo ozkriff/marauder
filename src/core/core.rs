@@ -198,13 +198,10 @@ fn get_players_list() -> Vec<Player> {
 
 impl Core {
     pub fn new(fs: &FileSystem) -> Core {
+        // TODO: fix set_error_context
         // set_error_context!("constructing Core", "-");
         let config = Config::new(&fs.get(&Path::new("data/conf_core.json")));
         let map_size: Size2<MInt> = serde_json::from_value(config.get("map_size").clone()).unwrap();
-        // let map_size = Size2 {
-        //     w: map_size["w"].as_i64().unwrap() as MInt,
-        //     h: map_size["h"].as_i64().unwrap() as MInt,
-        // };
         let mut core = Core {
             game_state: GameState::new(),
             players: get_players_list(),
@@ -330,8 +327,7 @@ impl Core {
 
     pub fn get_event(&mut self) -> Option<Event> {
         let list = self.event_lists.get_mut(&self.current_player_id).unwrap();
-        // list.pop()
-        if list.len() == 0 {
+        if list.is_empty() {
             None
         } else {
             Some(list.remove(0))
