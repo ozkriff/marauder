@@ -1,17 +1,19 @@
 // See LICENSE file for copyright and license details.
 
-use std::cmp;
-use std::collections::hashmap::HashMap;
-use stb_tt;
-use cgmath::{Vector3, Vector2};
-use core::types::{Size2, MInt};
-use core::misc::add_quad_to_vec;
-use visualizer::texture::Texture;
-use visualizer::types::{VertexCoord, TextureCoord, MFloat, ScreenPos};
-use visualizer::mesh::Mesh;
-use visualizer::shader::Shader;
+use crate::core::misc::add_quad_to_vec;
+use crate::core::types::{MInt, Size2};
+use crate::visualizer::mesh::Mesh;
+use crate::visualizer::shader::Shader;
+use crate::visualizer::texture::Texture;
+use crate::visualizer::types::{MFloat, ScreenPos, TextureCoord, VertexCoord};
+use cgmath::{Vector2, Vector3};
+use stb_tt::Font;
 
-struct Glyph {
+use std::collections::HashMap;
+use std::path::Path;
+
+#[derive(Clone)]
+pub struct Glyph {
     pos: ScreenPos,
     size: Size2<MInt>,
     xoff: MInt,
@@ -20,7 +22,7 @@ struct Glyph {
 
 pub struct FontStash {
     size: MFloat,
-    font: stb_tt::Font,
+    font: Font,
     texture: Texture,
     texture_size: MInt,
     pos: ScreenPos,
@@ -31,23 +33,27 @@ pub struct FontStash {
 impl FontStash {
     pub fn new(font_path: &Path, size: MFloat) -> FontStash {
         let texture_size = 1024;
-        let font = stb_tt::Font::new(font_path, size);
-        let texture = Texture::new_empty(
-            Size2{w: texture_size, h: texture_size});
+        let font = Font::new(font_path, size);
+        let texture = Texture::new_empty(Size2 {
+            w: texture_size,
+            h: texture_size,
+        });
         FontStash {
-            size: size,
-            font: font,
-            texture: texture,
-            texture_size: texture_size,
-            pos: ScreenPos{v: Vector2{x: 0, y: 0}},
+            size,
+            font,
+            texture,
+            texture_size,
+            pos: ScreenPos {
+                v: Vector2 { x: 0, y: 0 },
+            },
             glyphs: HashMap::new(),
             max_h: 0,
         }
     }
 
     pub fn get_glyph(&mut self, c: char) -> Glyph {
-        match self.glyphs.find(&c) {
-            Some(&r) => r,
+        match self.glyphs.get(&c) {
+            Some(r) => r.clone(),
             None => self.add_glyph(c),
         }
     }
@@ -57,8 +63,10 @@ impl FontStash {
     }
 
     pub fn get_text_size(&mut self, text: &str) -> (ScreenPos, Size2<MInt>) {
-        let mut size = Size2{w: 0, h: 0};
-        let mut pos = ScreenPos{v: Vector2{x: 0, y: 0}};
+        let mut size = Size2 { w: 0, h: 0 };
+        let mut pos = ScreenPos {
+            v: Vector2 { x: 0, y: 0 },
+        };
         for c in text.chars() {
             let glyph = self.get_glyph(c);
             let w = glyph.size.w;
@@ -90,18 +98,50 @@ impl FontStash {
             let y2 = y1 + h / s;
             add_quad_to_vec(
                 &mut tex_data,
-                TextureCoord{v: Vector2{x: x1, y: y1}},
-                TextureCoord{v: Vector2{x: x1, y: y2}},
-                TextureCoord{v: Vector2{x: x2, y: y2}},
-                TextureCoord{v: Vector2{x: x2, y: y1}},
+                TextureCoord {
+                    v: Vector2 { x: x1, y: y1 },
+                },
+                TextureCoord {
+                    v: Vector2 { x: x1, y: y2 },
+                },
+                TextureCoord {
+                    v: Vector2 { x: x2, y: y2 },
+                },
+                TextureCoord {
+                    v: Vector2 { x: x2, y: y1 },
+                },
             );
             let yoff = -glyph.yoff as MFloat;
             add_quad_to_vec(
                 &mut vertex_data,
-                VertexCoord{v: Vector3{x: i, y: yoff, z: 0.0}},
-                VertexCoord{v: Vector3{x: i, y: yoff - h, z: 0.0}},
-                VertexCoord{v: Vector3{x: w + i, y: yoff - h, z: 0.0}},
-                VertexCoord{v: Vector3{x: w + i, y: yoff, z: 0.0}},
+                VertexCoord {
+                    v: Vector3 {
+                        x: i,
+                        y: yoff,
+                        z: 0.0,
+                    },
+                },
+                VertexCoord {
+                    v: Vector3 {
+                        x: i,
+                        y: yoff - h,
+                        z: 0.0,
+                    },
+                },
+                VertexCoord {
+                    v: Vector3 {
+                        x: w + i,
+                        y: yoff - h,
+                        z: 0.0,
+                    },
+                },
+                VertexCoord {
+                    v: Vector3 {
+                        x: w + i,
+                        y: yoff,
+                        z: 0.0,
+                    },
+                },
             );
             i += w + glyph.xoff as MFloat;
         }
@@ -111,20 +151,16 @@ impl FontStash {
         mesh
     }
 
-    fn insert_image_to_cache(
-        &mut self,
-        pos: ScreenPos,
-        size: Size2<MInt>,
-        bitmap: Vec<u8>
-    ) {
-        let mut data = Vec::from_elem((size.w * size.h) as uint * 4, 0u8);
-        for y in range(0, size.h) {
-            for x in range(0, size.w) {
-                let n = (x + y * size.w) as uint * 4;
-                *data.get_mut(n + 0) = 255;
-                *data.get_mut(n + 1) = 255;
-                *data.get_mut(n + 2) = 255;
-                *data.get_mut(n + 3) = bitmap[(x + y * size.w) as uint];
+    fn insert_image_to_cache(&mut self, pos: ScreenPos, size: Size2<MInt>, bitmap: Vec<u8>) {
+        // let mut data = std::vec::from_elem((size.w * size.h) as u8 * 4, 0);
+        let mut data = vec![0; ((size.w * size.h) * 4) as usize];
+        for y in 0..size.h {
+            for x in 0..size.w {
+                let n = (x + y * size.w) as usize * 4;
+                *data.get_mut(n + 0).unwrap() = 255;
+                *data.get_mut(n + 1).unwrap() = 255;
+                *data.get_mut(n + 2).unwrap() = 255;
+                *data.get_mut(n + 3).unwrap() = bitmap[(x + y * size.w) as usize];
             }
         }
         self.texture.bind();
@@ -139,17 +175,17 @@ impl FontStash {
     }
 
     fn add_glyph(&mut self, c: char) -> Glyph {
-        assert!(self.glyphs.find(&c).is_none());
+        assert!(self.glyphs.get(&c).is_none());
         let index = self.font.find_glyph_index(c);
         let (bitmap, w, h, xoff, yoff) = self.font.get_glyph(index);
         if self.pos.v.x + w > self.texture_size {
             self.start_new_row();
         }
-        self.pos.v.y = cmp::max(h, self.pos.v.y);
-        let pos = self.pos;
-        let size = Size2{w: w, h: h};
+        self.pos.v.y = std::cmp::max(h, self.pos.v.y);
+        let pos = self.pos.clone();
+        let size = Size2 { w, h };
         if w * h != 0 {
-            self.insert_image_to_cache(pos, size, bitmap);
+            self.insert_image_to_cache(pos.clone(), size, bitmap);
         }
         let xoff = if c == ' ' {
             let space_width = (self.size / 3.0) as MInt; // TODO: get from ttf
@@ -159,15 +195,15 @@ impl FontStash {
         };
         self.pos.v.x += w;
         let glyph = Glyph {
-            pos: pos,
-            size: size,
-            xoff: xoff,
-            yoff: yoff,
+            pos: pos.clone(),
+            size: size.clone(),
+            xoff,
+            yoff,
         };
         if self.max_h < h - yoff {
             self.max_h = h - yoff;
         }
-        self.glyphs.insert(c, glyph);
+        let _ = self.glyphs.insert(c, glyph.clone());
         glyph
     }
 }

@@ -1,17 +1,19 @@
 // See LICENSE file for copyright and license details.
 
-use std::collections::hashmap::HashMap;
-use cgmath::{Vector3};
-use core::types::{MInt, Size2};
-use visualizer::types::{MFloat, ScreenPos};
-use visualizer::shader::Shader;
-use visualizer::font_stash::FontStash;
-use visualizer::context::Context;
-use visualizer::mesh::Mesh;
-use visualizer::mgl;
+use crate::core::types::{MInt, Size2};
+use crate::visualizer::context::Context;
+use crate::visualizer::font_stash::FontStash;
+use crate::visualizer::mesh::Mesh;
+use crate::visualizer::mgl;
+use crate::visualizer::shader::Shader;
+use crate::visualizer::types::{MFloat, ScreenPos};
+use cgmath::Vector3;
+use std::collections::HashMap;
 
-#[deriving(PartialEq, Eq, Hash)]
-pub struct ButtonId {pub id: MInt}
+#[derive(PartialEq, Eq, Hash, Copy, Clone)]
+pub struct ButtonId {
+    pub id: MInt,
+}
 
 pub struct Button {
     pos: ScreenPos,
@@ -20,16 +22,11 @@ pub struct Button {
 }
 
 impl Button {
-    pub fn new(
-        label: &str,
-        font_stash: &mut FontStash,
-        shader: &Shader,
-        pos: ScreenPos
-    ) -> Button {
+    pub fn new(label: &str, font_stash: &mut FontStash, shader: &Shader, pos: ScreenPos) -> Button {
         let (_, size) = font_stash.get_text_size(label);
         Button {
-            pos: pos,
-            size: size,
+            pos,
+            size,
             mesh: font_stash.get_mesh(label, shader),
         }
     }
@@ -56,17 +53,17 @@ impl ButtonManager {
     pub fn new() -> ButtonManager {
         ButtonManager {
             buttons: HashMap::new(),
-            last_id: ButtonId{id: 0},
+            last_id: ButtonId { id: 0 },
         }
     }
 
-    pub fn buttons<'a>(&'a self) -> &'a HashMap<ButtonId, Button> {
+    pub fn buttons(&self) -> &HashMap<ButtonId, Button> {
         &self.buttons
     }
 
     pub fn add_button(&mut self, button: Button) -> ButtonId {
-        let id = self.last_id;
-        self.buttons.insert(id, button);
+        let id = self.last_id.clone();
+        let _ = self.buttons.insert(id, button);
         self.last_id.id += 1;
         id
     }
@@ -80,7 +77,7 @@ impl ButtonManager {
                 && y >= button.pos().v.y
                 && y <= button.pos().v.y + button.size().h
             {
-                return Some(*id);
+                return Some(id.clone());
             }
         }
         None
@@ -94,8 +91,9 @@ impl ButtonManager {
                 y: button.pos().v.y as MFloat,
                 z: 0.0,
             };
-            context.shader.uniform_mat4f(
-                context.mvp_mat_id, &mgl::tr(m, text_offset));
+            context
+                .shader
+                .uniform_mat4f(context.mvp_mat_id, &mgl::tr(m, text_offset));
             button.draw(&context.shader);
         }
     }

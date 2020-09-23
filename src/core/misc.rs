@@ -1,11 +1,12 @@
 // See LICENSE file for copyright and license details.
 
+use crate::visualizer::types::MFloat;
 use std::f32::consts::PI;
-use std::io::File;
-use std::io::fs::PathExtensions;
-use visualizer::types::MFloat;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
 
-pub fn clamp<T: Float>(n: T, min: T, max: T) -> T {
+pub fn clamp(n: MFloat, min: MFloat, max: MFloat) -> MFloat {
     match n {
         n if n < min => min,
         n if n > max => max,
@@ -25,11 +26,13 @@ pub fn read_file(path: &Path) -> String {
     if !path.exists() {
         panic!("Path does not exists: {}", path.display());
     }
-    let bytes = match File::open(path).read_to_end() {
+    let mut buffer = Vec::new();
+    let mut file = File::open(path).unwrap();
+    let _bytes = match file.read_to_end(&mut buffer) {
         Ok(bytes) => bytes,
         Err(msg) => panic!("Can not read from file {}: {}", path.display(), msg),
     };
-    match String::from_utf8(bytes) {
+    match String::from_utf8(buffer) {
         Ok(s) => s,
         Err(msg) => panic!("Not valid utf8 in file {}: {}", path.display(), msg),
     }

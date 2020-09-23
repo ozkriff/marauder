@@ -34,7 +34,7 @@ Marauder expects them in 'target/data' directory.
 
 Download to 'data' directory::
 
-    git clone --depth=1 https://github.com/ozkriff/marauder-data target/data
+    git clone --depth=1 https://github.com/ozkriff/marauder-data data
 
 Run Marauder::
 

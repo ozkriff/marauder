@@ -1,7 +1,7 @@
-target/.marauder.*fingerprint
-target/marauder
-target/data
-target/deps
+target/
+data/
 
 # vim tmp files
 *.swp
+
+Cargo.lock

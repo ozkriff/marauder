@@ -1,8 +1,8 @@
 // See LICENSE file for copyright and license details.
 
-use glfw;
-use visualizer::types::Time;
-use visualizer::context::Context;
+use crate::visualizer::types::Time;
+use crate::visualizer::context::Context;
+use glfw::WindowEvent;
 
 pub enum StateChangeCommand {
     StartGame,
@@ -12,8 +12,9 @@ pub enum StateChangeCommand {
 
 pub trait StateVisualizer {
     fn logic(&mut self, context: &Context);
-    fn draw(&mut self, context: &Context, dtime: Time);
-    fn handle_event(&mut self, context: &Context, event: glfw::WindowEvent);
+    fn draw(&mut self, context: &mut Context, dtime: Time);
+    // TODO: GLFW context or visualizer context
+    fn handle_event(&mut self, context: &Context, event: WindowEvent);
     fn get_command(&self) -> Option<StateChangeCommand>;
 }
 

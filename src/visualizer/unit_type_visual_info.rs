@@ -1,8 +1,8 @@
 // See LICENSE file for copyright and license details.
 
-use core::core::{UnitTypeId};
-use visualizer::types::{MFloat};
-use visualizer::mesh::{MeshId};
+use crate::core::core::UnitTypeId;
+use crate::visualizer::mesh::MeshId;
+use crate::visualizer::types::MFloat;
 
 pub struct UnitTypeVisualInfo {
     pub mesh_id: MeshId,
@@ -15,17 +15,15 @@ pub struct UnitTypeVisualInfoManager {
 
 impl UnitTypeVisualInfoManager {
     pub fn new() -> UnitTypeVisualInfoManager {
-        UnitTypeVisualInfoManager {
-            list: vec![],
-        }
+        UnitTypeVisualInfoManager { list: Vec::new() }
     }
 
     pub fn add_info(&mut self, info: UnitTypeVisualInfo) {
         self.list.push(info);
     }
 
-    pub fn get<'a>(&'a self, type_id: UnitTypeId) -> &'a UnitTypeVisualInfo {
-        &self.list[type_id.id as uint]
+    pub fn get(&self, type_id: UnitTypeId) -> &UnitTypeVisualInfo {
+        &self.list[type_id.id as usize]
     }
 }
 

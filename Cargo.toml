@@ -3,27 +3,24 @@
 name = "marauder"
 version = "0.0.1"
 authors = [
-   "ozkriff@gmail.com",
+    "ozkriff@gmail.com",
 ]
+edition = "2018"
 
-[[bin]]
-name = "marauder"
-test = false
+#[[bin]]
+#name = "marauder"
+#test = false
 
-[dependencies.glfw]
-git = "https://github.com/bjz/glfw-rs"
-
-[dependencies.gl]
-git = "https://github.com/bjz/gl-rs"
-
-[dependencies.cgmath]
-git = "https://github.com/bjz/cgmath-rs"
-
-[dependencies.error_context]
-git = "https://github.com/ozkriff/error-context"
-
-[dependencies.stb_image]
-git = "https://github.com/mozilla-servo/rust-stb-image"
+[dependencies]
+gl = "0.14.0"
+glfw = "0.40.0"
+cgmath = "0.6.0"
+error-context = "0.1.2"
+stb_image = "0.2.2"
+time = "0.1.0"
+rand = "0.7.3"
+serde = { version = "1.0.116", features = ["derive"] }
+serde_json = "1.0.57"
 
 [dependencies.stb_tt]
 git = "https://github.com/ozkriff/stb-tt-rs"
