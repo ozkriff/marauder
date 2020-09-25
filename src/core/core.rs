@@ -1,14 +1,16 @@
 // See LICENSE file for copyright and license details.
 
-use std::rand::{task_rng, Rng};
-use std::collections::hashmap::HashMap;
-use cgmath::{Vector2};
-use error_context;
-use core::types::{Size2, MInt, UnitId, PlayerId, MapPos};
-use core::conf::Config;
-use core::game_state::GameState;
-use core::fs::FileSystem;
-use core::map::{distance};
+use crate::core::conf::Config;
+use crate::core::core::Event::{EventAttackUnit, EventCreateUnit, EventEndTurn, EventMove};
+use crate::core::core::UnitClass::{Infantry, Vehicle};
+use crate::core::fs::FileSystem;
+use crate::core::game_state::GameState;
+use crate::core::map::distance;
+use crate::core::types::{MInt, MapPos, PlayerId, Size2, UnitId};
+use cgmath::Vector2;
+use rand::Rng;
+use std::collections::HashMap;
+use std::path::Path;
 
 pub enum Command {
     CommandMove(UnitId, Vec<MapPos>),
@@ -17,10 +19,11 @@ pub enum Command {
     CommandAttackUnit(UnitId, UnitId),
 }
 
-#[deriving(Clone)]
+#[derive(Clone)]
 pub enum Event {
     EventMove(UnitId, Vec<MapPos>),
-    EventEndTurn(PlayerId, PlayerId), // old_id, new_id
+    EventEndTurn(PlayerId, PlayerId),
+    // old_id, new_id
     EventCreateUnit(UnitId, MapPos, UnitTypeId, PlayerId),
     EventAttackUnit(UnitId, UnitId, /* killed: */ bool),
 }
@@ -42,8 +45,10 @@ pub struct WeaponType {
     pub max_distance: MInt,
 }
 
-#[deriving(Clone)]
-pub struct WeaponTypeId{pub id: MInt}
+#[derive(Copy, Clone)]
+pub struct WeaponTypeId {
+    pub id: MInt,
+}
 
 pub struct UnitType {
     pub name: String,
@@ -57,8 +62,10 @@ pub struct UnitType {
     pub move_points: MInt,
 }
 
-#[deriving(Clone)]
-pub struct UnitTypeId{pub id: MInt}
+#[derive(Copy, Clone)]
+pub struct UnitTypeId {
+    pub id: MInt,
+}
 
 pub struct Unit {
     pub id: UnitId,
@@ -77,8 +84,8 @@ pub struct ObjectTypes {
 impl ObjectTypes {
     pub fn new() -> ObjectTypes {
         let mut object_types = ObjectTypes {
-            unit_types: vec![],
-            weapon_types: vec![],
+            unit_types: Vec::new(),
+            weapon_types: Vec::new(),
         };
         object_types.get_weapon_types();
         object_types.get_unit_types();
@@ -133,15 +140,15 @@ impl ObjectTypes {
 
     fn get_unit_type_id_opt(&self, name: &str) -> Option<UnitTypeId> {
         for (id, unit_type) in self.unit_types.iter().enumerate() {
-            if unit_type.name.as_slice() == name {
-                return Some(UnitTypeId{id: id as MInt});
+            if &unit_type.name == name {
+                return Some(UnitTypeId { id: id as MInt });
             }
         }
         None
     }
 
-    pub fn get_unit_type<'a>(&'a self, unit_type_id: UnitTypeId) -> &'a UnitType {
-        &self.unit_types[unit_type_id.id as uint]
+    pub fn get_unit_type(&self, unit_type_id: UnitTypeId) -> &UnitType {
+        &self.unit_types[unit_type_id.id as usize]
     }
 
     fn get_unit_type_id(&self, name: &str) -> UnitTypeId {
@@ -153,8 +160,8 @@ impl ObjectTypes {
 
     fn get_weapon_type_id(&self, name: &str) -> WeaponTypeId {
         for (id, weapon_type) in self.weapon_types.iter().enumerate() {
-            if weapon_type.name.as_slice() == name {
-                return WeaponTypeId{id: id as MInt};
+            if &weapon_type.name == name {
+                return WeaponTypeId { id: id as MInt };
             }
         }
         panic!("No weapon type with name \"{}\"", name);
@@ -173,30 +180,35 @@ pub struct Core {
 
 fn get_event_lists() -> HashMap<PlayerId, Vec<Event>> {
     let mut map = HashMap::new();
-    map.insert(PlayerId{id: 0}, Vec::new());
-    map.insert(PlayerId{id: 1}, Vec::new());
+    let _ = map.insert(PlayerId { id: 0 }, Vec::new());
+    let _ = map.insert(PlayerId { id: 1 }, Vec::new());
     map
 }
 
 fn get_players_list() -> Vec<Player> {
-    vec!(
-        Player{id: PlayerId{id: 0}},
-        Player{id: PlayerId{id: 1}},
-    )
+    vec![
+        Player {
+            id: PlayerId { id: 0 },
+        },
+        Player {
+            id: PlayerId { id: 1 },
+        },
+    ]
 }
 
 impl Core {
     pub fn new(fs: &FileSystem) -> Core {
-        set_error_context!("constructing Core", "-");
+        // TODO: fix set_error_context
+        // set_error_context!("constructing Core", "-");
         let config = Config::new(&fs.get(&Path::new("data/conf_core.json")));
-        let map_size = config.get("map_size");
+        let map_size: Size2<MInt> = serde_json::from_value(config.get("map_size").clone()).unwrap();
         let mut core = Core {
             game_state: GameState::new(),
             players: get_players_list(),
-            current_player_id: PlayerId{id: 0},
+            current_player_id: PlayerId { id: 0 },
             core_event_list: Vec::new(),
             event_lists: get_event_lists(),
-            map_size: map_size,
+            map_size,
             object_types: ObjectTypes::new(),
         };
         core.get_units();
@@ -211,27 +223,46 @@ impl Core {
     fn get_units(&mut self) {
         let tank_id = self.object_types.get_unit_type_id("tank");
         let soldier_id = self.object_types.get_unit_type_id("soldier");
-        self.add_unit(MapPos{v: Vector2{x: 0, y: 0}}, tank_id, PlayerId{id: 0});
-        self.add_unit(MapPos{v: Vector2{x: 0, y: 1}}, soldier_id, PlayerId{id: 0});
-        self.add_unit(MapPos{v: Vector2{x: 2, y: 0}}, tank_id, PlayerId{id: 1});
-        self.add_unit(MapPos{v: Vector2{x: 2, y: 2}}, soldier_id, PlayerId{id: 1});
+        self.add_unit(
+            MapPos {
+                v: Vector2 { x: 0, y: 0 },
+            },
+            tank_id,
+            PlayerId { id: 0 },
+        );
+        self.add_unit(
+            MapPos {
+                v: Vector2 { x: 0, y: 1 },
+            },
+            soldier_id,
+            PlayerId { id: 0 },
+        );
+        self.add_unit(
+            MapPos {
+                v: Vector2 { x: 2, y: 0 },
+            },
+            tank_id,
+            PlayerId { id: 1 },
+        );
+        self.add_unit(
+            MapPos {
+                v: Vector2 { x: 2, y: 2 },
+            },
+            soldier_id,
+            PlayerId { id: 1 },
+        );
     }
 
     fn get_new_unit_id(&self) -> UnitId {
-        let id = match self.game_state.units.keys().max_by(|&n| n) {
+        let id = match self.game_state.units.keys().max_by_key(|&n| n) {
             Some(n) => n.id + 1,
             None => 0,
         };
-        UnitId{id: id}
+        UnitId { id }
     }
 
     fn add_unit(&mut self, pos: MapPos, type_id: UnitTypeId, player_id: PlayerId) {
-        let event = EventCreateUnit(
-            self.get_new_unit_id(),
-            pos,
-            type_id,
-            player_id,
-        );
+        let event = EventCreateUnit(self.get_new_unit_id(), pos, type_id, player_id);
         self.do_core_event(event);
     }
 
@@ -239,25 +270,25 @@ impl Core {
         self.map_size
     }
 
-    fn get_unit<'a>(&'a self, id: UnitId) -> &'a Unit {
-        match self.game_state.units.find(&id) {
+    fn get_unit(&self, id: UnitId) -> &Unit {
+        match self.game_state.units.get(&id) {
             Some(unit) => unit,
             None => panic!("No unit with id = {}", id.id),
         }
     }
 
     pub fn get_weapon_type(&self, weapon_type_id: WeaponTypeId) -> &WeaponType {
-        &self.object_types.weapon_types[weapon_type_id.id as uint]
+        &self.object_types.weapon_types[weapon_type_id.id as usize]
     }
 
     fn hit_test(&self, attacker_id: UnitId, defender_id: UnitId) -> bool {
         fn test(needed: MInt) -> bool {
-            let real = task_rng().gen_range(-5i32, 5i32);
+            let real: MInt = rand::thread_rng().gen_range(-5_i32, 5_i32);
             let result = real < needed;
             println!("real:{} < needed:{} = {}", real, needed, result);
             result
         }
-        println!("");
+        println!();
         let attacker = self.get_unit(attacker_id);
         let defender = self.get_unit(defender_id);
         let attacker_type = self.object_types.get_unit_type(attacker.type_id);
@@ -266,12 +297,14 @@ impl Core {
         if distance(attacker.pos, defender.pos) > weapon_type.max_distance {
             return false;
         }
-        let hit_test_v = -15 + defender_type.size
-            + weapon_type.accuracy + attacker_type.weapon_skill;
+        let hit_test_v =
+            -15 + defender_type.size + weapon_type.accuracy + attacker_type.weapon_skill;
         let pierce_test_v = 5 + -defender_type.armor + weapon_type.ap;
         let wound_test_v = -defender_type.toughness + weapon_type.damage;
-        println!("hit_test = {}, pierce_test = {}, wound_test_v = {}",
-            hit_test_v, pierce_test_v, wound_test_v);
+        println!(
+            "hit_test = {}, pierce_test = {}, wound_test_v = {}",
+            hit_test_v, pierce_test_v, wound_test_v
+        );
         print!("hit test: ");
         if !test(hit_test_v) {
             return false;
@@ -289,21 +322,25 @@ impl Core {
     }
 
     pub fn player_id(&self) -> PlayerId {
-        self.current_player_id
+        self.current_player_id.clone()
     }
 
     pub fn get_event(&mut self) -> Option<Event> {
-        let list = self.event_lists.get_mut(&self.current_player_id);
-        list.remove(0)
+        let list = self.event_lists.get_mut(&self.current_player_id).unwrap();
+        if list.is_empty() {
+            None
+        } else {
+            Some(list.remove(0))
+        }
     }
 
     fn command_attack_unit_to_event(
         &self,
         attacker_id: UnitId,
-        defender_id: UnitId
+        defender_id: UnitId,
     ) -> Option<Event> {
-        let attacker = &self.game_state.units[attacker_id];
-        let defender = &self.game_state.units[defender_id];
+        let attacker = &self.game_state.units[&attacker_id];
+        let defender = &self.game_state.units[&defender_id];
         let attacker_type = self.object_types.get_unit_type(attacker.type_id);
         let weapon_type = self.get_weapon_type(attacker_type.weapon_type_id);
         if distance(attacker.pos, defender.pos) <= weapon_type.max_distance {
@@ -319,37 +356,32 @@ impl Core {
 
     fn command_to_event(&self, command: Command) -> Option<Event> {
         match command {
-            CommandEndTurn => {
+            Command::CommandEndTurn => {
                 let old_id = self.current_player_id.id;
                 let max_id = self.players.len() as MInt;
-                let new_id = if old_id + 1 == max_id {
-                    0
-                } else {
-                    old_id + 1
-                };
-                Some(EventEndTurn(PlayerId{id: old_id}, PlayerId{id: new_id}))
-            },
-            CommandCreateUnit(pos) => {
-                Some(EventCreateUnit(
-                    self.get_new_unit_id(),
-                    pos,
-                    self.object_types.get_unit_type_id("soldier"),
-                    self.current_player_id,
+                let new_id = if old_id + 1 == max_id { 0 } else { old_id + 1 };
+                Some(EventEndTurn(
+                    PlayerId { id: old_id },
+                    PlayerId { id: new_id },
                 ))
-            },
-            CommandMove(unit_id, path) => {
-                Some(EventMove(unit_id, path))
-            },
-            CommandAttackUnit(attacker_id, defender_id) => {
+            }
+            Command::CommandCreateUnit(pos) => Some(EventCreateUnit(
+                self.get_new_unit_id(),
+                pos,
+                self.object_types.get_unit_type_id("soldier"),
+                self.current_player_id.clone(),
+            )),
+            Command::CommandMove(unit_id, path) => Some(EventMove(unit_id, path)),
+            Command::CommandAttackUnit(attacker_id, defender_id) => {
                 self.command_attack_unit_to_event(attacker_id, defender_id)
-            },
+            }
         }
     }
 
     pub fn do_command(&mut self, command: Command) {
         match self.command_to_event(command) {
             Some(event) => self.do_core_event(event),
-            None => {},
+            None => {}
         }
     }
 
@@ -359,18 +391,18 @@ impl Core {
     }
 
     fn apply_event(&mut self, event: &Event) {
-        match *event {
+        match event {
             EventEndTurn(old_player_id, new_player_id) => {
                 for player in self.players.iter() {
-                    if player.id == new_player_id {
-                        if self.current_player_id == old_player_id {
-                            self.current_player_id = player.id;
+                    if player.id == *new_player_id {
+                        if self.current_player_id == *old_player_id {
+                            self.current_player_id = player.id.clone();
                         }
                         return;
                     }
                 }
-            },
-            _ => {},
+            }
+            _ => {}
         }
     }
 
@@ -380,7 +412,7 @@ impl Core {
             self.apply_event(&event);
             self.game_state.apply_event(&self.object_types, &event);
             for player in self.players.iter() {
-                let event_list = self.event_lists.get_mut(&player.id);
+                let event_list = self.event_lists.get_mut(&player.id).unwrap();
                 // TODO: per player event filter
                 event_list.push(event.clone());
             }

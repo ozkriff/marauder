@@ -1,13 +1,14 @@
 // See LICENSE file for copyright and license details.
 
-use cgmath::{perspective, deg, Matrix4, Vector3};
-use core::types::{MInt, Size2};
-use core::misc::{clamp, deg_to_rad};
-use visualizer::mgl;
-use visualizer::types::{MFloat, WorldPos};
+use crate::core::misc::{clamp, deg_to_rad};
+use crate::core::types::{MInt, Size2};
+use crate::visualizer::mgl;
+use crate::visualizer::types::{MFloat, WorldPos};
+use cgmath::{deg, Matrix4, Vector, Vector3};
 
 pub struct Camera {
-    x_angle: MFloat, // TODO: MFloat -> Angle
+    x_angle: MFloat,
+    // TODO: MFloat -> Angle
     z_angle: MFloat,
     pos: WorldPos,
     max_pos: WorldPos,
@@ -18,10 +19,9 @@ pub struct Camera {
 fn get_projection_mat(win_size: Size2<MInt>) -> Matrix4<MFloat> {
     let fov = deg(45.0f32);
     let ratio = win_size.w as MFloat / win_size.h as MFloat;
-    let display_range_min = 0.1;
-    let display_range_max = 100.0;
-    perspective(
-        fov, ratio, display_range_min, display_range_max)
+    let display_range_min = 0.1 as MFloat;
+    let display_range_max = 100.0 as MFloat;
+    cgmath::perspective(fov, ratio, display_range_min, display_range_max)
 }
 
 impl Camera {
@@ -29,19 +29,26 @@ impl Camera {
         Camera {
             x_angle: 45.0,
             z_angle: 0.0,
-            pos: WorldPos{v: Vector3::zero()},
-            max_pos: WorldPos{v: Vector3::zero()},
+            pos: WorldPos { v: Vector3::zero() },
+            max_pos: WorldPos { v: Vector3::zero() },
             zoom: 10.0,
             projection_mat: get_projection_mat(win_size),
         }
     }
 
     pub fn mat(&self) -> Matrix4<MFloat> {
-        let mut m = self.projection_mat;
-        m = mgl::tr(m, Vector3{x: 0.0, y: 0.0, z: -self.zoom});
+        let mut m = self.projection_mat.clone();
+        m = mgl::tr(
+            m,
+            Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: -self.zoom,
+            },
+        );
         m = mgl::rot_x(m, -self.x_angle);
         m = mgl::rot_z(m, -self.z_angle);
-        m = mgl::tr(m, self.pos.v);
+        m = mgl::tr(m, self.pos.v.clone());
         m
     }
 

@@ -1,25 +1,43 @@
 // See LICENSE file for copyright and license details.
 
-#![macro_escape]
+#![macro_use]
 
-use std;
-use gl;
-use gl::types::{GLuint, GLsizeiptr};
-use cgmath::{Matrix, Matrix4, Matrix3, ToMatrix4};
-use cgmath::{Vector3, rad, ortho};
-use core::misc::deg_to_rad;
-use core::types::{Size2, MInt};
-use visualizer::types::{MFloat, Color3, Color4, ScreenPos};
+use crate::core::misc::deg_to_rad;
+use crate::core::types::{MInt, Size2};
+use crate::visualizer::types::{Color3, Color4, MFloat, ScreenPos};
+use cgmath::{ortho, rad, Matrix, Matrix3, Matrix4, SquareMatrix, Vector3};
+use gl::types::{GLsizeiptr, GLuint};
 
-pub use gl::load_with as load_gl_funcs_with;
+pub const GREY_3: Color3 = Color3 {
+    r: 0.3,
+    g: 0.3,
+    b: 0.3,
+};
+pub const BLACK_3: Color3 = Color3 {
+    r: 0.0,
+    g: 0.0,
+    b: 0.0,
+};
+pub const WHITE: Color4 = Color4 {
+    r: 1.0,
+    g: 1.0,
+    b: 1.0,
+    a: 1.0,
+};
+pub const BLUE: Color4 = Color4 {
+    r: 0.0,
+    g: 0.0,
+    b: 1.0,
+    a: 1.0,
+};
+pub const BLACK: Color4 = Color4 {
+    r: 0.0,
+    g: 0.0,
+    b: 0.0,
+    a: 1.0,
+};
 
-pub const GREY_3: Color3 = Color3{r: 0.3, g: 0.3, b: 0.3};
-pub const BLACK_3: Color3 = Color3{r: 0.0, g: 0.0, b: 0.0};
-pub const WHITE: Color4 = Color4{r: 1.0, g: 1.0, b: 1.0, a: 1.0};
-pub const BLUE: Color4 = Color4{r: 0.0, g: 0.0, b: 1.0, a: 1.0};
-pub const BLACK: Color4 = Color4{r: 0.0, g: 0.0, b: 0.0, a: 1.0};
-
-macro_rules! verify(
+macro_rules! verify (
     ($e: expr) => ({
         let result = $e;
         let error_code = gl::GetError();
@@ -37,8 +55,9 @@ macro_rules! verify(
         }
         result
     })
-)
+);
 
+#[derive(Copy, Clone)]
 pub enum MeshRenderMode {
     Triangles,
     Lines,
@@ -46,9 +65,9 @@ pub enum MeshRenderMode {
 
 impl MeshRenderMode {
     fn to_gl_type(&self) -> GLuint {
-        match *self {
-            Triangles => gl::TRIANGLES,
-            Lines => gl::LINES,
+        match self.clone() {
+            MeshRenderMode::Triangles => gl::TRIANGLES,
+            MeshRenderMode::Lines => gl::LINES,
         }
     }
 }
@@ -72,32 +91,42 @@ pub fn scale(m: Matrix4<MFloat>, scale: MFloat) -> Matrix4<MFloat> {
 
 pub fn rot_x(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
     let rad = rad(deg_to_rad(angle));
-    let r = Matrix3::from_angle_x(rad).to_matrix4();
+    let r = Matrix3::from_angle_x(rad);
+    let r = Matrix4::from(r);
     m.mul_m(&r)
 }
 
 pub fn rot_z(m: Matrix4<MFloat>, angle: MFloat) -> Matrix4<MFloat> {
     let rad = rad(deg_to_rad(angle));
-    let r = Matrix3::from_angle_z(rad).to_matrix4();
+    let r = Matrix3::from_angle_z(rad);
+    let r = Matrix4::from(r);
     m.mul_m(&r)
 }
 
 pub fn init_opengl() {
-    verify!(gl::Enable(gl::DEPTH_TEST));
-    verify!(gl::Enable(gl::BLEND));
-    verify!(gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA));
+    unsafe {
+        verify!(gl::Enable(gl::DEPTH_TEST));
+        verify!(gl::Enable(gl::BLEND));
+        verify!(gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA));
+    }
 }
 
 pub fn set_clear_color(color: Color3) {
-    verify!(gl::ClearColor(color.r, color.g, color.b, 1.0));
+    unsafe {
+        verify!(gl::ClearColor(color.r, color.g, color.b, 1.0));
+    }
 }
 
 pub fn clear_screen() {
-    verify!(gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT));
+    unsafe {
+        verify!(gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT));
+    }
 }
 
 pub fn set_viewport(size: Size2<MInt>) {
-    verify!(gl::Viewport(0, 0, size.w, size.h));
+    unsafe {
+        verify!(gl::Viewport(0, 0, size.w, size.h));
+    }
 }
 
 pub struct Vao {
@@ -110,24 +139,30 @@ impl Vao {
         unsafe {
             verify!(gl::GenVertexArrays(1, &mut id));
         }
-        let vao = Vao{id: id};
+        let vao = Vao { id };
         vao.bind();
         vao
     }
 
     pub fn bind(&self) {
-        verify!(gl::BindVertexArray(self.id));
+        unsafe {
+            verify!(gl::BindVertexArray(self.id));
+        }
     }
 
     pub fn unbind(&self) {
-        verify!(gl::BindVertexArray(0));
+        unsafe {
+            verify!(gl::BindVertexArray(0));
+        }
     }
 
     pub fn draw_array(&self, mesh_mode: MeshRenderMode, faces_count: MInt) {
         let starting_index = 0;
         let vertices_count = faces_count * 3;
         let mode = mesh_mode.to_gl_type();
-        verify!(gl::DrawArrays(mode, starting_index, vertices_count));
+        unsafe {
+            verify!(gl::DrawArrays(mode, starting_index, vertices_count));
+        }
     }
 }
 
@@ -153,11 +188,13 @@ fn get_new_vbo_id() -> GLuint {
 
 impl Vbo {
     pub fn from_data<T>(data: &[T]) -> Vbo {
-        let vbo = Vbo{id: get_new_vbo_id()};
+        let vbo = Vbo {
+            id: get_new_vbo_id(),
+        };
         vbo.bind();
         let size = std::mem::size_of::<T>();
         let buf_size = (data.len() * size) as GLsizeiptr;
-        if data.len() != 0 {
+        if !data.is_empty() {
             unsafe {
                 let data_ptr = std::mem::transmute(&data[0]);
                 verify!(gl::BufferData(
@@ -172,7 +209,9 @@ impl Vbo {
     }
 
     pub fn bind(&self) {
-        verify!(gl::BindBuffer(gl::ARRAY_BUFFER, self.id));
+        unsafe {
+            verify!(gl::BindBuffer(gl::ARRAY_BUFFER, self.id));
+        }
     }
 }
 
@@ -184,23 +223,27 @@ impl Drop for Vbo {
     }
 }
 
-pub fn read_pixel_bytes(
-    win_size: Size2<MInt>,
-    mouse_pos: ScreenPos,
-) -> (MInt, MInt, MInt, MInt) {
+pub fn read_pixel_bytes(win_size: Size2<MInt>, mouse_pos: ScreenPos) -> (MInt, MInt, MInt, MInt) {
     let height = win_size.h;
     let reverted_h = height - mouse_pos.v.y;
-    let data: [u8, ..4] = [0, 0, 0, 0]; // mut
+    let data: [u8; 4] = [0, 0, 0, 0];
     unsafe {
-        let data_ptr = std::mem::transmute(&data[0]);
         verify!(gl::ReadPixels(
-            mouse_pos.v.x, reverted_h, 1, 1,
+            mouse_pos.v.x,
+            reverted_h,
+            1,
+            1,
             gl::RGBA,
             gl::UNSIGNED_BYTE,
-            data_ptr
+            std::mem::transmute(&data[0])
         ));
     }
-    (data[0] as MInt, data[1] as MInt, data[2] as MInt, data[3] as MInt)
+    (
+        data[0] as MInt,
+        data[1] as MInt,
+        data[2] as MInt,
+        data[3] as MInt,
+    )
 }
 
 pub fn get_2d_screen_matrix(win_size: Size2<MInt>) -> Matrix4<MFloat> {

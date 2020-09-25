@@ -1,19 +1,19 @@
 // See LICENSE file for copyright and license details.
 
-use std::os;
+use std::path::{Path, PathBuf};
 
 pub struct FileSystem {
-    root_path: Path,
+    root_path: PathBuf,
 }
 
 impl FileSystem {
     pub fn new() -> FileSystem {
         FileSystem {
-            root_path: os::self_exe_path().unwrap(),
+            root_path: std::env::current_dir().unwrap(),
         }
     }
 
-    pub fn get(&self, path: &Path) -> Path {
+    pub fn get(&self, path: &Path) -> PathBuf {
         self.root_path.join(path)
     }
 }

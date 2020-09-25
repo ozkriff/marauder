@@ -1,14 +1,14 @@
 // See LICENSE file for copyright and license details.
 
+use crate::core::conf::Config;
+use crate::core::types::{MInt, Size2};
+use crate::visualizer::font_stash::FontStash;
+use crate::visualizer::mgl;
+use crate::visualizer::shader::Shader;
+use crate::visualizer::types::{ColorId, MatId, ScreenPos};
+use cgmath::Vector2;
+use glfw::WindowEvent::{CursorPos, Size};
 use std::cell::RefCell;
-use glfw;
-use cgmath::{Vector2};
-use core::types::{Size2, MInt};
-use core::conf::Config;
-use visualizer::types::{MatId, ColorId, ScreenPos};
-use visualizer::shader::Shader;
-use visualizer::font_stash::FontStash;
-use visualizer::mgl;
 
 pub struct Context {
     pub win: glfw::Window,
@@ -29,16 +29,18 @@ impl Context {
 
     pub fn handle_event(&mut self, event: glfw::WindowEvent) {
         match event {
-            glfw::CursorPosEvent(x, y) => {
-                self.mouse_pos = ScreenPos{v: Vector2 {
-                    x: x as MInt,
-                    y: y as MInt,
-                }};
-            },
-            glfw::SizeEvent(w, h) => {
-                self.set_window_size(Size2{w: w, h: h});
-            },
-            _ => {},
+            CursorPos(x, y) => {
+                self.mouse_pos = ScreenPos {
+                    v: Vector2 {
+                        x: x as MInt,
+                        y: y as MInt,
+                    },
+                };
+            }
+            Size(w, h) => {
+                self.set_window_size(Size2 { w, h });
+            }
+            _ => {}
         }
     }
 }

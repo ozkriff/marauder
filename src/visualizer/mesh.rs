@@ -1,12 +1,16 @@
 // See LICENSE file for copyright and license details.
 
-use core::types::MInt;
-use visualizer::mgl::{Vbo, Vao, MeshRenderMode, Triangles};
-use visualizer::types::{Color3, VertexCoord, TextureCoord};
-use visualizer::shader::Shader;
-use visualizer::texture::Texture;
+use crate::core::types::MInt;
+use crate::visualizer::mgl::MeshRenderMode::Triangles;
+use crate::visualizer::mgl::{MeshRenderMode, Vao, Vbo};
+use crate::visualizer::shader::Shader;
+use crate::visualizer::texture::Texture;
+use crate::visualizer::types::{Color3, TextureCoord, VertexCoord};
 
-pub struct MeshId{pub id: MInt}
+#[derive(Clone, Copy)]
+pub struct MeshId {
+    pub id: MInt,
+}
 
 pub struct Mesh {
     vertex_coords_vbo: Vbo,
@@ -26,7 +30,7 @@ impl Mesh {
             color_vbo: None,
             texture_coords_vbo: None,
             texture: None,
-            length: length,
+            length,
             vao: Vao::new(),
             mode: Triangles,
         }
@@ -54,15 +58,15 @@ impl Mesh {
             Some(ref vbo) => {
                 vbo.bind();
                 shader.enable_attr("in_texture_coordinates", 2);
-            },
-            None => {},
+            }
+            None => {}
         }
         match self.color_vbo {
             Some(ref vbo) => {
                 vbo.bind();
                 shader.enable_attr("color", 3);
-            },
-            None => {},
+            }
+            None => {}
         }
         self.vertex_coords_vbo.bind();
         shader.enable_attr("in_vertex_coordinates", 3);
@@ -73,7 +77,7 @@ impl Mesh {
         self.vao.bind();
         match self.texture {
             Some(ref texture) => texture.enable(shader),
-            None => {},
+            None => {}
         }
         self.vao.draw_array(self.mode, self.length);
         self.vao.unbind();

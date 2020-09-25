@@ -1,30 +1,26 @@
 // See LICENSE file for copyright and license details.
 
+use crate::core::conf::Config;
+use crate::core::fs::FileSystem;
+use crate::core::types::{MInt, Size2};
+use crate::visualizer::context::Context;
+use crate::visualizer::font_stash::FontStash;
+use crate::visualizer::game_state_visualizer::GameStateVisualizer;
+use crate::visualizer::menu_state_visualizer::MenuStateVisualizer;
+use crate::visualizer::mgl;
+use crate::visualizer::shader::Shader;
+use crate::visualizer::state_visualizer::{StateVisualizer, StateChangeCommand};
+use crate::visualizer::types::{ColorId, MFloat, MatId, ScreenPos, Time};
+use cgmath::{Vector, Vector2};
 use std::cell::RefCell;
+use std::path::Path;
+use std::sync::mpsc::Receiver;
 use time::precise_time_ns;
-use glfw;
-use cgmath::{Vector2};
-use core::types::{Size2, MInt};
-use core::conf::Config;
-use core::fs::FileSystem;
-use visualizer::mgl;
-use visualizer::types::{MatId, ColorId, Time, ScreenPos};
-use visualizer::shader::Shader;
-use visualizer::font_stash::FontStash;
-use visualizer::context::Context;
-use visualizer::state_visualizer::{
-    StateVisualizer,
-    StartGame,
-    EndGame,
-    QuitMenu,
-};
-use visualizer::game_state_visualizer::GameStateVisualizer;
-use visualizer::menu_state_visualizer::MenuStateVisualizer;
 
 type EventsReceiver = Receiver<(f64, glfw::WindowEvent)>;
 
 pub struct Visualizer {
-    visualizers: Vec<Box<StateVisualizer+'static>>,
+    visualizers: Vec<Box<dyn StateVisualizer + 'static>>,
     dtime: Time,
     last_time: Time,
     glfw: glfw::Glfw,
@@ -34,56 +30,62 @@ pub struct Visualizer {
     should_close: bool,
 }
 
-fn create_win(glfw: &glfw::Glfw, win_size: Size2<MInt>)
-    -> (glfw::Window, EventsReceiver)
-{
+fn create_win(glfw: &glfw::Glfw, win_size: Size2<MInt>) -> (glfw::Window, EventsReceiver) {
     let w = win_size.w as u32;
     let h = win_size.h as u32;
     let title = "Marauder";
-    let flags = glfw::Windowed;
+    let flags = glfw::WindowMode::Windowed;
     glfw.create_window(w, h, title, flags).unwrap()
 }
 
 impl Visualizer {
     pub fn new() -> Visualizer {
         let fs = FileSystem::new();
-        let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
         let config = Config::new(&fs.get(&Path::new("data/conf_visualizer.json")));
-        let win_size = config.get::<Size2<MInt>>("screen_size");
-        let (win, events) = create_win(&glfw, win_size);
+        let win_size: Size2<MInt> = serde_json::from_value(config.get("screen_size").clone()).unwrap();
+        let (mut win, events) = create_win(&glfw, win_size);
         glfw.make_context_current(Some(&win));
-        mgl::load_gl_funcs_with(|procname| win.get_proc_address(procname));
+        gl::load_with(|procname| win.get_proc_address(procname));
         mgl::init_opengl();
         mgl::set_viewport(win_size);
         win.set_all_polling(true);
-        let font_size = config.get("font_size");
+        let font_size = config.get("font_size").as_f64().unwrap() as MFloat;
         let font_stash = FontStash::new(
-            &fs.get(&Path::new("data/DroidSerif-Regular.ttf")), font_size);
+            &fs.get(&Path::new("data/DroidSerif-Regular.ttf")),
+            font_size,
+        );
         let shader = Shader::new(
             &fs.get(&Path::new("data/normal.vs.glsl")),
             &fs.get(&Path::new("data/normal.fs.glsl")),
         );
-        let mvp_mat_id = MatId{id: shader.get_uniform("mvp_mat")};
-        let basic_color_id = ColorId{id: shader.get_uniform("basic_color")};
-        let context = Context {
-            win: win,
-            win_size: win_size,
-            config: config,
-            mouse_pos: ScreenPos{v: Vector2::zero()},
-            font_stash: RefCell::new(font_stash),
-            shader: shader,
-            mvp_mat_id: mvp_mat_id,
-            basic_color_id: basic_color_id,
+        let mvp_mat_id = MatId {
+            id: shader.get_uniform("mvp_mat"),
         };
-        let visualizer = box MenuStateVisualizer::new(&context);
+        let basic_color_id = ColorId {
+            id: shader.get_uniform("basic_color"),
+        };
+        let context = Context {
+            win,
+            win_size,
+            config,
+            mouse_pos: ScreenPos { v: Vector2::zero() },
+            font_stash: RefCell::new(font_stash),
+            shader,
+            mvp_mat_id,
+            basic_color_id,
+        };
+        let visualizer = Box::new(MenuStateVisualizer::new(&context));
         Visualizer {
-            visualizers: vec![visualizer as Box<StateVisualizer>],
-            dtime: Time{n: 0},
-            last_time: Time{n: precise_time_ns()},
-            glfw: glfw,
-            events: events,
-            context: context,
-            fs: fs,
+            visualizers: vec![visualizer as Box<dyn StateVisualizer>],
+            dtime: Time { n: 0 },
+            last_time: Time {
+                n: precise_time_ns(),
+            },
+            glfw,
+            events,
+            context,
+            fs,
             should_close: false,
         }
     }
@@ -107,18 +109,18 @@ impl Visualizer {
             None => panic!("No state visualizer"),
         };
         match cmd {
-            Some(StartGame) => {
-                let visualizer = box GameStateVisualizer::new(
-                    &self.fs, &self.context);
-                self.visualizers.push(visualizer as Box<StateVisualizer>);
+            Some(StateChangeCommand::StartGame) => {
+                let visualizer = Box::new(GameStateVisualizer::new(&self.fs, &self.context));
+                self.visualizers
+                    .push(visualizer as Box<dyn StateVisualizer>);
             }
-            Some(EndGame) => {
+            Some(StateChangeCommand::EndGame) => {
                 let _ = self.visualizers.pop();
-            },
-            Some(QuitMenu) => {
+            }
+            Some(StateChangeCommand::QuitMenu) => {
                 self.should_close = true;
-            },
-            None => {},
+            }
+            None => {}
         }
     }
 
@@ -131,11 +133,11 @@ impl Visualizer {
                 None => panic!("No state visualizer"),
             };
             for event in events.iter() {
-                visualizer.handle_event(&self.context, *event);
-                self.context.handle_event(*event);
+                visualizer.handle_event(&self.context, event.clone());
+                self.context.handle_event(event.clone());
             }
             visualizer.logic(&self.context);
-            visualizer.draw(&self.context, self.dtime);
+            visualizer.draw(&mut self.context, self.dtime);
         }
         self.handle_cmd();
         self.update_time();
